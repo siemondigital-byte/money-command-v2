@@ -114,7 +114,15 @@ type MonthlyDecimalKeys =
   | "netWorth"
   | "savingsRate"
   | "weightedReturn"
-  | "potentialSavingsMissed";
+  | "potentialSavingsMissed"
+  // Campos doctrinales (ARQUITECTURA.md §4)
+  | "essentials"
+  | "style"
+  | "freedom"
+  | "debtTotal"
+  | "portfolioValue"
+  | "investedThisMonth"
+  | "notRealized";
 
 export type SerializedMonthlyRecord = Omit<
   MonthlyRecord,
@@ -153,6 +161,13 @@ export function serializeMonthlyRecord(
     savingsRate: dec(r.savingsRate),
     weightedReturn: dec(r.weightedReturn),
     potentialSavingsMissed: dec(r.potentialSavingsMissed),
+    essentials: dec(r.essentials),
+    style: dec(r.style),
+    freedom: dec(r.freedom),
+    debtTotal: dec(r.debtTotal),
+    portfolioValue: dec(r.portfolioValue),
+    investedThisMonth: dec(r.investedThisMonth),
+    notRealized: dec(r.notRealized),
     recordedAt: isoReq(r.recordedAt),
     createdAt: isoReq(r.createdAt),
     updatedAt: isoReq(r.updatedAt),

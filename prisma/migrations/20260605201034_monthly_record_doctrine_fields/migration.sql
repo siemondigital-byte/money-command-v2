@@ -1,0 +1,12 @@
+-- AlterTable
+ALTER TABLE "monthly_records" ADD COLUMN     "debtTotal" DECIMAL(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "essentials" DECIMAL(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "freedom" DECIMAL(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "investedThisMonth" DECIMAL(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "notRealized" DECIMAL(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "portfolioValue" DECIMAL(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "style" DECIMAL(12,2) NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "profiles" ADD COLUMN     "activeMonth" INTEGER,
+ADD COLUMN     "activeYear" INTEGER;

@@ -59,6 +59,11 @@ model Profile {
   freedomMonthlySpend Decimal? @db.Decimal(12, 2) // si null, usa gastos actuales
   salaryGrowthRate  Decimal @default(2.5) @db.Decimal(5, 2) // % anual
 
+  // Periodo activo persistente (selector global del header).
+  // null = la app usa el mes actual.
+  activeYear  Int?
+  activeMonth Int? // 1-12
+
   // Método preferido del usuario
   preferredMethod String @default("50/30/20") // 50/30/20 | 50/25/25 | 50/20/30 | 40/20/40
 
@@ -132,6 +137,26 @@ model MonthlyRecord {
 
   // No realizado (lo que se pudo ahorrar y no se hizo)
   potentialSavingsMissed Decimal @default(0) @db.Decimal(12, 2)
+
+  // ============================================================
+  // Campos doctrinales — ARQUITECTURA.md §4 (canónicos)
+  //
+  // Estos son los campos canónicos según la ley del repo. Los
+  // campos legacy (expenseNeeds/Wants/Investments, liabilityTotal,
+  // assetInvestments, potentialSavingsMissed) coexisten por ahora
+  // y se unifican en FASE B (eliminación de Monthly Entry vieja).
+  // ============================================================
+
+  // Canastas del gasto (Esenciales / Estilo / Libertad)
+  essentials Decimal @default(0) @db.Decimal(12, 2)
+  style      Decimal @default(0) @db.Decimal(12, 2)
+  freedom    Decimal @default(0) @db.Decimal(12, 2)
+
+  // Snapshots del estado actual al cierre del mes
+  debtTotal         Decimal @default(0) @db.Decimal(12, 2)
+  portfolioValue    Decimal @default(0) @db.Decimal(12, 2)
+  investedThisMonth Decimal @default(0) @db.Decimal(12, 2)
+  notRealized       Decimal @default(0) @db.Decimal(12, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
