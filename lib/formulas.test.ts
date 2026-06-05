@@ -27,7 +27,7 @@ import {
   lifeHoursCost,
   calculateScorecard,
   scorecardRange,
-  SAFE_WITHDRAWAL_RATE,
+  NLF_DIVISOR,
   DEFAULT_PORTFOLIO_RETURN,
 } from "./formulas";
 
@@ -46,9 +46,9 @@ describe("freedomNumber (NLF)", () => {
     expect(freedomNumber(-100)).toBe(0);
   });
 
-  it("usa exactamente la regla del 4% (SAFE_WITHDRAWAL_RATE)", () => {
-    expect(SAFE_WITHDRAWAL_RATE).toBe(0.04);
-    // Validar que el divisor sea siempre 0.04
+  it("usa el divisor del NLF fijo en 0.04", () => {
+    expect(NLF_DIVISOR).toBe(0.04);
+    // El divisor del NLF nunca cambia: 4% es invariante doctrinal
     const monthlySpend = 1000;
     expect(freedomNumber(monthlySpend)).toBe((monthlySpend * 12) / 0.04);
   });

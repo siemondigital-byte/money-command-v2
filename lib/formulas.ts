@@ -9,17 +9,28 @@
  * - docs/REFERENCIA_4_PORCIENTO_NLF.md
  * - SPEC.md sección "Fórmulas oficiales"
  *
- * Filosofía: el 4% es tasa de retiro sostenible (FIJA, divisor del NLF).
- *            El 8% es tasa de retorno esperada (EDITABLE, crecimiento del portafolio).
- *            Nunca mezclar estas dos cosas.
+ * Doctrina (NO negociable):
+ *   - 4% = DIVISOR del Número de Libertad. Fijo, no editable.
+ *     NO es "tasa de retiro" ni "withdrawal rate". El usuario vive de FLUJOS
+ *     pasivos perpetuos; el capital queda intacto y sigue creciendo.
+ *   - 8% = retorno esperado del portafolio en acumulación. Editable.
+ *     Es crecimiento, no retiro.
+ *   - El Plan B real (ingreso pasivo) se calcula como suma de
+ *     (posición × yield ponderado), NO como capital × 0.04.
  */
 
 // ============================================================================
 // Constantes oficiales
 // ============================================================================
 
-/** Tasa de retiro sostenible (Trinity Study). Fija, no editable por usuario. */
-export const SAFE_WITHDRAWAL_RATE = 0.04;
+/**
+ * Divisor del Número de Libertad. Fijo, no editable por usuario.
+ *
+ * Es la traducción matemática de "¿qué tan grande tiene que ser el capital
+ * para que sus flujos pasivos cubran 1 año de gastos?". Origen histórico:
+ * Trinity Study. NO representa "retiro" — el capital no se toca.
+ */
+export const NLF_DIVISOR = 0.04;
 
 /** Retorno default del S&P 500 histórico, usado cuando el usuario no tiene portafolio. */
 export const DEFAULT_PORTFOLIO_RETURN = 0.08;
@@ -65,7 +76,7 @@ export type InvestmentType =
  */
 export function freedomNumber(monthlyDesiredSpend: number): number {
   if (monthlyDesiredSpend <= 0) return 0;
-  return (monthlyDesiredSpend * 12) / SAFE_WITHDRAWAL_RATE;
+  return (monthlyDesiredSpend * 12) / NLF_DIVISOR;
 }
 
 // ============================================================================
@@ -314,17 +325,23 @@ export function thermostatZone(multiplier: number): ThermostatZone {
 // ============================================================================
 
 /**
- * Calcula la renta pasiva mensual que genera un capital invertido al 4%.
+ * Caudal mensual de referencia del NLF para un capital dado.
  *
- * Esta es la versión "vivís de los flujos" del libro: retiras 4% anual
- * (lo conservador, probado por Trinity Study) y el capital queda intacto.
+ * Es el inverso matemático del Número de Libertad: si NLF = (gasto × 12) / 0.04,
+ * entonces para un capital C, el caudal mensual implícito por ese mismo
+ * divisor es (C × 0.04) / 12. Útil para mostrar "tu capital actual cubre X
+ * de gasto mensual según el divisor de libertad".
+ *
+ * NO es Plan B real — el Plan B se calcula en Investments como la suma de
+ * (posición × yield pasivo ponderado). Esta función es una métrica de
+ * referencia, no el flujo pasivo efectivo del usuario.
  *
  * @param capital Capital invertido total
- * @returns Renta pasiva mensual
+ * @returns Caudal mensual de referencia
  */
 export function monthlyPassiveIncome(capital: number): number {
   if (capital <= 0) return 0;
-  return (capital * SAFE_WITHDRAWAL_RATE) / 12;
+  return (capital * NLF_DIVISOR) / 12;
 }
 
 // ============================================================================
