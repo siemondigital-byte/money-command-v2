@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeMonthlyRecord } from "@/lib/serialize";
+import { setActivePeriodAction } from "@/app/(app)/_actions/period";
 
 export const metadata = { title: "Historial · The Money Command" };
 
@@ -62,8 +63,8 @@ export default async function HistoryPage() {
         <div className="card">
           <p style={{ fontSize: "13px", color: "var(--muted)" }}>
             Empezá registrando tu primer mes en{" "}
-            <Link href="/monthly" style={{ color: "var(--accent)" }}>
-              /monthly
+            <Link href="/income" style={{ color: "var(--accent)" }}>
+              /income
             </Link>
             .
           </p>
@@ -110,15 +111,25 @@ export default async function HistoryPage() {
                     <Td align="right">{pct.format(r.savingsRate / 100)}</Td>
                     <Td align="right">{money.format(r.netWorth)}</Td>
                     <Td align="right">
-                      <Link
-                        href={`/monthly?year=${r.year}&month=${r.month}`}
-                        style={{
-                          color: "var(--accent)",
-                          fontSize: "12px",
-                        }}
-                      >
-                        Editar
-                      </Link>
+                      <form action={setActivePeriodAction}>
+                        <input type="hidden" name="year" value={r.year} />
+                        <input type="hidden" name="month" value={r.month} />
+                        <input type="hidden" name="next" value="/income" />
+                        <button
+                          type="submit"
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            color: "var(--accent)",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            fontFamily: "DM Mono, monospace",
+                            padding: 0,
+                          }}
+                        >
+                          Ir al mes
+                        </button>
+                      </form>
                     </Td>
                   </tr>
                 ))}

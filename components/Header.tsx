@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { logoutAction } from "@/app/(auth)/actions";
 import type { SerializedProfile } from "@/lib/serialize";
+import { PeriodSelector } from "./PeriodSelector";
+import { activePeriod } from "@/lib/monthly";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/monthly", label: "Mes" },
   { href: "/income", label: "Ingresos" },
   { href: "/investments", label: "Inversiones" },
   { href: "/history", label: "Historial" },
@@ -12,6 +13,11 @@ const NAV_ITEMS = [
 ];
 
 export function Header({ profile }: { profile: SerializedProfile }) {
+  const period = activePeriod({
+    activeYear: profile.activeYear,
+    activeMonth: profile.activeMonth,
+  });
+
   return (
     <header
       style={{
@@ -60,6 +66,7 @@ export function Header({ profile }: { profile: SerializedProfile }) {
               fontSize: "12px",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
+              flexWrap: "wrap",
             }}
           >
             {NAV_ITEMS.map((item) => (
@@ -71,6 +78,10 @@ export function Header({ profile }: { profile: SerializedProfile }) {
                 {item.label}
               </Link>
             ))}
+            <PeriodSelector
+              activeYear={period.year}
+              activeMonth={period.month}
+            />
             <form action={logoutAction}>
               <button
                 type="submit"

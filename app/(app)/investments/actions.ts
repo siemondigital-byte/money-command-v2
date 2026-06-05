@@ -6,6 +6,29 @@ import { Prisma } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { INVESTMENT_CATEGORIES } from "@/lib/formulas";
+import {
+  activePeriod,
+  consolidatePeriodFromLiveEntities,
+} from "@/lib/monthly";
+
+/**
+ * Tras mutar una posición, consolida el MonthlyRecord del período activo:
+ * recomputa Plan B (yields), portfolioValue (snapshot) y los escribe al
+ * record del período. Si algo falla, loggeamos pero no rompemos.
+ */
+async function reconsolidateActivePeriod(userId: string): Promise<void> {
+  try {
+    const profile = await prisma.profile.findUnique({
+      where: { userId },
+      select: { activeYear: true, activeMonth: true },
+    });
+    if (!profile) return;
+    const period = activePeriod(profile);
+    await consolidatePeriodFromLiveEntities(userId, period);
+  } catch (err) {
+    console.error("[investments] reconsolidate failed:", err);
+  }
+}
 
 export type InvestmentsActionResult = { error?: string; ok?: boolean };
 
@@ -86,7 +109,11 @@ export async function createInvestmentAction(
     };
   }
 
+  await reconsolidateActivePeriod(user.id);
   revalidatePath("/investments");
+  revalidatePath("/income");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
   return { ok: true };
 }
 
@@ -135,7 +162,11 @@ export async function updateInvestmentAction(
     };
   }
 
+  await reconsolidateActivePeriod(user.id);
   revalidatePath("/investments");
+  revalidatePath("/income");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
   return { ok: true };
 }
 
@@ -151,5 +182,9 @@ export async function deleteInvestmentAction(formData: FormData) {
     where: { id, userId: user.id },
   });
 
+  await reconsolidateActivePeriod(user.id);
   revalidatePath("/investments");
+  revalidatePath("/income");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
 }

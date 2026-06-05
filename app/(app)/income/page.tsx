@@ -1,17 +1,37 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { serializeIncome, serializeInvestment } from "@/lib/serialize";
+import { serializeIncome } from "@/lib/serialize";
 import {
   effectivePlanB,
   incomeTotals,
   idealMonthlyInvestmentCapital,
 } from "@/lib/income";
+import {
+  activePeriod,
+  getMonthlyRecord,
+  periodToString,
+} from "@/lib/monthly";
 import { IncomeRowForm } from "./IncomeRowForm";
 import { PlanBOverrideForm } from "./PlanBOverrideForm";
 import { deleteIncomeAction } from "./actions";
 
 export const metadata = { title: "Ingresos · The Money Command" };
+
+const MONTH_LABELS_ES = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
 
 const PLAN_LABELS = {
   A: { name: "Plan A · Salario / Activos", helper: "Tu ingreso principal recurrente." },
@@ -34,8 +54,13 @@ export default async function IncomePage({
   const { user, profile } = await requireUser();
   const params = await searchParams;
 
+  const period = activePeriod({
+    activeYear: profile.activeYear,
+    activeMonth: profile.activeMonth,
+  });
+
   // Carga de datos
-  const [rowsRaw, positionsRaw] = await Promise.all([
+  const [rowsRaw, positionsRaw, monthlyRecord] = await Promise.all([
     prisma.income.findMany({
       where: { userId: user.id },
       orderBy: [{ plan: "asc" }, { createdAt: "asc" }],
@@ -44,6 +69,7 @@ export default async function IncomePage({
       where: { userId: user.id, isActive: true },
       select: { capital: true, passiveYield: true },
     }),
+    getMonthlyRecord(user.id, period),
   ]);
 
   const rows = rowsRaw.map(serializeIncome);
@@ -99,7 +125,9 @@ export default async function IncomePage({
   return (
     <div className="fade-up flex flex-col gap-6">
       <header>
-        <div className="label mb-1">Ingresos</div>
+        <div className="label mb-1">
+          Ingresos · {MONTH_LABELS_ES[period.month - 1]} {period.year}
+        </div>
         <h1>Plan A · B · C</h1>
         <p
           style={{
@@ -109,8 +137,21 @@ export default async function IncomePage({
           }}
         >
           Plan A y Plan C son manuales. Plan B se consume desde Inversiones
-          como suma de yields ÷ 12 — con override manual opcional.
+          como suma de yields ÷ 12 — con override manual opcional. Lo que
+          cargás acá se consolida automáticamente en el período activo.
         </p>
+        {monthlyRecord && (
+          <p
+            style={{
+              fontSize: "11px",
+              color: "var(--hint)",
+              marginTop: "6px",
+            }}
+          >
+            Consolidado al MonthlyRecord {periodToString(period)} ·
+            incomeTotal = {money.format(Number(monthlyRecord.incomeTotal))}
+          </p>
+        )}
       </header>
 
       {/* KPIs */}

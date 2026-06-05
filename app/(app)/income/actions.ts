@@ -5,6 +5,30 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  activePeriod,
+  consolidatePeriodFromLiveEntities,
+} from "@/lib/monthly";
+
+/**
+ * Tras mutar una entidad viva (Income o Plan B override), re-consolida el
+ * MonthlyRecord del período activo del usuario para que Dashboard/History
+ * lean siempre el estado vivo. Falla silenciosa: si el consolidate falla,
+ * loggeamos pero no rompemos la acción del usuario.
+ */
+async function reconsolidateActivePeriod(userId: string): Promise<void> {
+  try {
+    const profile = await prisma.profile.findUnique({
+      where: { userId },
+      select: { activeYear: true, activeMonth: true },
+    });
+    if (!profile) return;
+    const period = activePeriod(profile);
+    await consolidatePeriodFromLiveEntities(userId, period);
+  } catch (err) {
+    console.error("[income] reconsolidate failed:", err);
+  }
+}
 
 export type IncomeActionResult = { error?: string; ok?: boolean };
 
@@ -66,7 +90,10 @@ export async function createIncomeAction(
     };
   }
 
+  await reconsolidateActivePeriod(user.id);
   revalidatePath("/income");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
   return { ok: true };
 }
 
@@ -108,7 +135,10 @@ export async function updateIncomeAction(
     };
   }
 
+  await reconsolidateActivePeriod(user.id);
   revalidatePath("/income");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
   return { ok: true };
 }
 
@@ -120,7 +150,10 @@ export async function deleteIncomeAction(formData: FormData) {
   await prisma.income.deleteMany({
     where: { id, userId: user.id },
   });
+  await reconsolidateActivePeriod(user.id);
   revalidatePath("/income");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
 }
 
 // ============================================================================
@@ -175,7 +208,10 @@ export async function updatePlanBOverrideAction(
     };
   }
 
+  await reconsolidateActivePeriod(user.id);
   revalidatePath("/income");
   revalidatePath("/investments");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
   return { ok: true };
 }

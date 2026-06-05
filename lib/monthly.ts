@@ -22,6 +22,8 @@
 
 import { Prisma, type MonthlyRecord } from "@prisma/client";
 import { prisma } from "./prisma";
+import { monthlyPlanB } from "./formulas";
+import { effectivePlanB } from "./income";
 
 // ============================================================================
 // Tipos
@@ -257,5 +259,79 @@ export async function upsertMonthlyData(
       savingsRate: dec(derived.savingsRate),
       netWorth: dec(derived.netWorth),
     },
+  });
+}
+
+/**
+ * Consolida el MonthlyRecord del período tomando los valores actuales de
+ * las entidades vivas del usuario:
+ *
+ *   - Plan A = Σ Income filas activas con plan="A"
+ *   - Plan B = monthlyPlanB(Investments activas) o el override del Profile
+ *   - Plan C = Σ Income filas activas con plan="C"
+ *   - portfolioValue = Σ capital de Investments activas
+ *
+ * Es la API que las Server Actions de Income e Investments deben llamar
+ * al final de cada mutación. También la llama el Server Action que cambia
+ * el período activo, para que el MonthlyRecord del nuevo período refleje
+ * el estado vivo actual.
+ *
+ * No toca essentials/style/freedom (Expenses, FASE futura), debtTotal
+ * (Debts, FASE futura), ni notRealized (lógica del Coach).
+ */
+export async function consolidatePeriodFromLiveEntities(
+  userId: string,
+  period: Period,
+): Promise<MonthlyRecord> {
+  const [profile, incomes, investments] = await Promise.all([
+    prisma.profile.findUnique({
+      where: { userId },
+      select: {
+        planBManualOverride: true,
+        planBManualAmount: true,
+      },
+    }),
+    prisma.income.findMany({
+      where: { userId, isActive: true },
+      select: { plan: true, amount: true },
+    }),
+    prisma.investment.findMany({
+      where: { userId, isActive: true },
+      select: { capital: true, passiveYield: true },
+    }),
+  ]);
+
+  const planA = incomes
+    .filter((i) => i.plan === "A")
+    .reduce((s, i) => s + Number(i.amount), 0);
+
+  const planC = incomes
+    .filter((i) => i.plan === "C")
+    .reduce((s, i) => s + Number(i.amount), 0);
+
+  const positions = investments.map((i) => ({
+    capital: Number(i.capital),
+    passiveYield: Number(i.passiveYield),
+  }));
+
+  // Plan B respeta el override del Profile (consistente con effectivePlanB)
+  const planB = profile
+    ? effectivePlanB({
+        positions,
+        manualOverride: profile.planBManualOverride,
+        manualAmount:
+          profile.planBManualAmount !== null
+            ? Number(profile.planBManualAmount)
+            : null,
+      }).amount
+    : monthlyPlanB(positions);
+
+  const portfolioValue = positions.reduce((s, p) => s + p.capital, 0);
+
+  return upsertMonthlyData(userId, period, {
+    planA,
+    planB,
+    planC,
+    portfolioValue,
   });
 }

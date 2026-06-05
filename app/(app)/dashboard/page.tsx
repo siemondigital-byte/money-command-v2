@@ -31,11 +31,13 @@ export default function DashboardPlaceholder() {
           </p>
         </Link>
 
-        <Link href="/monthly" className="card" style={{ textDecoration: "none" }}>
+        <Link href="/income" className="card" style={{ textDecoration: "none" }}>
           <div className="label mb-2">Paso 2</div>
-          <h3 style={{ marginBottom: "8px" }}>Registrar tu mes</h3>
+          <h3 style={{ marginBottom: "8px" }}>Cargar ingresos</h3>
           <p style={{ fontSize: "12px", color: "var(--muted)" }}>
-            Ingresos, gastos, deudas y activos del mes en curso.
+            Plan A (salario), Plan C (secundario). Plan B se calcula desde
+            Inversiones. Cambiá el período en el header para registrar
+            otro mes.
           </p>
         </Link>
       </div>
