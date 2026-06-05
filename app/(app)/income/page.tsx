@@ -249,7 +249,8 @@ export default async function IncomePage({
                 : null
             }
             autoAmount={planB.autoAmount}
-            formatMoney={(n) => money.format(n)}
+            locale={profile.locale}
+            currency={profile.currency}
           />
         </div>
       </section>

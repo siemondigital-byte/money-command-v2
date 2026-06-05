@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { formatMoney } from "@/lib/format";
 import {
   updatePlanBOverrideAction,
   type IncomeActionResult,
@@ -10,13 +11,16 @@ export function PlanBOverrideForm({
   enabled,
   amount,
   autoAmount,
-  formatMoney,
+  locale,
+  currency,
 }: {
   enabled: boolean;
   amount: number | null;
   autoAmount: number;
-  formatMoney: (n: number) => string;
+  locale: string;
+  currency: string;
 }) {
+  const fmt = (n: number) => formatMoney(n, locale, currency);
   const [state, formAction, pending] = useActionState<
     IncomeActionResult,
     FormData
@@ -54,7 +58,7 @@ export function PlanBOverrideForm({
             step="0.01"
             min="0"
             defaultValue={amount ?? ""}
-            placeholder={`auto: ${formatMoney(autoAmount)}`}
+            placeholder={`auto: ${fmt(autoAmount)}`}
           />
           <span
             style={{
@@ -63,7 +67,7 @@ export function PlanBOverrideForm({
               lineHeight: 1.5,
             }}
           >
-            El valor automático sigue siendo {formatMoney(autoAmount)} desde
+            El valor automático sigue siendo {fmt(autoAmount)} desde
             Inversiones. Tu valor manual va a sobrescribirlo.
           </span>
         </label>
