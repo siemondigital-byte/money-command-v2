@@ -1,8 +1,10 @@
 # The Money Command v2 — Especificación Oficial
 
+> **Antes de cualquier tarea, leer [`ARQUITECTURA.md`](./ARQUITECTURA.md). Manda sobre cualquier implementación.**
+
 > **Versión**: 1.0 · **Estado**: Congelado para construcción · **Fecha**: 4 junio 2026
 >
-> Fuente única de verdad. Cualquier cambio que toque arquitectura, fórmulas o módulos se discute acá ANTES de tocar código.
+> Esta spec describe el **contenido** de cada módulo. `ARQUITECTURA.md` describe **cómo se conectan** los datos (MonthlyRecord como fuente única de verdad, período global, dos clases de dato). Si hay conflicto, gana ARQUITECTURA.md.
 >
 > Documentos satélite:
 > - `docs/COACH_CONTENIDO_v3.md` — Contenido del Coach (53 conceptos, 28 chips, 16 retos, 35 frases)

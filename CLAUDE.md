@@ -1,5 +1,7 @@
 # The Money Command v2 — Instrucciones para Claude Code
 
+> **Antes de cualquier tarea, leer [`ARQUITECTURA.md`](./ARQUITECTURA.md). Manda sobre cualquier implementación.**
+
 > Este archivo es lo primero que Claude Code lee al arrancar en este repo. Define qué se construye, cómo se construye, y qué NO se hace nunca.
 
 ---
