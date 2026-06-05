@@ -5,6 +5,7 @@ import type { SerializedProfile } from "@/lib/serialize";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/monthly", label: "Mes" },
+  { href: "/investments", label: "Inversiones" },
   { href: "/history", label: "Historial" },
   { href: "/settings", label: "Settings" },
 ];

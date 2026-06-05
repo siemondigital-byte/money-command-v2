@@ -207,19 +207,38 @@ model Debt {
 }
 
 // ============================================================================
-// Investment — cada inversión con su retorno esperado
-// El retorno ponderado del portafolio se calcula sobre estas filas
+// Investment — cada posición del portafolio
+//
+// Cinco categorías doctrinales (Sprint 2):
+//   "fixed_income" — Renta fija (bonos, fondos de bonos, plazo fijo)
+//   "equity"       — Renta variable (acciones, ETFs, fondos)
+//   "real_estate"  — Bienes raíces (propiedades, REITs)
+//   "speculative"  — Cripto / Especulativo
+//   "other"        — Otros
+//
+// passiveYield = % anual que la posición entrega como FLUJO (dividendos,
+// intereses, renta neta). NO es la apreciación del capital. Plan B mensual
+// se computa en Investments como:
+//
+//     planB = Σ (capital × passiveYield) / 12
+//
+// y es la ÚNICA fuente de verdad para el ingreso pasivo del usuario.
+//
+// Lo que NO está acá:
+//   - Retorno esperado de cartera (8%): vive en Settings, se usa solo para
+//     proyección de crecimiento en Sprint 3. No se modela por posición.
+//   - Divisor del NLF (4%): vive en formulas.ts como NLF_DIVISOR. No es
+//     un rendimiento ni una tasa de retiro.
 // ============================================================================
 model Investment {
   id     String @id @default(uuid()) @db.Uuid
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name             String
-  type             String // "variable_income" | "fixed_income" | "liquidity" | "real_estate" | "dividends" | "crypto" | "other"
-  currentValue     Decimal @db.Decimal(12, 2)
-  monthlyContribution Decimal @default(0) @db.Decimal(12, 2)
-  expectedReturn   Decimal @db.Decimal(5, 2) // % anual, default por tipo pero editable
+  category     String  // "fixed_income" | "equity" | "real_estate" | "speculative" | "other"
+  label        String?
+  capital      Decimal @db.Decimal(12, 2)
+  passiveYield Decimal @db.Decimal(5, 2) // % anual de flujo pasivo
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

@@ -38,25 +38,60 @@ export const DEFAULT_PORTFOLIO_RETURN = 0.08;
 /** Inflación default global cuando no hay dato del país del usuario. */
 export const DEFAULT_INFLATION_RATE = 0.03;
 
-/** Retornos default por tipo de inversión. El usuario puede editar cada uno. */
-export const DEFAULT_RETURNS_BY_TYPE: Record<InvestmentType, number> = {
-  variable_income: 0.08,
-  fixed_income: 0.04,
-  liquidity: 0.01,
-  real_estate: 0.06,
-  dividends: 0.05,
-  crypto: 0.12,
-  other: 0.05,
+/**
+ * Cinco categorías doctrinales del portafolio (Sprint 2).
+ *
+ * Los labels en ES viven en la UI; el enum interno se mantiene en EN.
+ */
+export type InvestmentCategory =
+  | "fixed_income"
+  | "equity"
+  | "real_estate"
+  | "speculative"
+  | "other";
+
+export const INVESTMENT_CATEGORIES = [
+  "fixed_income",
+  "equity",
+  "real_estate",
+  "speculative",
+  "other",
+] as const satisfies readonly InvestmentCategory[];
+
+/**
+ * Yield pasivo default por categoría. Es el % anual que la categoría
+ * entrega como FLUJO (dividendos, intereses, renta neta). Cada posición
+ * puede ajustarlo; estos son sugerencias.
+ *
+ * NO es el retorno total esperado de la categoría — el retorno esperado
+ * de cartera vive en Settings y se usa para proyección (Sprint 3).
+ */
+export const DEFAULT_PASSIVE_YIELDS_BY_CATEGORY: Record<
+  InvestmentCategory,
+  number
+> = {
+  fixed_income: 0.04, // bonos / plazo fijo pagan la mayoría como cupón
+  equity: 0.015, // dividend yield promedio del S&P 500
+  real_estate: 0.04, // renta neta típica
+  speculative: 0.0, // cripto sin staking no entrega flujo
+  other: 0.02, // estimación conservadora
 };
 
-export type InvestmentType =
-  | "variable_income"
-  | "fixed_income"
-  | "liquidity"
-  | "real_estate"
-  | "dividends"
-  | "crypto"
-  | "other";
+/**
+ * Retorno total esperado por categoría (crecimiento en acumulación).
+ * Default cuando no se sabe nada del portafolio del usuario. Se usa en
+ * Sprint 3 para proyección. NO se usa para calcular Plan B.
+ */
+export const DEFAULT_EXPECTED_RETURN_BY_CATEGORY: Record<
+  InvestmentCategory,
+  number
+> = {
+  fixed_income: 0.04,
+  equity: 0.08,
+  real_estate: 0.06,
+  speculative: 0.12,
+  other: 0.05,
+};
 
 // ============================================================================
 // Número de Libertad Financiera (NLF)
@@ -80,40 +115,68 @@ export function freedomNumber(monthlyDesiredSpend: number): number {
 }
 
 // ============================================================================
-// Retorno Ponderado del Portafolio
+// Plan B — Ingreso pasivo mensual (CONTRATO de Investments)
 // ============================================================================
 
-export interface InvestmentForReturn {
-  currentValue: number;
-  expectedReturn: number; // como decimal (0.08 = 8%)
+export interface PortfolioPosition {
+  capital: number;
+  passiveYield: number; // anual, como decimal (0.04 = 4%)
 }
 
 /**
- * Calcula el retorno ponderado anual de un portafolio según composición.
+ * Plan B mensual: suma de flujos pasivos del portafolio.
  *
- * Retorno Ponderado = Σ (% asignación × retorno esperado del tipo)
+ *     planB = Σ (posición.capital × posición.passiveYield) / 12
  *
- * Si el usuario no tiene inversiones cargadas, retorna DEFAULT_PORTFOLIO_RETURN.
+ * Es la ÚNICA fuente de verdad para el ingreso pasivo del usuario.
+ * Income consumirá este valor; si Income guarda un override manual,
+ * gana el override (regla del módulo Income, no de este).
  *
- * @param investments Array de inversiones con valor actual y retorno esperado
- * @returns Tasa anual como decimal (ej. 0.072 = 7.2%)
+ * PROHIBIDO: calcular Plan B como (portafolio × 4%) o (portafolio × 8%).
+ * El 4% es divisor del NLF; el 8% es retorno de crecimiento. Plan B es
+ * flujo de yields, posición por posición.
+ *
+ * @param positions Posiciones del portafolio del usuario
+ * @returns Ingreso pasivo mensual en la misma moneda que los capitales
  */
-export function weightedPortfolioReturn(
-  investments: InvestmentForReturn[]
+export function monthlyPlanB(positions: PortfolioPosition[]): number {
+  if (!positions || positions.length === 0) return 0;
+  const annual = positions.reduce(
+    (sum, p) => sum + p.capital * p.passiveYield,
+    0,
+  );
+  return annual / 12;
+}
+
+// ============================================================================
+// Retorno Esperado de Crecimiento del Portafolio (Sprint 3, no Plan B)
+// ============================================================================
+
+export interface PortfolioExpectedReturnInput {
+  capital: number;
+  expectedReturn: number; // crecimiento anual, decimal
+}
+
+/**
+ * Retorno esperado ponderado de crecimiento del portafolio. Se usa para
+ * proyección de cartera en el Freedom Calculator (Sprint 3). NO se usa
+ * para Plan B.
+ *
+ * Si no hay posiciones cargadas, retorna DEFAULT_PORTFOLIO_RETURN (8%).
+ *
+ * @param positions Posiciones con capital y retorno esperado de crecimiento
+ * @returns Tasa anual ponderada como decimal
+ */
+export function weightedExpectedReturn(
+  positions: PortfolioExpectedReturnInput[],
 ): number {
-  if (!investments || investments.length === 0) {
-    return DEFAULT_PORTFOLIO_RETURN;
-  }
-
-  const totalValue = investments.reduce((sum, inv) => sum + inv.currentValue, 0);
-  if (totalValue <= 0) return DEFAULT_PORTFOLIO_RETURN;
-
-  const weighted = investments.reduce((sum, inv) => {
-    const weight = inv.currentValue / totalValue;
-    return sum + weight * inv.expectedReturn;
-  }, 0);
-
-  return weighted;
+  if (!positions || positions.length === 0) return DEFAULT_PORTFOLIO_RETURN;
+  const totalCapital = positions.reduce((sum, p) => sum + p.capital, 0);
+  if (totalCapital <= 0) return DEFAULT_PORTFOLIO_RETURN;
+  return positions.reduce(
+    (sum, p) => sum + (p.capital / totalCapital) * p.expectedReturn,
+    0,
+  );
 }
 
 // ============================================================================

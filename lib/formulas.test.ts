@@ -10,7 +10,8 @@
 import { describe, it, expect } from "vitest";
 import {
   freedomNumber,
-  weightedPortfolioReturn,
+  weightedExpectedReturn,
+  monthlyPlanB,
   yearsToFinancialFreedom,
   netWorth,
   savingsRate,
@@ -58,35 +59,111 @@ describe("freedomNumber (NLF)", () => {
   });
 });
 
-describe("weightedPortfolioReturn", () => {
+describe("weightedExpectedReturn (proyección, Sprint 3)", () => {
   it("retorna default 8% si no hay inversiones", () => {
-    expect(weightedPortfolioReturn([])).toBe(0.08);
+    expect(weightedExpectedReturn([])).toBe(0.08);
   });
 
-  it("retorna default 8% si valor total es 0", () => {
+  it("retorna default 8% si capital total es 0", () => {
     expect(
-      weightedPortfolioReturn([
-        { currentValue: 0, expectedReturn: 0.08 },
-      ])
+      weightedExpectedReturn([{ capital: 0, expectedReturn: 0.08 }]),
     ).toBe(DEFAULT_PORTFOLIO_RETURN);
   });
 
   it("calcula retorno ponderado correcto con portafolio mixto", () => {
     // 40% renta fija 4% + 40% renta variable 8% + 20% bienes raíces 6%
     // = 0.4*0.04 + 0.4*0.08 + 0.2*0.06 = 0.016 + 0.032 + 0.012 = 0.06
-    const result = weightedPortfolioReturn([
-      { currentValue: 4000, expectedReturn: 0.04 },
-      { currentValue: 4000, expectedReturn: 0.08 },
-      { currentValue: 2000, expectedReturn: 0.06 },
+    const result = weightedExpectedReturn([
+      { capital: 4000, expectedReturn: 0.04 },
+      { capital: 4000, expectedReturn: 0.08 },
+      { capital: 2000, expectedReturn: 0.06 },
     ]);
     expect(result).toBeCloseTo(0.06, 4);
   });
 
   it("portafolio único retorna su mismo retorno", () => {
     expect(
-      weightedPortfolioReturn([{ currentValue: 10000, expectedReturn: 0.07 }])
+      weightedExpectedReturn([{ capital: 10000, expectedReturn: 0.07 }]),
     ).toBeCloseTo(0.07, 4);
   });
+});
+
+describe("monthlyPlanB (CONTRATO Investments → Income)", () => {
+  it("retorna 0 con portafolio vacío", () => {
+    expect(monthlyPlanB([])).toBe(0);
+  });
+
+  it("retorna 0 si capitales son 0", () => {
+    expect(
+      monthlyPlanB([
+        { capital: 0, passiveYield: 0.04 },
+        { capital: 0, passiveYield: 0.08 },
+      ]),
+    ).toBe(0);
+  });
+
+  it("retorna 0 si todos los yields son 0 (ej. crypto sin staking)", () => {
+    expect(
+      monthlyPlanB([
+        { capital: 10000, passiveYield: 0 },
+        { capital: 5000, passiveYield: 0 },
+      ]),
+    ).toBe(0);
+  });
+
+  it("una sola posición: 100000 al 4% → 333.33/mes", () => {
+    // 100000 × 0.04 = 4000/año → 4000/12 = 333.33
+    expect(monthlyPlanB([{ capital: 100_000, passiveYield: 0.04 }])).toBeCloseTo(
+      333.33,
+      2,
+    );
+  });
+
+  it("varias posiciones de distinto yield: suma ponderada correcta", () => {
+    // 100k bono 4% = 4000/año
+    // 200k equity 1.5% = 3000/año
+    // 50k real estate 5% = 2500/año
+    // total anual = 9500 → mensual = 791.67
+    const planB = monthlyPlanB([
+      { capital: 100_000, passiveYield: 0.04 },
+      { capital: 200_000, passiveYield: 0.015 },
+      { capital: 50_000, passiveYield: 0.05 },
+    ]);
+    expect(planB).toBeCloseTo(9500 / 12, 2);
+  });
+
+  it("cambiar capital de una posición recalcula", () => {
+    const baseline = monthlyPlanB([{ capital: 100_000, passiveYield: 0.04 }]);
+    const doubled = monthlyPlanB([{ capital: 200_000, passiveYield: 0.04 }]);
+    expect(doubled).toBeCloseTo(baseline * 2, 6);
+  });
+
+  it("cambiar yield de una posición recalcula", () => {
+    const conservative = monthlyPlanB([
+      { capital: 100_000, passiveYield: 0.02 },
+    ]);
+    const moderate = monthlyPlanB([{ capital: 100_000, passiveYield: 0.04 }]);
+    expect(moderate).toBeCloseTo(conservative * 2, 6);
+  });
+
+  it("DOCTRINA: no equivale a (portafolio total × 4%) / 12", () => {
+    // El 4% es divisor del NLF, no yield de cartera. Plan B con yields
+    // mixtos NO da el mismo número que multiplicar el total por 0.04.
+    const positions = [
+      { capital: 100_000, passiveYield: 0.04 }, // renta fija
+      { capital: 100_000, passiveYield: 0.015 }, // equity
+      { capital: 100_000, passiveYield: 0 }, // speculative sin staking
+    ];
+    const totalCapital = 300_000;
+    const planB = monthlyPlanB(positions);
+    const wrongCalculation = (totalCapital * 0.04) / 12; // PROHIBIDO
+    expect(planB).not.toBeCloseTo(wrongCalculation, 2);
+  });
+
+  // TODO (Income module, Sprint 2 — Módulo 2):
+  //   - integración: Income.planB === Investments.passiveIncome
+  //   - integración: si Income tiene override manual de Plan B, gana el
+  //     override sobre el valor computado.
 });
 
 describe("yearsToFinancialFreedom", () => {
