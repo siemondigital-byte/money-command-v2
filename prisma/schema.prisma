@@ -1,0 +1,301 @@
+// The Money Command v2 — Prisma Schema
+// Fuente de verdad para el modelo de datos. Cualquier cambio acá afecta toda la app.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================================
+// User — sincronizado con Supabase Auth. El id viene del auth.users.id de Supabase.
+// ============================================================================
+model User {
+  id        String   @id @db.Uuid
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile        Profile?
+  monthlyRecords MonthlyRecord[]
+  incomes        Income[]
+  expenses       Expense[]
+  debts          Debt[]
+  investments    Investment[]
+  goals          Goal[]
+  achievements   Achievement[]
+
+  @@map("users")
+}
+
+// ============================================================================
+// Profile — settings del usuario, brújula, supuestos, configuración de UI
+// ============================================================================
+model Profile {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Datos personales
+  name             String?
+  ageCurrent       Int?
+  ageFreedomTarget Int?
+  country          String? // ISO code (US, CO, MX, etc.) — usado para inflación default
+
+  // Brújula (proyectada al header de la app)
+  compassWhat         String? @db.VarChar(80)
+  compassYear         Int?
+  compassContribution String? @db.VarChar(80)
+
+  // Termostato meta a 2 años (manual)
+  thermostatTarget Decimal? @db.Decimal(12, 2)
+
+  // Supuestos
+  inflationRate     Decimal @default(3.0) @db.Decimal(5, 2) // % anual
+  freedomMonthlySpend Decimal? @db.Decimal(12, 2) // si null, usa gastos actuales
+  salaryGrowthRate  Decimal @default(2.5) @db.Decimal(5, 2) // % anual
+
+  // Método preferido del usuario
+  preferredMethod String @default("50/30/20") // 50/30/20 | 50/25/25 | 50/20/30 | 40/20/40
+
+  // Configuración de UI
+  currency String @default("USD") // ISO code, solo cosmético (símbolo y decimales)
+  locale   String @default("es")  // es | en
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+// ============================================================================
+// MonthlyRecord — TABLA MAESTRA. Una fila por usuario/año/mes.
+// Todos los datos consolidados del usuario en ese mes.
+// Los módulos de carga (Income, Expense, Debt, Investment) alimentan estos
+// totales vía Server Actions.
+// ============================================================================
+model MonthlyRecord {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // La fecha la pone el usuario al registrar (puede ser pasada)
+  year  Int
+  month Int // 1-12
+  recordedAt DateTime @default(now())
+
+  // Ingresos
+  incomeActive    Decimal @default(0) @db.Decimal(12, 2)
+  incomePassive   Decimal @default(0) @db.Decimal(12, 2) // calculado desde Investments
+  incomeSecondary Decimal @default(0) @db.Decimal(12, 2)
+  incomeTotal     Decimal @default(0) @db.Decimal(12, 2)
+
+  // Gastos por categoría del método
+  expenseNeeds       Decimal @default(0) @db.Decimal(12, 2)
+  expenseWants       Decimal @default(0) @db.Decimal(12, 2)
+  expenseInvestments Decimal @default(0) @db.Decimal(12, 2)
+  expenseTotal       Decimal @default(0) @db.Decimal(12, 2)
+
+  // Pasivos (deuda)
+  liabilityCard     Decimal @default(0) @db.Decimal(12, 2)
+  liabilityPersonal Decimal @default(0) @db.Decimal(12, 2)
+  liabilityMortgage Decimal @default(0) @db.Decimal(12, 2)
+  liabilityOther    Decimal @default(0) @db.Decimal(12, 2)
+  liabilityTotal    Decimal @default(0) @db.Decimal(12, 2)
+
+  // Activos
+  assetCash        Decimal @default(0) @db.Decimal(12, 2)
+  assetInvestments Decimal @default(0) @db.Decimal(12, 2)
+  assetRealEstate  Decimal @default(0) @db.Decimal(12, 2)
+  assetOther       Decimal @default(0) @db.Decimal(12, 2)
+  assetTotal       Decimal @default(0) @db.Decimal(12, 2)
+
+  // Calculados (snapshot del momento del registro)
+  netWorth        Decimal @default(0) @db.Decimal(12, 2)
+  savingsRate     Decimal @default(0) @db.Decimal(5, 2) // %
+  weightedReturn  Decimal @default(8.0) @db.Decimal(5, 2) // %
+
+  // No realizado (lo que se pudo ahorrar y no se hizo)
+  potentialSavingsMissed Decimal @default(0) @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, year, month])
+  @@index([userId, year, month])
+  @@map("monthly_records")
+}
+
+// ============================================================================
+// Income — fuentes de ingreso individuales (Plan A, Plan C)
+// Plan B se calcula desde Investments, no se almacena acá
+// ============================================================================
+model Income {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String
+  plan      String // "A" | "C" (B se calcula desde Investments)
+  amount    Decimal @db.Decimal(12, 2) // monto mensual
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@map("incomes")
+}
+
+// ============================================================================
+// Expense — gastos individuales con categorización
+// Las suscripciones y microgastos también van acá (con periodicity adecuada)
+// ============================================================================
+model Expense {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  category    String // vivienda | comida | transporte | salud | entretenimiento | educacion | otros
+  type        String // "fixed" | "variable"
+  classification String // "need" | "want" | "investment"
+  periodicity String // "once" | "monthly" | "annual"
+  amount      Decimal @db.Decimal(12, 2)
+
+  // Para gastos hormiga (microgastos)
+  isAntExpense    Boolean  @default(false)
+  unitAmount      Decimal? @db.Decimal(12, 2) // ej. $5 por café
+  frequencyPerMonth Int?    // ej. 20 días al mes
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@index([userId, isAntExpense])
+  @@map("expenses")
+}
+
+// ============================================================================
+// Debt — cada deuda con sus parámetros
+// ============================================================================
+model Debt {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name           String
+  type           String // "card" | "fixed_loan" | "no_interest_loan" | "mortgage" | "other"
+  balance        Decimal @db.Decimal(12, 2)
+  apr            Decimal @db.Decimal(5, 2) // % anual
+  minPayment     Decimal @db.Decimal(12, 2)
+  currentPayment Decimal @db.Decimal(12, 2)
+  termMonths     Int?    // para préstamos con plazo
+  originalAmount Decimal? @db.Decimal(12, 2) // para calcular % reducido
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@map("debts")
+}
+
+// ============================================================================
+// Investment — cada inversión con su retorno esperado
+// El retorno ponderado del portafolio se calcula sobre estas filas
+// ============================================================================
+model Investment {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name             String
+  type             String // "variable_income" | "fixed_income" | "liquidity" | "real_estate" | "dividends" | "crypto" | "other"
+  currentValue     Decimal @db.Decimal(12, 2)
+  monthlyContribution Decimal @default(0) @db.Decimal(12, 2)
+  expectedReturn   Decimal @db.Decimal(5, 2) // % anual, default por tipo pero editable
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@map("investments")
+}
+
+// ============================================================================
+// Goal — metas categorizadas (Necesidad | Deseo | Patrimonio)
+// ============================================================================
+model Goal {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  category    String // "need" | "want" | "patrimony"
+  targetAmount Decimal @db.Decimal(12, 2)
+  targetDate  DateTime
+  currentAmount Decimal @default(0) @db.Decimal(12, 2)
+  monthlyContribution Decimal @default(0) @db.Decimal(12, 2)
+
+  isActive   Boolean  @default(true)
+  isAchieved Boolean  @default(false)
+  achievedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@index([userId, targetDate])
+  @@map("goals")
+}
+
+// ============================================================================
+// Achievement — logros desbloqueados (no se repiten)
+// Ver lib/achievements.ts para la lista oficial [01]-[14]
+// ============================================================================
+model Achievement {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  code      String // "[01]" | "[02]" | ... | "[14]"
+  name      String
+  message   String
+  unlockedAt DateTime @default(now())
+
+  @@unique([userId, code])
+  @@index([userId])
+  @@map("achievements")
+}
+
+// ============================================================================
+// SavedScenario — escenarios guardados desde el Simulador (Freedom Calc Tab 5)
+// ============================================================================
+model SavedScenario {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+
+  name                 String
+  monthlyContribution  Decimal @db.Decimal(12, 2)
+  weightedReturn       Decimal @db.Decimal(5, 2)
+  wantsReductionPct    Decimal @default(0) @db.Decimal(5, 2)
+  incomeIncreasePct    Decimal @default(0) @db.Decimal(5, 2)
+  extraCapital         Decimal @default(0) @db.Decimal(12, 2)
+
+  // Resultados snapshot al momento de guardar
+  yearsToFreedom       Decimal @db.Decimal(5, 2)
+  projectedNetWorth    Decimal @db.Decimal(12, 2)
+  passiveIncomeMonthly Decimal @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("saved_scenarios")
+}
