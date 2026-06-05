@@ -62,6 +62,7 @@ export type SerializedProfile = Omit<
   | "inflationRate"
   | "freedomMonthlySpend"
   | "salaryGrowthRate"
+  | "planBManualAmount"
   | "createdAt"
   | "updatedAt"
 > & {
@@ -69,6 +70,7 @@ export type SerializedProfile = Omit<
   inflationRate: number;
   freedomMonthlySpend: number | null;
   salaryGrowthRate: number;
+  planBManualAmount: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -80,6 +82,7 @@ export function serializeProfile(p: Profile): SerializedProfile {
     inflationRate: dec(p.inflationRate),
     freedomMonthlySpend: decN(p.freedomMonthlySpend),
     salaryGrowthRate: dec(p.salaryGrowthRate),
+    planBManualAmount: decN(p.planBManualAmount),
     createdAt: isoReq(p.createdAt),
     updatedAt: isoReq(p.updatedAt),
   };

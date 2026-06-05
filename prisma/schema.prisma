@@ -62,6 +62,17 @@ model Profile {
   // Método preferido del usuario
   preferredMethod String @default("50/30/20") // 50/30/20 | 50/25/25 | 50/20/30 | 40/20/40
 
+  // Override de Plan B (ingreso pasivo)
+  // ------------------------------------------------------------------
+  // Por contrato del Sprint 2, Plan B se computa automáticamente desde
+  // Investments como monthlyPlanB(positions). El usuario puede activar
+  // un override manual; si está activo, el override gana sobre el
+  // cálculo. Esto NO duplica datos: el campo computed sigue siendo la
+  // fuente para "Plan B automático"; el override es solo un escape
+  // explícito por usuario.
+  planBManualOverride Boolean  @default(false)
+  planBManualAmount   Decimal? @db.Decimal(12, 2)
+
   // Configuración de UI
   currency String @default("USD") // ISO code, solo cosmético (símbolo y decimales)
   locale   String @default("es")  // es | en
