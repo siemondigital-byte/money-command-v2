@@ -2,9 +2,9 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeMonthlyRecord } from "@/lib/serialize";
-import { setActivePeriodAction } from "@/app/(app)/_actions/period";
 import { HistoryEditForm } from "./HistoryEditForm";
 import { DeleteRecordButton } from "./DeleteRecordButton";
+import { GoToPeriodButton } from "./GoToPeriodButton";
 
 export const metadata = { title: "Historial · The Money Command" };
 
@@ -129,25 +129,7 @@ export default async function HistoryPage({
                           alignItems: "center",
                         }}
                       >
-                        <form action={setActivePeriodAction}>
-                          <input type="hidden" name="year" value={r.year} />
-                          <input type="hidden" name="month" value={r.month} />
-                          <input type="hidden" name="next" value="/income" />
-                          <button
-                            type="submit"
-                            style={{
-                              background: "transparent",
-                              border: "none",
-                              color: "var(--accent)",
-                              fontSize: "12px",
-                              cursor: "pointer",
-                              fontFamily: "DM Mono, monospace",
-                              padding: 0,
-                            }}
-                          >
-                            Ir al mes
-                          </button>
-                        </form>
+                        <GoToPeriodButton year={r.year} month={r.month} />
                         <Link
                           href={`/history?edit=${r.id}#edit`}
                           style={{ color: "var(--accent-2)", fontSize: "12px" }}

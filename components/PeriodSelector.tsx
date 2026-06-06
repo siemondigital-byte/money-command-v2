@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useTransition } from "react";
-import { setActivePeriodAction } from "@/app/(app)/_actions/period";
+import { useEffect, useState } from "react";
+import { usePeriodChange } from "./usePeriodChange";
 
 const MONTH_LABELS_ES = [
   "Enero",
@@ -19,8 +19,17 @@ const MONTH_LABELS_ES = [
 ];
 
 /**
- * Selector de período global del header. Persiste en Profile.activeYear /
- * activeMonth via Server Action. Al cambiar revalida toda la app.
+ * Selector de período global del header.
+ *
+ * Es un ESPEJO de `Profile.activeYear / activeMonth` (fuente única de verdad):
+ * los `<select>` están CONTROLADOS por `value`, no por `defaultValue`. El
+ * estado local se siembra de las props del servidor y se re-sincroniza cada
+ * vez que esas props cambian — incluso si el período cambió por otra vía (el
+ * botón "Ir al mes" de History, un redirect, etc.). Así el selector SIEMPRE
+ * muestra el mismo mes que usan las páginas; no puede quedar desfasado.
+ *
+ * El cambio se aplica vía el helper único `usePeriodChange`, compartido con
+ * History.
  */
 export function PeriodSelector({
   activeYear,
@@ -29,28 +38,29 @@ export function PeriodSelector({
   activeYear: number;
   activeMonth: number;
 }) {
-  const formRef = useRef<HTMLFormElement>(null);
-  const [pending, startTransition] = useTransition();
+  const { changePeriod, pending } = usePeriodChange();
 
-  const submit = () => {
-    if (!formRef.current) return;
-    const fd = new FormData(formRef.current);
-    startTransition(() => {
-      setActivePeriodAction(fd);
-    });
-  };
+  // Estado local controlado, sembrado del servidor…
+  const [month, setMonth] = useState(activeMonth);
+  const [year, setYear] = useState(activeYear);
+
+  // …y re-sincronizado cuando el servidor cambia el período por cualquier vía.
+  useEffect(() => {
+    setMonth(activeMonth);
+  }, [activeMonth]);
+  useEffect(() => {
+    setYear(activeYear);
+  }, [activeYear]);
 
   // Rango de años: desde 5 atrás hasta 1 adelante del actual
   const currentYear = new Date().getFullYear();
-  const yearStart = Math.min(activeYear, currentYear - 5);
-  const yearEnd = Math.max(activeYear, currentYear + 1);
+  const yearStart = Math.min(year, currentYear - 5);
+  const yearEnd = Math.max(year, currentYear + 1);
   const years: number[] = [];
   for (let y = yearStart; y <= yearEnd; y++) years.push(y);
 
   return (
-    <form
-      ref={formRef}
-      action={setActivePeriodAction}
+    <div
       style={{
         display: "flex",
         alignItems: "center",
@@ -70,8 +80,12 @@ export function PeriodSelector({
       </span>
       <select
         name="month"
-        defaultValue={activeMonth}
-        onChange={submit}
+        value={month}
+        onChange={(e) => {
+          const m = Number(e.target.value);
+          setMonth(m);
+          changePeriod(year, m);
+        }}
         disabled={pending}
         style={{ padding: "4px 8px", fontSize: "12px" }}
       >
@@ -83,8 +97,12 @@ export function PeriodSelector({
       </select>
       <select
         name="year"
-        defaultValue={activeYear}
-        onChange={submit}
+        value={year}
+        onChange={(e) => {
+          const y = Number(e.target.value);
+          setYear(y);
+          changePeriod(y, month);
+        }}
         disabled={pending}
         style={{ padding: "4px 8px", fontSize: "12px" }}
       >
@@ -94,6 +112,6 @@ export function PeriodSelector({
           </option>
         ))}
       </select>
-    </form>
+    </div>
   );
 }
