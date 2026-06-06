@@ -32,78 +32,87 @@ export function Header({ profile }: { profile: SerializedProfile }) {
         className="mx-auto"
         style={{
           maxWidth: "1100px",
-          padding: "12px 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
+          padding: "14px 20px",
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
+          columnGap: "24px",
+          rowGap: "10px",
+          alignItems: "center",
         }}
       >
+        {/* Logo: ocupa las dos filas a la izquierda */}
+        <Link
+          href="/dashboard"
+          className="logo-wordmark"
+          style={{ gridRow: "1 / span 2", alignSelf: "center" }}
+        >
+          <span className="logo-line">The Money</span>
+          <span className="logo-line-accent">
+            Command
+            <span className="terminal-cursor" aria-hidden="true" />
+          </span>
+        </Link>
+
+        {/* Fila 1 derecha — Período */}
         <div
           style={{
             display: "flex",
+            justifyContent: "flex-end",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: "16px",
           }}
         >
-          <Link
-            href="/dashboard"
-            className="font-display"
-            style={{
-              fontSize: "1.1rem",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            The Money <span style={{ color: "var(--accent)" }}>Command</span>
-          </Link>
-
-          <nav
-            style={{
-              display: "flex",
-              gap: "20px",
-              alignItems: "center",
-              fontSize: "12px",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              flexWrap: "wrap",
-            }}
-          >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{ color: "var(--muted)" }}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <PeriodSelector
-              activeYear={period.year}
-              activeMonth={period.month}
-            />
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "var(--muted)",
-                  fontSize: "12px",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  fontFamily: "DM Mono, monospace",
-                  padding: 0,
-                }}
-              >
-                Salir
-              </button>
-            </form>
-          </nav>
+          <PeriodSelector
+            activeYear={period.year}
+            activeMonth={period.month}
+          />
         </div>
 
-        <CompassWhisper profile={profile} />
+        {/* Fila 2 derecha — Nav + Salir */}
+        <nav
+          style={{
+            display: "flex",
+            gap: "20px",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            fontSize: "12px",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            flexWrap: "wrap",
+          }}
+        >
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{ color: "var(--muted)" }}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--muted)",
+                fontSize: "12px",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                fontFamily: "DM Mono, monospace",
+                padding: 0,
+              }}
+            >
+              Salir
+            </button>
+          </form>
+        </nav>
+
+        {/* Brújula debajo de todo, full-width */}
+        <div style={{ gridColumn: "1 / -1" }}>
+          <CompassWhisper profile={profile} />
+        </div>
       </div>
     </header>
   );

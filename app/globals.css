@@ -107,6 +107,48 @@ h3 {
   line-height: 1.5;
 }
 
+/* Wordmark oficial del header — "The Money / Command" en dos líneas */
+.logo-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
+  font-size: clamp(1.5rem, 4.5vw, 1.95rem);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.logo-wordmark .logo-line-accent {
+  color: var(--accent);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+/* Cursor de terminal: bloque verde con glow, parpadeando */
+.terminal-cursor {
+  display: inline-block;
+  width: 0.5ch;
+  height: 0.78em;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(127, 255, 178, 0.65);
+  /* steps(1) = on/off súbito como terminal real, no fade lineal */
+  animation: terminal-cursor-blink 1s steps(1, end) infinite;
+}
+
+@keyframes terminal-cursor-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
 /* Inputs base */
 input,
 select,
