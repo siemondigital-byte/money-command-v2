@@ -173,6 +173,7 @@ export default async function ExpensesPage({
       )}
       {tab === "basket" && (
         <BasketSection
+          rows={rows}
           realByBasket={realByBasket}
           donutSlices={donutSlices}
           money={money}
@@ -372,10 +373,12 @@ function ExpenseTypeSection({
 }
 
 function BasketSection({
+  rows,
   realByBasket,
   donutSlices,
   money,
 }: {
+  rows: SerializedExpense[];
   realByBasket: ReturnType<typeof sumRealByBasket>;
   donutSlices: DonutSlice[];
   money: Intl.NumberFormat;
@@ -390,13 +393,19 @@ function BasketSection({
         alignItems: "stretch",
       }}
     >
-      <div className="card flex flex-col gap-4">
+      <div className="card flex flex-col gap-5">
         <div className="label">Reparto del gasto real por canasta</div>
         {BASKETS.map((b) => {
           const real = realByBasket[b];
-          // Porcentaje que la canasta representa sobre el total real del mes.
+          // NIVEL 1 — % de la canasta sobre el total real del mes.
           // Las tres suman 100%. Si el total es 0, 0% sin dividir por cero.
           const pct = total > 0 ? (real / total) * 100 : 0;
+          // NIVEL 2 — gastos de la canasta (activos), de mayor a menor; cada
+          // % es sobre el TOTAL del mes (no sobre la canasta), para que se vea
+          // el peso real de cada gasto en el panorama completo.
+          const items = rows
+            .filter((r) => r.isActive && r.basket === b)
+            .sort((a, c) => c.amount - a.amount);
           return (
             <div key={b} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <div
@@ -431,6 +440,61 @@ function BasketSection({
                   }}
                 />
               </div>
+
+              {/* NIVEL 2 — desglose de gastos individuales */}
+              {items.length > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                    paddingLeft: "12px",
+                    marginTop: "4px",
+                  }}
+                >
+                  {items.map((r) => {
+                    const itemPct = total > 0 ? (r.amount / total) * 100 : 0;
+                    return (
+                      <div
+                        key={r.id}
+                        style={{ display: "flex", flexDirection: "column", gap: "3px" }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: "12px",
+                            color: "var(--muted)",
+                          }}
+                        >
+                          <span>{r.name}</span>
+                          <span>
+                            {money.format(r.amount)}
+                            {" · "}
+                            {itemPct.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            height: 4,
+                            background: "var(--surface)",
+                            borderRadius: 4,
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `${itemPct}%`,
+                              height: "100%",
+                              background: "var(--muted)",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
