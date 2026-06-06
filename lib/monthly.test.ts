@@ -155,6 +155,56 @@ describe("computeDerived", () => {
     });
     expect(r.savingsRate).toBe(-100);
   });
+
+  it("déficit moderado no se clampea (ingreso 1000, gasto 1200 → -20%)", () => {
+    const r = computeDerived({
+      planA: 1000,
+      planB: 0,
+      planC: 0,
+      essentials: 1200,
+      style: 0,
+      freedom: 0,
+    });
+    expect(r.savingsRate).toBe(-20);
+  });
+
+  it("gastos MUCHO mayores que ingresos → clamp a -100% (evita overflow Decimal(5,2))", () => {
+    // (100 - 2535.99) / 100 * 100 = -2435.99% → antes reventaba el campo
+    const r = computeDerived({
+      planA: 100,
+      planB: 0,
+      planC: 0,
+      essentials: 2000,
+      style: 520,
+      freedom: 15.99,
+    });
+    expect(r.savingsRate).toBe(-100);
+    expect(r.savingsRate).toBeGreaterThanOrEqual(-100);
+  });
+
+  it("ingreso 0 con gastos → savingsRate 0 (neutral, sin tasa)", () => {
+    const r = computeDerived({
+      planA: 0,
+      planB: 0,
+      planC: 0,
+      essentials: 800,
+      style: 0,
+      freedom: 0,
+    });
+    expect(r.savingsRate).toBe(0);
+  });
+
+  it("sin gastos → savingsRate 100% (techo)", () => {
+    const r = computeDerived({
+      planA: 4000,
+      planB: 0,
+      planC: 0,
+      essentials: 0,
+      style: 0,
+      freedom: 0,
+    });
+    expect(r.savingsRate).toBe(100);
+  });
 });
 
 describe("periodToString", () => {

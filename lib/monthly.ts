@@ -95,8 +95,15 @@ export function activePeriod(
  *
  * - `incomeTotal` = planA + planB + planC
  * - `expensesTotal` = essentials + style + freedom
- * - `savingsRate` = (incomeTotal - expensesTotal) / incomeTotal × 100
- *                   (0 si incomeTotal es 0, para evitar división por cero)
+ * - `savingsRate` = (incomeTotal - expensesTotal) / incomeTotal × 100,
+ *                   CLAMPEADO a [-100, 100]:
+ *                     · 0 si incomeTotal es 0 (sin ingreso → sin tasa, neutral)
+ *                     · piso -100% = "gastás al menos el doble de tu ingreso"
+ *                       (déficit serio). Más allá no aporta como tasa y los
+ *                       montos crudos quedan visibles aparte.
+ *                   El clamp evita además el numeric field overflow del campo
+ *                   savingsRate Decimal(5,2) (rango [-999.99, 999.99]) cuando
+ *                   los gastos superan ~11× el ingreso.
  * - `netWorth` = portfolioValue - debtTotal (si están presentes)
  *
  * Las cifras se redondean a 2 decimales para que coincidan con la
@@ -107,10 +114,11 @@ export function computeDerived(input: MonthlyInputs): MonthlyDerived {
   const expensesTotal = round2(
     input.essentials + input.style + input.freedom,
   );
-  const savingsRate =
+  const rawRate =
     incomeTotal > 0
-      ? round2(((incomeTotal - expensesTotal) / incomeTotal) * 100)
+      ? ((incomeTotal - expensesTotal) / incomeTotal) * 100
       : 0;
+  const savingsRate = clamp(round2(rawRate), -100, 100);
   const netWorth = round2(
     (input.portfolioValue ?? 0) - (input.debtTotal ?? 0),
   );
@@ -124,6 +132,10 @@ export function periodToString(p: Period): string {
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+function clamp(n: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, n));
 }
 
 function dec(n: number): Prisma.Decimal {
