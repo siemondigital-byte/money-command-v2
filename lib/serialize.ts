@@ -202,9 +202,10 @@ export function serializeIncome(i: Income): SerializedIncome {
 
 export type SerializedExpense = Omit<
   Expense,
-  "amount" | "unitAmount" | "createdAt" | "updatedAt"
+  "amount" | "budget" | "unitAmount" | "createdAt" | "updatedAt"
 > & {
   amount: number;
+  budget: number;
   unitAmount: number | null;
   createdAt: string;
   updatedAt: string;
@@ -214,6 +215,7 @@ export function serializeExpense(e: Expense): SerializedExpense {
   return {
     ...e,
     amount: dec(e.amount),
+    budget: dec(e.budget),
     unitAmount: decN(e.unitAmount),
     createdAt: isoReq(e.createdAt),
     updatedAt: isoReq(e.updatedAt),

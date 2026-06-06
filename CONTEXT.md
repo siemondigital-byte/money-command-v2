@@ -141,3 +141,8 @@ Ver `.env.example` para el listado completo y comentarios. Resumen:
   form.** Hoy el período de una fila Income lo define el selector global
   ANTES de cargar; no se puede mover una fila ya cargada a otro mes.
   Workaround actual: borrarla y volver a cargarla en el período correcto.
+
+- **Eliminar columna legacy `classification` de Expense cuando sea seguro.**
+  Hoy se deriva del `basket` (essentials→need, style→want, freedom→investment)
+  solo para no romper su NOT NULL heredado; el módulo Expenses nunca la lee.
+  La fuente de verdad de la canasta es `basket`.

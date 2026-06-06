@@ -7,6 +7,7 @@ import { activePeriod } from "@/lib/monthly";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/income", label: "Ingresos" },
+  { href: "/expenses", label: "Gastos" },
   { href: "/investments", label: "Inversiones" },
   { href: "/history", label: "Historial" },
   { href: "/settings", label: "Settings" },

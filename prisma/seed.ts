@@ -184,6 +184,52 @@ async function populatePostgres(userId: string): Promise<void> {
           },
         ],
       },
+
+      expenses: {
+        create: [
+          // Fijo Esenciales
+          {
+            name: "Renta",
+            category: "vivienda",
+            type: "fixed",
+            classification: "need",
+            periodicity: "monthly",
+            basket: "essentials",
+            budget: 2000,
+            amount: 2000,
+            year: seedYear,
+            month: seedMonth,
+          },
+          // Variable Estilo
+          {
+            name: "Restaurantes",
+            category: "restaurantes",
+            type: "variable",
+            classification: "want",
+            periodicity: "monthly",
+            basket: "style",
+            budget: 400,
+            amount: 520,
+            year: seedYear,
+            month: seedMonth,
+          },
+          // Suscripción (absorbida en Estilo)
+          {
+            name: "Netflix",
+            category: "suscripciones",
+            type: "fixed",
+            classification: "want",
+            periodicity: "monthly",
+            basket: "style",
+            budget: 15.99,
+            amount: 15.99,
+            isSubscription: true,
+            isAntExpense: true,
+            year: seedYear,
+            month: seedMonth,
+          },
+        ],
+      },
     },
   });
 }

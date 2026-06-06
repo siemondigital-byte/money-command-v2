@@ -24,6 +24,7 @@ import { Prisma, type MonthlyRecord } from "@prisma/client";
 import { prisma } from "./prisma";
 import { monthlyPlanB } from "./formulas";
 import { effectivePlanB } from "./income";
+import { sumRealByBasket } from "./expenses";
 
 // ============================================================================
 // Tipos
@@ -283,7 +284,7 @@ export async function consolidatePeriodFromLiveEntities(
   userId: string,
   period: Period,
 ): Promise<MonthlyRecord> {
-  const [profile, incomes, investments] = await Promise.all([
+  const [profile, incomes, investments, expenses] = await Promise.all([
     prisma.profile.findUnique({
       where: { userId },
       select: {
@@ -304,6 +305,16 @@ export async function consolidatePeriodFromLiveEntities(
     prisma.investment.findMany({
       where: { userId, isActive: true },
       select: { capital: true, passiveYield: true },
+    }),
+    prisma.expense.findMany({
+      // Expenses es flujo del mes: sólo los gastos del período se consolidan.
+      where: {
+        userId,
+        isActive: true,
+        year: period.year,
+        month: period.month,
+      },
+      select: { type: true, basket: true, amount: true, budget: true, isSubscription: true },
     }),
   ]);
 
@@ -334,10 +345,28 @@ export async function consolidatePeriodFromLiveEntities(
 
   const portfolioValue = positions.reduce((s, p) => s + p.capital, 0);
 
+  // Gastos del período consolidados por canasta (Esenciales/Estilo/Libertad).
+  // sumRealByBasket usa el REAL pagado (amount); upsertMonthlyData computa
+  // expenseTotal y recalcula savingsRate. Mes sin gastos → canastas en 0 →
+  // savingsRate 100% (ANEXO §6, comportamiento correcto).
+  const baskets = sumRealByBasket(
+    expenses.map((e) => ({
+      type: e.type,
+      basket: e.basket,
+      amount: Number(e.amount),
+      budget: Number(e.budget),
+      isActive: true,
+      isSubscription: e.isSubscription,
+    })),
+  );
+
   return upsertMonthlyData(userId, period, {
     planA,
     planB,
     planC,
     portfolioValue,
+    essentials: baskets.essentials,
+    style: baskets.style,
+    freedom: baskets.freedom,
   });
 }
