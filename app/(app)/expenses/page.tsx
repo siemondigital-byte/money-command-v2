@@ -453,25 +453,28 @@ function BasketSection({
                   }}
                 >
                   {items.map((r) => {
-                    const itemPct = total > 0 ? (r.amount / total) * 100 : 0;
+                    // Dos porcentajes: dentro de la canasta y sobre el total
+                    // del mes. Guards para no dividir por cero.
+                    const pctOfBasket = real > 0 ? (r.amount / real) * 100 : 0;
+                    const pctOfTotal = total > 0 ? (r.amount / total) * 100 : 0;
+                    // La barra representa el peso sobre el TOTAL del mes, así
+                    // todas las barras (canasta y gastos) quedan en la misma
+                    // escala y se compara el peso real de un vistazo.
                     return (
                       <div
                         key={r.id}
-                        style={{ display: "flex", flexDirection: "column", gap: "3px" }}
+                        style={{ display: "flex", flexDirection: "column", gap: "4px" }}
                       >
                         <div
                           style={{
                             display: "flex",
                             justifyContent: "space-between",
                             fontSize: "12px",
-                            color: "var(--muted)",
                           }}
                         >
-                          <span>{r.name}</span>
-                          <span>
+                          <span style={{ color: "var(--text)" }}>{r.name}</span>
+                          <span style={{ color: "var(--muted)" }}>
                             {money.format(r.amount)}
-                            {" · "}
-                            {itemPct.toFixed(1)}%
                           </span>
                         </div>
                         <div
@@ -484,11 +487,23 @@ function BasketSection({
                         >
                           <div
                             style={{
-                              width: `${itemPct}%`,
+                              width: `${pctOfTotal}%`,
                               height: "100%",
                               background: "var(--muted)",
                             }}
                           />
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            fontSize: "11px",
+                            color: "var(--hint)",
+                          }}
+                        >
+                          <span>{Math.round(pctOfBasket)}% de la canasta</span>
+                          <span>·</span>
+                          <span>{pctOfTotal.toFixed(1)}% del total</span>
                         </div>
                       </div>
                     );
