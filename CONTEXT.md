@@ -133,6 +133,18 @@ Ver `.env.example` para el listado completo y comentarios. Resumen:
 3. ~~**Copy de moneda.**~~ **RESUELTO** (Settings describe la moneda solo
    funcionalmente: ajusta símbolo y decimales, no convierte).
 
+4. **i18n ES/EN nunca se implementó (tanda grande y transversal — REQUISITO
+   DE LANZAMIENTO).** Las cadenas están hardcodeadas en español;
+   `Profile.locale` solo afecta el formato numérico (`Intl.NumberFormat`
+   es-AR/en-US), no el idioma de los textos. Para traducir hay que extraer
+   TODAS las cadenas de TODOS los módulos a catálogos es/en y wirear el
+   locale a un provider.
+   - **Enfoque decidido:** `next-intl` (estándar App Router).
+   - **Cuándo:** se hace cuando la app esté funcionalmente completa, pero
+     ANTES de salir a la venta del producto. El lanzamiento es bilingüe
+     ES/EN: el inglés es **requisito de salida a producción, no opcional**.
+   - **Mercado inicial:** hispano.
+
 ---
 
 ## Mejoras futuras
