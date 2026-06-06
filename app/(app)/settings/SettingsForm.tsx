@@ -123,7 +123,7 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
       <Section title="Moneda e idioma" anchor="locale">
         <Row>
           <Select
-            label="Moneda (cosmético, sin conversión)"
+            label="Moneda"
             name="currency"
             options={CURRENCIES}
             defaultValue={profile.currency}
@@ -135,6 +135,10 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
             defaultValue={profile.locale}
           />
         </Row>
+        <p style={{ fontSize: "11px", color: "var(--hint)", marginTop: "8px" }}>
+          Ajusta el símbolo y los decimales en toda la app. No convierte montos
+          entre monedas.
+        </p>
       </Section>
 
       <div

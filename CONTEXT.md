@@ -114,3 +114,27 @@ Ver `.env.example` para el listado completo y comentarios. Resumen:
 | `DATABASE_URL` | Prisma runtime (pooler 6543) | NO — contiene password |
 | `DIRECT_URL` | Prisma migrate (pooler 5432) | NO — contiene password |
 | `NEXT_PUBLIC_SITE_URL` | Auth callback y emails | sí |
+
+---
+
+## Pendientes prioritarios
+
+1. **Period-scoping de Income (PRIORITARIO).** Las filas de Income deben
+   estar scopeadas por período, no globales. Hoy el mismo ingreso se
+   consolida a TODOS los meses (`consolidatePeriodFromLiveEntities` lee
+   `Income` sin filtrar por período). Resolverlo destraba:
+   - (A) corregir un registro desde Historial;
+   - (B) elegir el período en el selector ANTES de cargar y que se
+     consolide en el mes correcto;
+   - que el selector "viaje en el tiempo": cada módulo carga la data de
+     ese mes.
+
+2. **Tablas-historial por módulo.** Cada módulo (empezando por
+   Inversiones) debe tener su propia tabla de registro histórico (qué
+   inversiones, cuándo, ediciones, bajas), editable y borrable, que
+   retroalimenta el MonthlyRecord y el Historial general. Está en el
+   mapeo original de 12 puntos.
+
+3. **Copy de moneda.** Quitar cualquier texto que diga que la moneda es
+   "maquillaje" o "cuestión de gustos". Dejar solo la descripción
+   funcional: ajusta símbolo y decimales, no convierte.
