@@ -130,7 +130,7 @@ h3 {
 /* Cursor de terminal: bloque verde con glow, parpadeando */
 .terminal-cursor {
   display: inline-block;
-  width: 0.5ch;
+  width: 0.2ch;
   height: 0.78em;
   background: var(--accent);
   box-shadow: 0 0 8px rgba(127, 255, 178, 0.65);
