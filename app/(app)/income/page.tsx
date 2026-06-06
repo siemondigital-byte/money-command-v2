@@ -34,7 +34,7 @@ const PLAN_LABELS = {
   B: {
     name: "Plan B · Ingreso pasivo",
     helper:
-      "Calculado desde el portafolio de Inversiones: capital × yield pasivo ÷ 12. Es la fuente única de verdad — Income consume este valor.",
+      "Ingreso pasivo de tus inversiones. Se calcula solo desde tu portafolio.",
   },
   C: {
     name: "Plan C · Secundario / Freelance",
@@ -158,12 +158,28 @@ export default async function IncomePage({
         </div>
         <div>
           <div className="label">% pasivo</div>
-          <div className="kpi-medium" style={{ marginTop: "4px" }}>
-            {pct.format(totals.passiveShare)}
-          </div>
-          <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
-            Plan B sobre el total
-          </p>
+          {totals.planB > 0 ? (
+            <>
+              <div className="kpi-medium" style={{ marginTop: "4px" }}>
+                {pct.format(totals.passiveShare)}
+              </div>
+              <p
+                style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}
+              >
+                Plan B sobre el total
+              </p>
+            </>
+          ) : (
+            <p
+              style={{
+                fontSize: "13px",
+                color: "var(--muted)",
+                marginTop: "4px",
+              }}
+            >
+              Sin ingreso pasivo aún
+            </p>
+          )}
         </div>
       </section>
 
@@ -247,7 +263,7 @@ export default async function IncomePage({
               }}
             >
               <Link href="/investments" style={{ color: "var(--accent-2)" }}>
-                Editar posiciones →
+                Agrega tus posiciones
               </Link>
             </p>
           </div>
@@ -448,12 +464,14 @@ function PlanSection({
           borderTop: "1px solid var(--border)",
         }}
       >
-        <div
-          className="label"
-          style={{ marginBottom: "8px", color: "var(--muted)" }}
-        >
-          {editing ? `Editar fila ${plan}` : `Agregar a Plan ${plan}`}
-        </div>
+        {editing && (
+          <div
+            className="label"
+            style={{ marginBottom: "8px", color: "var(--muted)" }}
+          >
+            Editar fila {plan}
+          </div>
+        )}
         <IncomeRowForm plan={plan} editing={editing} onDoneHref={editingHref} />
       </div>
     </section>

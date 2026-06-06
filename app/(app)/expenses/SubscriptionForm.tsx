@@ -1,21 +1,39 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   createSubscriptionAction,
   type ExpenseActionResult,
 } from "./actions";
 
 /**
- * Form para agregar una suscripción. Se absorbe en la canasta Estilo con el
- * flag dedicado isSubscription, para alimentar el resumen mensual/anual y la
- * futura GASTOS_HORMIGA_MES del Coach.
+ * Form para agregar una suscripción (se absorbe en Estilo con el flag dedicado
+ * isSubscription). Arranca colapsado en un botón "Agregar"; al guardar con
+ * éxito se vuelve a colapsar (la suscripción aparece en la lista por la
+ * revalidación del server action).
  */
 export function SubscriptionForm() {
   const [state, formAction, pending] = useActionState<
     ExpenseActionResult,
     FormData
   >(createSubscriptionAction, {});
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (state.ok) setOpen(false);
+  }, [state]);
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={() => setOpen(true)}
+      >
+        Agregar
+      </button>
+    );
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
@@ -59,11 +77,26 @@ export function SubscriptionForm() {
       </div>
       <input type="hidden" name="category" value="suscripciones" />
 
+      <div>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--muted)",
+            fontSize: "12px",
+            cursor: "pointer",
+            fontFamily: "DM Mono, monospace",
+            padding: 0,
+          }}
+        >
+          Cancelar
+        </button>
+      </div>
+
       {state.error && (
         <p style={{ color: "var(--danger)", fontSize: "12px" }}>{state.error}</p>
-      )}
-      {state.ok && (
-        <p style={{ color: "var(--accent)", fontSize: "12px" }}>Agregada.</p>
       )}
     </form>
   );

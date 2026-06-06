@@ -183,8 +183,9 @@ export default async function ExpensesPage({
         />
       )}
 
-      {/* Suscripciones (absorbidas en Estilo) */}
-      <section className="card flex flex-col gap-4">
+      {/* Suscripciones (absorbidas en Estilo) — solo en la tab Variables */}
+      {tab === "variable" && (
+        <section className="card flex flex-col gap-4">
         <div>
           <div className="label">Suscripciones y gastos hormiga</div>
           <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
@@ -244,7 +245,8 @@ export default async function ExpensesPage({
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: "12px" }}>
           <SubscriptionForm />
         </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
@@ -359,9 +361,14 @@ function ExpenseTypeSection({
         id="form"
         style={{ paddingTop: "8px", borderTop: "1px solid var(--border)" }}
       >
-        <div className="label" style={{ marginBottom: "8px", color: "var(--muted)" }}>
-          {editing ? "Editar gasto" : `Agregar gasto ${type === "fixed" ? "fijo" : "variable"}`}
-        </div>
+        {editing && (
+          <div
+            className="label"
+            style={{ marginBottom: "8px", color: "var(--muted)" }}
+          >
+            Editar gasto
+          </div>
+        )}
         <ExpenseForm type={type} editing={editing} onDoneHref={`/expenses?tab=${tab}`} />
       </div>
     </section>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SerializedExpense } from "@/lib/serialize";
 import {
   BASKETS,
@@ -16,9 +17,12 @@ import {
 
 /**
  * Form para crear/editar un gasto fijo o variable. El `type` lo fija el tab
- * activo (Fijos/Variables) y viaja como hidden. Canasta + categoría + montos
- * presupuesto/real. Importa helpers de formato/listas desde lib (nada
- * Server→Client).
+ * activo (Fijos/Variables) y viaja como hidden.
+ *
+ * - Agregar: arranca colapsado en un botón "Agregar"; al guardar con éxito se
+ *   vuelve a colapsar (el gasto aparece en la lista por la revalidación).
+ * - Editar: se abre vía ?edit=ID; al guardar con éxito vuelve a la lista
+ *   (limpia el ?edit=), cerrándose solo sin necesidad de "Volver".
  */
 export function ExpenseForm({
   type,
@@ -29,15 +33,36 @@ export function ExpenseForm({
   editing: SerializedExpense | null;
   onDoneHref: string;
 }) {
-  const action = editing ? updateExpenseAction : createExpenseAction;
+  const router = useRouter();
+  const isEditing = editing != null;
+  const action = isEditing ? updateExpenseAction : createExpenseAction;
   const [state, formAction, pending] = useActionState<
     ExpenseActionResult,
     FormData
   >(action, {});
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!state.ok) return;
+    if (isEditing) router.replace(onDoneHref);
+    else setOpen(false);
+  }, [state, isEditing, onDoneHref, router]);
+
+  if (!isEditing && !open) {
+    return (
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={() => setOpen(true)}
+      >
+        Agregar
+      </button>
+    );
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      {editing && <input type="hidden" name="id" value={editing.id} />}
+      {isEditing && <input type="hidden" name="id" value={editing.id} />}
       <input type="hidden" name="type" value={type} />
 
       <div
@@ -121,20 +146,32 @@ export function ExpenseForm({
           disabled={pending}
           style={{ opacity: pending ? 0.6 : 1 }}
         >
-          {pending ? "…" : editing ? "Guardar" : "Agregar"}
+          {pending ? "…" : isEditing ? "Guardar" : "Agregar"}
+        </button>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() =>
+            isEditing ? router.replace(onDoneHref) : setOpen(false)
+          }
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--muted)",
+            fontSize: "12px",
+            cursor: "pointer",
+            fontFamily: "DM Mono, monospace",
+            padding: 0,
+          }}
+        >
+          Cancelar
         </button>
       </div>
 
       {state.error && (
         <p style={{ color: "var(--danger)", fontSize: "12px" }}>{state.error}</p>
-      )}
-      {state.ok && !editing && (
-        <p style={{ color: "var(--accent)", fontSize: "12px" }}>Agregado.</p>
-      )}
-      {state.ok && editing && (
-        <p style={{ color: "var(--accent)", fontSize: "12px" }}>
-          Cambios guardados. <a href={onDoneHref}>Volver</a>
-        </p>
       )}
     </form>
   );

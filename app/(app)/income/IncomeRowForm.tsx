@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SerializedIncome } from "@/lib/serialize";
 import {
   createIncomeAction,
@@ -8,6 +9,15 @@ import {
   type IncomeActionResult,
 } from "./actions";
 
+/**
+ * Form de fila Income (Plan A/C).
+ *
+ * - Agregar: arranca colapsado en un botón "Agregar"; al tocarlo despliega los
+ *   campos. Al guardar con éxito se vuelve a colapsar (la fila nueva aparece en
+ *   la lista por la revalidación del server action).
+ * - Editar: se abre vía ?edit=ID. Al guardar con éxito navega de vuelta a la
+ *   lista (limpia el ?edit=), cerrándose solo sin necesidad de "Volver".
+ */
 export function IncomeRowForm({
   plan,
   editing,
@@ -17,15 +27,38 @@ export function IncomeRowForm({
   editing: SerializedIncome | null;
   onDoneHref: string;
 }) {
-  const action = editing ? updateIncomeAction : createIncomeAction;
+  const router = useRouter();
+  const isEditing = editing != null;
+  const action = isEditing ? updateIncomeAction : createIncomeAction;
   const [state, formAction, pending] = useActionState<
     IncomeActionResult,
     FormData
   >(action, {});
+  const [open, setOpen] = useState(false);
+
+  // Al guardar con éxito: editar → vuelve a la lista; agregar → colapsa.
+  useEffect(() => {
+    if (!state.ok) return;
+    if (isEditing) router.replace(onDoneHref);
+    else setOpen(false);
+  }, [state, isEditing, onDoneHref, router]);
+
+  // Agregar, colapsado: solo el botón.
+  if (!isEditing && !open) {
+    return (
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={() => setOpen(true)}
+      >
+        Agregar
+      </button>
+    );
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      {editing && <input type="hidden" name="id" value={editing.id} />}
+      {isEditing && <input type="hidden" name="id" value={editing.id} />}
       <input type="hidden" name="plan" value={plan} />
 
       <div
@@ -66,20 +99,32 @@ export function IncomeRowForm({
           disabled={pending}
           style={{ opacity: pending ? 0.6 : 1 }}
         >
-          {pending ? "…" : editing ? "Guardar" : "Agregar"}
+          {pending ? "…" : isEditing ? "Guardar" : "Agregar"}
+        </button>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() =>
+            isEditing ? router.replace(onDoneHref) : setOpen(false)
+          }
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--muted)",
+            fontSize: "12px",
+            cursor: "pointer",
+            fontFamily: "DM Mono, monospace",
+            padding: 0,
+          }}
+        >
+          Cancelar
         </button>
       </div>
 
       {state.error && (
         <p style={{ color: "var(--danger)", fontSize: "12px" }}>{state.error}</p>
-      )}
-      {state.ok && !editing && (
-        <p style={{ color: "var(--accent)", fontSize: "12px" }}>Agregado.</p>
-      )}
-      {state.ok && editing && (
-        <p style={{ color: "var(--accent)", fontSize: "12px" }}>
-          Cambios guardados. <a href={onDoneHref}>Volver</a>
-        </p>
       )}
     </form>
   );
