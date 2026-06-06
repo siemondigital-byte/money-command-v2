@@ -57,17 +57,11 @@ export default async function InvestmentsPage({
   );
   const totalCapital = serialized.reduce((sum, p) => sum + p.capital, 0);
 
-  // Formato moneda
+  // Formato moneda — decimales según moneda (default ISO 4217)
   const locale = profile.locale === "es" ? "es-AR" : "en-US";
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: profile.currency,
-    maximumFractionDigits: 0,
-  });
-  const moneyDecimals = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: profile.currency,
-    maximumFractionDigits: 2,
   });
   const pct = new Intl.NumberFormat(locale, {
     style: "percent",
@@ -145,7 +139,7 @@ export default async function InvestmentsPage({
               className="kpi-large"
               style={{ marginTop: "4px" }}
             >
-              {moneyDecimals.format(planBMonthly)}
+              {money.format(planBMonthly)}
             </div>
             <p
               style={{

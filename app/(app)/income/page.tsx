@@ -2,11 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeIncome } from "@/lib/serialize";
-import {
-  effectivePlanB,
-  incomeTotals,
-  idealMonthlyInvestmentCapital,
-} from "@/lib/income";
+import { effectivePlanB, incomeTotals } from "@/lib/income";
 import {
   activePeriod,
   getMonthlyRecord,
@@ -97,22 +93,12 @@ export default async function IncomePage({
     rows.map((r) => ({ plan: r.plan, amount: r.amount, isActive: r.isActive })),
     planB.amount,
   );
-  const idealInvestment = idealMonthlyInvestmentCapital(
-    totals.total,
-    profile.preferredMethod,
-  );
 
-  // Formato moneda
+  // Formato moneda — decimales según moneda (default ISO 4217)
   const locale = profile.locale === "es" ? "es-AR" : "en-US";
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: profile.currency,
-    maximumFractionDigits: 2,
-  });
-  const moneyRound = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: profile.currency,
-    maximumFractionDigits: 0,
   });
   const pct = new Intl.NumberFormat(locale, {
     style: "percent",
@@ -166,7 +152,7 @@ export default async function IncomePage({
         <div>
           <div className="label">Total ingresos/mes</div>
           <div className="kpi-large" style={{ marginTop: "4px" }}>
-            {moneyRound.format(totals.total)}
+            {money.format(totals.total)}
           </div>
         </div>
         <div>
@@ -178,22 +164,12 @@ export default async function IncomePage({
             Plan B sobre el total
           </p>
         </div>
-        <div>
-          <div className="label">Capital ideal a invertir</div>
-          <div className="kpi-medium" style={{ marginTop: "4px" }}>
-            {moneyRound.format(idealInvestment)}
-          </div>
-          <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
-            Según método {profile.preferredMethod}
-          </p>
-        </div>
       </section>
 
       {/* Plan A */}
       <PlanSection
         plan="A"
         money={money}
-        moneyRound={moneyRound}
         rows={rowsA}
         editing={editing?.plan === "A" ? editing : null}
         editingHref="/income"
@@ -300,7 +276,6 @@ export default async function IncomePage({
       <PlanSection
         plan="C"
         money={money}
-        moneyRound={moneyRound}
         rows={rowsC}
         editing={editing?.plan === "C" ? editing : null}
         editingHref="/income"
@@ -352,14 +327,12 @@ function PlanSection({
   editing,
   editingHref,
   money,
-  moneyRound,
 }: {
   plan: "A" | "C";
   rows: ReturnType<typeof serializeIncome>[];
   editing: ReturnType<typeof serializeIncome> | null;
   editingHref: string;
   money: Intl.NumberFormat;
-  moneyRound: Intl.NumberFormat;
 }) {
   const subtotal = rows
     .filter((r) => r.isActive)
@@ -396,7 +369,7 @@ function PlanSection({
             className="kpi-medium"
             style={{ marginTop: "4px", color: "var(--accent)" }}
           >
-            {moneyRound.format(subtotal)}
+            {money.format(subtotal)}
           </div>
         </div>
       </div>

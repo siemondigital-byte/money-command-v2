@@ -16,16 +16,24 @@ export function bcp47(locale: string): string {
 }
 
 export interface MoneyOptions {
-  /** Máximo de decimales. Default 2. */
+  /** Máximo de decimales. Si no se pasa, usa el default por moneda (ISO 4217). */
   maxFractionDigits?: number;
-  /** Mínimo de decimales. Default 0. */
+  /** Mínimo de decimales. Si no se pasa, usa el default por moneda (ISO 4217). */
   minFractionDigits?: number;
 }
 
 /**
  * Formatea un monto como moneda según locale + currency del Profile.
  *
- * Ejemplo: formatMoney(1234.5, "es", "USD") → "US$1.234,50"
+ * Por default usa los decimales canónicos de cada moneda (ISO 4217):
+ *   USD/EUR/MXN/ARS/BRL/PEN → 2 decimales
+ *   COP/CLP                 → 0 decimales (entero)
+ *
+ * No convierte tasas — es puramente cosmético: símbolo y decimales según
+ * la moneda elegida en Settings.
+ *
+ * Ejemplo: formatMoney(1234.5, "es", "USD") → "US$ 1.234,50"
+ *          formatMoney(1234.5, "es", "COP") → "$ 1.235"
  */
 export function formatMoney(
   amount: number,
@@ -33,12 +41,17 @@ export function formatMoney(
   currency: string,
   opts: MoneyOptions = {},
 ): string {
-  return new Intl.NumberFormat(bcp47(locale), {
+  const fmtOpts: Intl.NumberFormatOptions = {
     style: "currency",
     currency,
-    maximumFractionDigits: opts.maxFractionDigits ?? 2,
-    minimumFractionDigits: opts.minFractionDigits ?? 0,
-  }).format(amount);
+  };
+  if (opts.maxFractionDigits !== undefined) {
+    fmtOpts.maximumFractionDigits = opts.maxFractionDigits;
+  }
+  if (opts.minFractionDigits !== undefined) {
+    fmtOpts.minimumFractionDigits = opts.minFractionDigits;
+  }
+  return new Intl.NumberFormat(bcp47(locale), fmtOpts).format(amount);
 }
 
 /**

@@ -3,6 +3,8 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeMonthlyRecord } from "@/lib/serialize";
 import { setActivePeriodAction } from "@/app/(app)/_actions/period";
+import { HistoryEditForm } from "./HistoryEditForm";
+import { DeleteRecordButton } from "./DeleteRecordButton";
 
 export const metadata = { title: "Historial · The Money Command" };
 
@@ -21,8 +23,13 @@ const SHORT_MONTHS = [
   "Dic",
 ];
 
-export default async function HistoryPage() {
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string }>;
+}) {
   const { user, profile } = await requireUser();
+  const params = await searchParams;
 
   const records = await prisma.monthlyRecord.findMany({
     where: { userId: user.id },
@@ -30,11 +37,15 @@ export default async function HistoryPage() {
   });
   const rows = records.map(serializeMonthlyRecord);
 
+  const editing = params.edit
+    ? (rows.find((r) => r.id === params.edit) ?? null)
+    : null;
+
+  // Formato moneda — decimales según moneda (default ISO 4217)
   const locale = profile.locale === "es" ? "es-AR" : "en-US";
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: profile.currency,
-    maximumFractionDigits: 0,
   });
   const pct = new Intl.NumberFormat(locale, {
     style: "percent",
@@ -111,25 +122,43 @@ export default async function HistoryPage() {
                     <Td align="right">{pct.format(r.savingsRate / 100)}</Td>
                     <Td align="right">{money.format(r.netWorth)}</Td>
                     <Td align="right">
-                      <form action={setActivePeriodAction}>
-                        <input type="hidden" name="year" value={r.year} />
-                        <input type="hidden" name="month" value={r.month} />
-                        <input type="hidden" name="next" value="/income" />
-                        <button
-                          type="submit"
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            color: "var(--accent)",
-                            fontSize: "12px",
-                            cursor: "pointer",
-                            fontFamily: "DM Mono, monospace",
-                            padding: 0,
-                          }}
+                      <div
+                        style={{
+                          display: "inline-flex",
+                          gap: "12px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <form action={setActivePeriodAction}>
+                          <input type="hidden" name="year" value={r.year} />
+                          <input type="hidden" name="month" value={r.month} />
+                          <input type="hidden" name="next" value="/income" />
+                          <button
+                            type="submit"
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              color: "var(--accent)",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              fontFamily: "DM Mono, monospace",
+                              padding: 0,
+                            }}
+                          >
+                            Ir al mes
+                          </button>
+                        </form>
+                        <Link
+                          href={`/history?edit=${r.id}#edit`}
+                          style={{ color: "var(--accent-2)", fontSize: "12px" }}
                         >
-                          Ir al mes
-                        </button>
-                      </form>
+                          Editar
+                        </Link>
+                        <DeleteRecordButton
+                          id={r.id}
+                          label={`${SHORT_MONTHS[r.month - 1]} ${r.year}`}
+                        />
+                      </div>
                     </Td>
                   </tr>
                 ))}
@@ -137,6 +166,15 @@ export default async function HistoryPage() {
             </table>
           </div>
         </div>
+      )}
+
+      {editing && (
+        <section id="edit" className="card">
+          <div className="label" style={{ marginBottom: "12px" }}>
+            Editar {SHORT_MONTHS[editing.month - 1]} {editing.year}
+          </div>
+          <HistoryEditForm record={editing} onDoneHref="/history" />
+        </section>
       )}
     </div>
   );
