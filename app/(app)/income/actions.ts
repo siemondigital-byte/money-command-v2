@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import {
   activePeriod,
   consolidatePeriodFromLiveEntities,
+  type Period,
 } from "@/lib/monthly";
 
 /**
@@ -18,16 +19,25 @@ import {
  */
 async function reconsolidateActivePeriod(userId: string): Promise<void> {
   try {
-    const profile = await prisma.profile.findUnique({
-      where: { userId },
-      select: { activeYear: true, activeMonth: true },
-    });
-    if (!profile) return;
-    const period = activePeriod(profile);
+    const period = await getActivePeriod(userId);
+    if (!period) return;
     await consolidatePeriodFromLiveEntities(userId, period);
   } catch (err) {
     console.error("[income] reconsolidate failed:", err);
   }
+}
+
+/**
+ * Período activo del usuario (selector global). Income lo usa para estampar
+ * las filas nuevas en el mes correcto. `null` si el Profile no existe.
+ */
+async function getActivePeriod(userId: string): Promise<Period | null> {
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+    select: { activeYear: true, activeMonth: true },
+  });
+  if (!profile) return null;
+  return activePeriod(profile);
 }
 
 export type IncomeActionResult = { error?: string; ok?: boolean };
@@ -72,6 +82,9 @@ export async function createIncomeAction(
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
 
+  const period = await getActivePeriod(user.id);
+  if (!period) return { error: "No se encontró el perfil del usuario" };
+
   try {
     await prisma.income.create({
       data: {
@@ -79,6 +92,9 @@ export async function createIncomeAction(
         plan: parsed.data.plan,
         name: parsed.data.name,
         amount: dec(parsed.data.amount),
+        // Income es flujo del mes: la fila pertenece al período activo.
+        year: period.year,
+        month: period.month,
       },
     });
   } catch (err) {

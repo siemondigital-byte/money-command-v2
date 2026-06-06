@@ -58,7 +58,8 @@ export default async function IncomePage({
   // Carga de datos
   const [rowsRaw, positionsRaw, monthlyRecord] = await Promise.all([
     prisma.income.findMany({
-      where: { userId: user.id },
+      // Sólo las filas del período activo (Income es flujo del mes).
+      where: { userId: user.id, year: period.year, month: period.month },
       orderBy: [{ plan: "asc" }, { createdAt: "asc" }],
     }),
     prisma.investment.findMany({

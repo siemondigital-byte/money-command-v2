@@ -82,6 +82,13 @@ async function createAuthUser(): Promise<string> {
 }
 
 async function populatePostgres(userId: string): Promise<void> {
+  // Income es flujo del mes: lo estampamos en el período activo del seed.
+  // El Profile no setea activeYear/activeMonth, así que el período activo
+  // por defecto es el mes calendario actual (ver activePeriod()).
+  const now = new Date();
+  const seedYear = now.getFullYear();
+  const seedMonth = now.getMonth() + 1;
+
   await prisma.user.create({
     data: {
       id: userId,
@@ -161,8 +168,20 @@ async function populatePostgres(userId: string): Promise<void> {
 
       incomes: {
         create: [
-          { plan: "A", name: "Salario principal", amount: 6500 },
-          { plan: "C", name: "Consultoría freelance", amount: 1200 },
+          {
+            plan: "A",
+            name: "Salario principal",
+            amount: 6500,
+            year: seedYear,
+            month: seedMonth,
+          },
+          {
+            plan: "C",
+            name: "Consultoría freelance",
+            amount: 1200,
+            year: seedYear,
+            month: seedMonth,
+          },
         ],
       },
     },

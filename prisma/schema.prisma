@@ -180,10 +180,17 @@ model Income {
   amount    Decimal @db.Decimal(12, 2) // monto mensual
   isActive  Boolean @default(true)
 
+  // Período al que pertenece (ARQUITECTURA §3: Income es flujo del mes).
+  // Cada fila vive en un mes/año concreto; el selector global decide en qué
+  // período se carga y se consulta.
+  year  Int
+  month Int // 1-12
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId, isActive])
+  @@index([userId, year, month])
   @@map("incomes")
 }
 

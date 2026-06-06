@@ -292,7 +292,13 @@ export async function consolidatePeriodFromLiveEntities(
       },
     }),
     prisma.income.findMany({
-      where: { userId, isActive: true },
+      // Income es flujo del mes: sólo las filas del período se consolidan.
+      where: {
+        userId,
+        isActive: true,
+        year: period.year,
+        month: period.month,
+      },
       select: { plan: true, amount: true },
     }),
     prisma.investment.findMany({

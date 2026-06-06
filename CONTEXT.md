@@ -119,15 +119,10 @@ Ver `.env.example` para el listado completo y comentarios. Resumen:
 
 ## Pendientes prioritarios
 
-1. **Period-scoping de Income (PRIORITARIO).** Las filas de Income deben
-   estar scopeadas por período, no globales. Hoy el mismo ingreso se
-   consolida a TODOS los meses (`consolidatePeriodFromLiveEntities` lee
-   `Income` sin filtrar por período). Resolverlo destraba:
-   - (A) corregir un registro desde Historial;
-   - (B) elegir el período en el selector ANTES de cargar y que se
-     consolide en el mes correcto;
-   - que el selector "viaje en el tiempo": cada módulo carga la data de
-     ese mes.
+1. ~~**Period-scoping de Income (PRIORITARIO).**~~ **RESUELTO** (Income
+   tiene `year`/`month`; cada mes carga, muestra y consolida sólo sus
+   filas Plan A/C). Plan B y portfolioValue siguen globales por doctrina
+   (Investments = estado actual).
 
 2. **Tablas-historial por módulo.** Cada módulo (empezando por
    Inversiones) debe tener su propia tabla de registro histórico (qué
@@ -135,6 +130,14 @@ Ver `.env.example` para el listado completo y comentarios. Resumen:
    retroalimenta el MonthlyRecord y el Historial general. Está en el
    mapeo original de 12 puntos.
 
-3. **Copy de moneda.** Quitar cualquier texto que diga que la moneda es
-   "maquillaje" o "cuestión de gustos". Dejar solo la descripción
-   funcional: ajusta símbolo y decimales, no convierte.
+3. ~~**Copy de moneda.**~~ **RESUELTO** (Settings describe la moneda solo
+   funcionalmente: ajusta símbolo y decimales, no convierte).
+
+---
+
+## Mejoras futuras
+
+- **Income: mover/reasignar una fila de ingreso a otro período desde el
+  form.** Hoy el período de una fila Income lo define el selector global
+  ANTES de cargar; no se puede mover una fila ya cargada a otro mes.
+  Workaround actual: borrarla y volver a cargarla en el período correcto.
