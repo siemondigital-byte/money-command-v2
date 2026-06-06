@@ -191,7 +191,7 @@ export default async function DebtsPage({
             debts.length === 0
               ? "—"
               : recommended.converges
-                ? `~${recommended.months} ${recommended.months === 1 ? "mes" : "meses"}`
+                ? `${recommended.months} ${recommended.months === 1 ? "mes" : "meses"}`
                 : "no converge"
           }
           sub={
@@ -376,7 +376,7 @@ export default async function DebtsPage({
         ) : (
           <>
             <p style={{ fontSize: "12px", color: "var(--muted)" }}>
-              Estrategia Avalancha, libre de deudas en ~{recommended.months}{" "}
+              Estrategia Avalancha, libre de deudas en {recommended.months}{" "}
               {recommended.months === 1 ? "mes" : "meses"}.
             </p>
             <DebtProjectionChart
