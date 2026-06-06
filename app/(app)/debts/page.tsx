@@ -13,10 +13,13 @@ import {
   dtiStatus,
   splitByPurpose,
   hasDebtsBehind,
+  compareStrategies,
   type DebtType,
   type DebtPurpose,
+  type PayoffResult,
 } from "@/lib/debts";
 import { DebtForm } from "./DebtForm";
+import { DebtProjectionChart } from "./DebtProjectionChart";
 import { deleteDebtAction, confirmDebtPaymentsAction } from "./actions";
 
 export const metadata = { title: "Deudas · The Money Command" };
@@ -80,6 +83,19 @@ export default async function DebtsPage({
         : "var(--danger)";
 
   const behind = hasDebtsBehind(debts, period);
+
+  // CAPA 2 — estrategias de pago sobre las deudas activas
+  const comparison = compareStrategies(
+    debts.map((d) => ({
+      id: d.id,
+      name: d.name,
+      balance: d.balance,
+      apr: d.apr,
+      minPayment: d.minPayment,
+      currentPayment: d.currentPayment,
+    })),
+  );
+  const recommended = comparison.avalanche; // recommended === "avalanche"
 
   // Formato — decimales según moneda (default ISO 4217)
   const locale = profile.locale === "es" ? "es-AR" : "en-US";
@@ -168,6 +184,28 @@ export default async function DebtsPage({
           value={pct.format(ratio)}
           sub="saludable < 36%"
           valueColor={income > 0 ? ratioColor : "var(--muted)"}
+        />
+        <Kpi
+          label="Libre de Deudas"
+          value={
+            debts.length === 0
+              ? "—"
+              : recommended.converges
+                ? `~${recommended.months} ${recommended.months === 1 ? "mes" : "meses"}`
+                : "no converge"
+          }
+          sub={
+            debts.length === 0
+              ? "sin deudas"
+              : recommended.converges
+                ? "estrategia Avalancha"
+                : "el pago no cubre el interés"
+          }
+          valueColor={
+            debts.length === 0 || !recommended.converges
+              ? "var(--muted)"
+              : "var(--accent)"
+          }
         />
       </section>
 
@@ -262,6 +300,94 @@ export default async function DebtsPage({
         </section>
       )}
 
+      {/* CAPA 2 — Estrategia de pago */}
+      <section className="card flex flex-col gap-4">
+        <div>
+          <div className="label">Estrategia de pago: ¿cuál te conviene?</div>
+          <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
+            Mismo presupuesto mensual, distinto orden de ataque. Cuando una
+            deuda se salda, su pago acelera la siguiente.
+          </p>
+        </div>
+
+        {debts.length === 0 ? (
+          <p style={{ fontSize: "13px", color: "var(--hint)" }}>
+            Cuando registres deudas, acá vas a ver tu plan para liberarte.
+          </p>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                gap: "16px",
+              }}
+            >
+              <StrategyCard
+                title="Avalancha"
+                recommended
+                desc="Paga primero la deuda con mayor interés. Ahorra más a largo plazo."
+                result={comparison.avalanche}
+                money={money}
+              />
+              <StrategyCard
+                title="Bola de Nieve"
+                desc="Paga primero la deuda más pequeña. Más victorias rápidas."
+                result={comparison.snowball}
+                money={money}
+              />
+            </div>
+
+            {comparison.avalanche.converges &&
+              comparison.snowball.converges &&
+              comparison.interestSaved > 0 && (
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--text)",
+                    borderTop: "1px solid var(--border)",
+                    paddingTop: "12px",
+                  }}
+                >
+                  La estrategia Avalancha te ahorra{" "}
+                  <span style={{ color: "var(--accent)" }}>
+                    {money.format(comparison.interestSaved)}
+                  </span>{" "}
+                  en intereses vs Bola de Nieve.
+                </p>
+              )}
+          </>
+        )}
+      </section>
+
+      {/* CAPA 2 — Proyección de reducción de deuda */}
+      <section className="card flex flex-col gap-3">
+        <div className="label">Proyección de reducción de deuda</div>
+        {debts.length === 0 ? (
+          <p style={{ fontSize: "13px", color: "var(--hint)" }}>
+            Acá vas a ver cómo baja tu saldo mes a mes hasta llegar a cero.
+          </p>
+        ) : !recommended.converges ? (
+          <p style={{ fontSize: "13px", color: "var(--muted)" }}>
+            Con el pago actual la deuda no se salda: el pago no alcanza a cubrir
+            el interés. Subí el pago mensual real de tus deudas para ver la
+            proyección.
+          </p>
+        ) : (
+          <>
+            <p style={{ fontSize: "12px", color: "var(--muted)" }}>
+              Estrategia Avalancha, libre de deudas en ~{recommended.months}{" "}
+              {recommended.months === 1 ? "mes" : "meses"}.
+            </p>
+            <DebtProjectionChart
+              schedule={recommended.schedule}
+              locale={profile.locale}
+              currency={profile.currency}
+            />
+          </>
+        )}
+      </section>
+
       {/* Form crear / editar */}
       <DebtForm editing={editing} />
     </div>
@@ -293,6 +419,97 @@ function Kpi({
           {sub}
         </p>
       )}
+    </div>
+  );
+}
+
+function StrategyCard({
+  title,
+  desc,
+  result,
+  money,
+  recommended,
+}: {
+  title: string;
+  desc: string;
+  result: PayoffResult;
+  money: Intl.NumberFormat;
+  recommended?: boolean;
+}) {
+  const startsWith = result.order[0]?.name ?? "—";
+  return (
+    <div
+      style={{
+        border: `1px solid ${recommended ? "var(--accent)" : "var(--border)"}`,
+        borderRadius: "12px",
+        padding: "16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span style={{ fontSize: "14px", color: "var(--text)", fontWeight: 600 }}>
+          {title}
+        </span>
+        {recommended && (
+          <span
+            style={{
+              fontSize: "9px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              color: "var(--bg)",
+              background: "var(--accent)",
+              padding: "3px 7px",
+              borderRadius: "6px",
+            }}
+          >
+            Recomendada
+          </span>
+        )}
+      </div>
+      <p style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.5 }}>
+        {desc}
+      </p>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+          borderTop: "1px solid var(--border)",
+          paddingTop: "10px",
+        }}
+      >
+        <StrategyStat
+          label="Libre en"
+          value={
+            result.converges
+              ? `${result.months} ${result.months === 1 ? "mes" : "meses"}`
+              : "no converge"
+          }
+        />
+        <StrategyStat
+          label="Interés total"
+          value={result.converges ? money.format(result.totalInterest) : "—"}
+        />
+        <StrategyStat label="Empieza por" value={startsWith} />
+      </div>
+    </div>
+  );
+}
+
+function StrategyStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        fontSize: "13px",
+      }}
+    >
+      <span style={{ color: "var(--muted)" }}>{label}</span>
+      <span style={{ color: "var(--text)" }}>{value}</span>
     </div>
   );
 }

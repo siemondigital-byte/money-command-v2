@@ -21,9 +21,25 @@ import {
   splitByPurpose,
   monthsElapsed,
   hasDebtsBehind,
+  simulatePayoff,
+  compareStrategies,
+  PAYOFF_MAX_MONTHS,
   type DebtRow,
   type DebtAsOf,
+  type DebtForPayoff,
 } from "./debts";
+
+function payoffDebt(p: Partial<DebtForPayoff>): DebtForPayoff {
+  return {
+    id: p.id ?? "d",
+    name: p.name ?? "Deuda",
+    balance: 0,
+    apr: 0,
+    minPayment: 0,
+    currentPayment: 0,
+    ...p,
+  };
+}
 
 function row(p: Partial<DebtRow>): DebtRow {
   return {
@@ -146,5 +162,142 @@ describe("confirmación pendiente", () => {
       { balanceAsOfYear: 2026, balanceAsOfMonth: 1, isActive: false },
     ];
     expect(hasDebtsBehind(debts, { year: 2026, month: 6 })).toBe(false);
+  });
+});
+
+// ============================================================================
+// CAPA 2 — estrategias de pago (bordes obligatorios del anexo §3)
+// ============================================================================
+
+describe("simulatePayoff: bordes obligatorios", () => {
+  it("sin deudas: todo en 0, no divide por cero ni cuelga", () => {
+    const r = simulatePayoff([], "avalanche");
+    expect(r.months).toBe(0);
+    expect(r.totalInterest).toBe(0);
+    expect(r.budget).toBe(0);
+    expect(r.converges).toBe(true);
+    expect(r.order).toEqual([]);
+    expect(r.schedule).toEqual([0]);
+  });
+
+  it("una sola deuda: avalancha y bola de nieve dan igual", () => {
+    const debts = [
+      payoffDebt({ id: "a", balance: 1000, apr: 24, minPayment: 50, currentPayment: 200 }),
+    ];
+    const a = simulatePayoff(debts, "avalanche");
+    const s = simulatePayoff(debts, "snowball");
+    expect(a.months).toBe(s.months);
+    expect(a.totalInterest).toBe(s.totalInterest);
+    expect(a.converges).toBe(true);
+    expect(a.schedule[a.schedule.length - 1]).toBe(0);
+  });
+
+  it("APR 0%: se paga linealmente, sin interés", () => {
+    // 100 / 25 por mes = 4 meses
+    const debts = [
+      payoffDebt({ id: "a", balance: 100, apr: 0, minPayment: 0, currentPayment: 25 }),
+    ];
+    const r = simulatePayoff(debts, "avalanche");
+    expect(r.months).toBe(4);
+    expect(r.totalInterest).toBe(0);
+    expect(r.converges).toBe(true);
+    expect(r.schedule).toEqual([100, 75, 50, 25, 0]);
+  });
+
+  it("no converge: el pago no cubre el interés, corta en el tope de seguridad", () => {
+    // saldo 1000 al 24% => interés 20/mes, presupuesto 5 < 20: crece
+    const debts = [
+      payoffDebt({ id: "a", balance: 1000, apr: 24, minPayment: 5, currentPayment: 5 }),
+    ];
+    const r = simulatePayoff(debts, "avalanche");
+    expect(r.converges).toBe(false);
+    expect(r.months).toBe(PAYOFF_MAX_MONTHS);
+    expect(Number.isFinite(r.totalInterest)).toBe(true);
+  });
+
+  it("rollover entre dos deudas: el pago liberado acelera la siguiente", () => {
+    // A y B de 100 c/u, mínimos 10 c/u, presupuesto total 100 (sobrante 80).
+    // El sobrante ataca A; al saldarse, todo el presupuesto cae sobre B.
+    // Resultado: ambas saldadas en 2 meses (vs 10 meses si A pagara solo 10).
+    const debts = [
+      payoffDebt({ id: "a", balance: 100, apr: 0, minPayment: 10, currentPayment: 10 }),
+      payoffDebt({ id: "b", balance: 100, apr: 0, minPayment: 10, currentPayment: 90 }),
+    ];
+    const r = simulatePayoff(debts, "snowball");
+    expect(r.budget).toBe(100);
+    expect(r.months).toBe(2);
+    expect(r.converges).toBe(true);
+    expect(r.schedule[r.schedule.length - 1]).toBe(0);
+  });
+
+  it("schedule: arranca en el total y baja monótono hasta 0", () => {
+    const debts = [
+      payoffDebt({ id: "a", balance: 500, apr: 12, minPayment: 25, currentPayment: 100 }),
+      payoffDebt({ id: "b", balance: 800, apr: 30, minPayment: 40, currentPayment: 120 }),
+    ];
+    const r = simulatePayoff(debts, "avalanche");
+    expect(r.schedule[0]).toBe(1300);
+    expect(r.schedule[r.schedule.length - 1]).toBe(0);
+    expect(r.schedule.length).toBe(r.months + 1);
+    for (let i = 1; i < r.schedule.length; i++) {
+      expect(r.schedule[i]).toBeLessThanOrEqual(r.schedule[i - 1]!);
+    }
+  });
+});
+
+describe("simulatePayoff: orden de ataque", () => {
+  const debts = [
+    // Saldo chico + APR bajo
+    payoffDebt({ id: "a", name: "A", balance: 500, apr: 5, minPayment: 20, currentPayment: 20 }),
+    // Saldo grande + APR alto
+    payoffDebt({ id: "b", name: "B", balance: 3000, apr: 35, minPayment: 100, currentPayment: 200 }),
+  ];
+
+  it("avalancha empieza por el mayor APR", () => {
+    const r = simulatePayoff(debts, "avalanche");
+    expect(r.order[0]!.id).toBe("b");
+  });
+
+  it("bola de nieve empieza por el menor saldo", () => {
+    const r = simulatePayoff(debts, "snowball");
+    expect(r.order[0]!.id).toBe("a");
+  });
+});
+
+describe("compareStrategies", () => {
+  const debts = [
+    payoffDebt({ id: "a", name: "A", balance: 500, apr: 5, minPayment: 20, currentPayment: 20 }),
+    payoffDebt({ id: "b", name: "B", balance: 3000, apr: 35, minPayment: 100, currentPayment: 200 }),
+  ];
+
+  it("avalancha paga <= interés que bola de nieve (caso normal)", () => {
+    const c = compareStrategies(debts);
+    expect(c.avalanche.totalInterest).toBeLessThanOrEqual(c.snowball.totalInterest);
+  });
+
+  it("ahorro = interés bola de nieve - interés avalancha, >= 0", () => {
+    const c = compareStrategies(debts);
+    expect(c.interestSaved).toBeCloseTo(
+      Math.round((c.snowball.totalInterest - c.avalanche.totalInterest) * 100) / 100,
+      2,
+    );
+    expect(c.interestSaved).toBeGreaterThanOrEqual(0);
+  });
+
+  it("presupuesto total idéntico en ambas estrategias (solo cambia el orden)", () => {
+    const c = compareStrategies(debts);
+    expect(c.avalanche.budget).toBe(c.snowball.budget);
+    expect(c.budget).toBe(220); // 20 + 200
+  });
+
+  it("recomendada = avalancha", () => {
+    expect(compareStrategies(debts).recommended).toBe("avalanche");
+  });
+
+  it("sin deudas: no rompe, ahorro 0", () => {
+    const c = compareStrategies([]);
+    expect(c.interestSaved).toBe(0);
+    expect(c.avalanche.months).toBe(0);
+    expect(c.budget).toBe(0);
   });
 });

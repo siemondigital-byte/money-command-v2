@@ -198,3 +198,157 @@ export function splitByPurpose(debts: DebtRow[]): PurposeSplit {
     investment: round2(acc.investment),
   };
 }
+
+// ============================================================================
+// CAPA 2 — Estrategias de pago (Avalancha / Bola de Nieve) con rollover
+// ============================================================================
+
+export type Strategy = "avalanche" | "snowball";
+
+export interface DebtForPayoff {
+  id: string;
+  name: string;
+  balance: number;
+  apr: number;
+  minPayment: number;
+  currentPayment: number;
+}
+
+export interface PayoffResult {
+  /** Meses hasta quedar libre de deudas (0 si no hay deuda). */
+  months: number;
+  /** Interés total pagado en el camino. */
+  totalInterest: number;
+  /** Presupuesto mensual = suma de pagos reales (igual en ambas estrategias). */
+  budget: number;
+  /** false si no se salda dentro del tope de seguridad (pago no cubre interés). */
+  converges: boolean;
+  /** Orden de ataque de las deudas. */
+  order: { id: string; name: string }[];
+  /** Saldo total mes a mes para el gráfico. schedule[0] = hoy. */
+  schedule: number[];
+}
+
+/** Tope de seguridad: 50 años. Evita colgar si la deuda no converge. */
+export const PAYOFF_MAX_MONTHS = 600;
+
+function orderForStrategy<T extends { apr: number; balance: number }>(
+  debts: T[],
+  strategy: Strategy,
+): T[] {
+  const copy = [...debts];
+  if (strategy === "avalanche") {
+    // Mayor APR primero; desempate por menor saldo.
+    copy.sort((a, b) => b.apr - a.apr || a.balance - b.balance);
+  } else {
+    // Menor saldo primero; desempate por mayor APR.
+    copy.sort((a, b) => a.balance - b.balance || b.apr - a.apr);
+  }
+  return copy;
+}
+
+/**
+ * Simula el pago mes a mes hasta saldar todas las deudas, con el método del
+ * rollover: el presupuesto total (suma de pagos reales) es constante; cada
+ * mes se aplica interés, se pagan los mínimos, y el sobrante ataca íntegro a
+ * la deuda objetivo (la primera del orden con saldo). Cuando una deuda llega
+ * a 0, su pago se libera y engrosa el ataque a la siguiente (rollover, que
+ * acá emerge solo de mantener el presupuesto constante y redirigir el
+ * sobrante).
+ */
+export function simulatePayoff(
+  debts: DebtForPayoff[],
+  strategy: Strategy,
+): PayoffResult {
+  const work = debts.map((d) => ({
+    id: d.id,
+    name: d.name,
+    balance: round2(d.balance),
+    apr: d.apr,
+    minPayment: d.minPayment,
+  }));
+  const budget = round2(debts.reduce((s, d) => s + d.currentPayment, 0));
+
+  const order = orderForStrategy(work, strategy);
+  const orderMeta = order.map((d) => ({ id: d.id, name: d.name }));
+
+  const initialTotal = round2(work.reduce((s, d) => s + Math.max(0, d.balance), 0));
+  const schedule: number[] = [initialTotal];
+
+  if (work.length === 0 || initialTotal <= 0) {
+    return {
+      months: 0,
+      totalInterest: 0,
+      budget,
+      converges: true,
+      order: orderMeta,
+      schedule,
+    };
+  }
+
+  let totalInterest = 0;
+  let months = 0;
+
+  while (months < PAYOFF_MAX_MONTHS) {
+    if (work.every((d) => d.balance <= 0)) break;
+    months++;
+
+    // 1. Interés del mes
+    for (const d of work) {
+      if (d.balance <= 0) continue;
+      const interest = round2((d.balance * (d.apr / 100)) / 12);
+      d.balance = round2(d.balance + interest);
+      totalInterest = round2(totalInterest + interest);
+    }
+
+    let available = budget;
+
+    // 2. Pagar los mínimos (acotado por el presupuesto disponible)
+    for (const d of work) {
+      if (d.balance <= 0 || available <= 0) continue;
+      const pay = Math.min(d.minPayment, d.balance, available);
+      d.balance = round2(d.balance - pay);
+      available = round2(available - pay);
+    }
+
+    // 3. El sobrante ataca a la deuda objetivo, cascadeando si se salda
+    for (const d of order) {
+      if (available <= 0) break;
+      if (d.balance <= 0) continue;
+      const pay = Math.min(available, d.balance);
+      d.balance = round2(d.balance - pay);
+      available = round2(available - pay);
+    }
+
+    schedule.push(round2(work.reduce((s, d) => s + Math.max(0, d.balance), 0)));
+  }
+
+  const converges = work.every((d) => d.balance <= 0);
+  return { months, totalInterest, budget, converges, order: orderMeta, schedule };
+}
+
+export interface StrategyComparison {
+  avalanche: PayoffResult;
+  snowball: PayoffResult;
+  /** Interés que ahorra la avalancha vs la bola de nieve (>= 0 normalmente). */
+  interestSaved: number;
+  recommended: Strategy;
+  budget: number;
+}
+
+/**
+ * Corre ambas estrategias y las compara. La avalancha es la recomendada por
+ * defecto (paga menos interés); la bola de nieve da victorias más rápidas.
+ */
+export function compareStrategies(debts: DebtForPayoff[]): StrategyComparison {
+  const avalanche = simulatePayoff(debts, "avalanche");
+  const snowball = simulatePayoff(debts, "snowball");
+  const interestSaved = round2(snowball.totalInterest - avalanche.totalInterest);
+  return {
+    avalanche,
+    snowball,
+    interestSaved,
+    recommended: "avalanche",
+    budget: avalanche.budget,
+  };
+}
