@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SerializedInvestment } from "@/lib/serialize";
 import {
   createInvestmentAction,
@@ -10,6 +11,15 @@ import {
 
 type CategoryOption = { value: string; label: string; suggestedYield: number };
 
+/**
+ * Form de posición de inversión.
+ *
+ * - Agregar: arranca colapsado en un botón "Agregar posición"; al tocarlo
+ *   despliega los campos. Al guardar con éxito se vuelve a colapsar (la
+ *   posición aparece en la lista por la revalidación del server action).
+ * - Editar: se abre vía ?edit=ID; al guardar con éxito vuelve a la lista
+ *   (limpia el ?edit=), cerrándose solo. Mismo patrón que Income y Expenses.
+ */
 export function InvestmentForm({
   categories,
   editing,
@@ -17,37 +27,48 @@ export function InvestmentForm({
   categories: CategoryOption[];
   editing: SerializedInvestment | null;
 }) {
-  const action = editing ? updateInvestmentAction : createInvestmentAction;
+  const router = useRouter();
+  const isEditing = editing != null;
+  const action = isEditing ? updateInvestmentAction : createInvestmentAction;
   const [state, formAction, pending] = useActionState<
     InvestmentsActionResult,
     FormData
   >(action, {});
+  const [open, setOpen] = useState(false);
+
+  // Al guardar con éxito: editar → vuelve a la lista; agregar → colapsa.
+  useEffect(() => {
+    if (!state.ok) return;
+    if (isEditing) router.replace("/investments");
+    else setOpen(false);
+  }, [state, isEditing, router]);
+
+  // Agregar, colapsado: solo el botón.
+  if (!isEditing && !open) {
+    return (
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={() => setOpen(true)}
+      >
+        Agregar posición
+      </button>
+    );
+  }
 
   const defaultCategory = editing?.category ?? categories[0]!.value;
   const defaultYieldPct = editing ? Number(editing.passiveYield) * 100 : "";
 
   return (
     <section className="card flex flex-col gap-3" id="form">
-      <div className="label">
-        {editing ? "Editar posición" : "Agregar posición"}
-      </div>
+      {isEditing && <div className="label">Editar posición</div>}
 
       {state.error && (
         <p style={{ color: "var(--danger)", fontSize: "12px" }}>{state.error}</p>
       )}
-      {state.ok && !editing && (
-        <p style={{ color: "var(--accent)", fontSize: "12px" }}>
-          Posición agregada.
-        </p>
-      )}
-      {state.ok && editing && (
-        <p style={{ color: "var(--accent)", fontSize: "12px" }}>
-          Cambios guardados.
-        </p>
-      )}
 
       <form action={formAction} className="flex flex-col gap-3">
-        {editing && <input type="hidden" name="id" value={editing.id} />}
+        {isEditing && <input type="hidden" name="id" value={editing.id} />}
 
         <div
           style={{
@@ -135,11 +156,15 @@ export function InvestmentForm({
             marginTop: "4px",
           }}
         >
-          {editing && (
-            <a href="/investments" className="btn-secondary" role="button">
-              Cancelar
-            </a>
-          )}
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() =>
+              isEditing ? router.replace("/investments") : setOpen(false)
+            }
+          >
+            Cancelar
+          </button>
           <button
             type="submit"
             className="btn-primary"
@@ -148,7 +173,7 @@ export function InvestmentForm({
           >
             {pending
               ? "Guardando…"
-              : editing
+              : isEditing
                 ? "Guardar cambios"
                 : "Agregar posición"}
           </button>
