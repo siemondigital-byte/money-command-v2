@@ -9,10 +9,8 @@ import {
   BASKET_COLORS,
   CATEGORY_LABELS_ES,
   sumRealByBasket,
-  sumBudgetByBasket,
   totalsByType,
   subscriptionSummary,
-  budgetStatus,
   type Basket,
 } from "@/lib/expenses";
 import { PortfolioDonut, type DonutSlice } from "../investments/PortfolioDonut";
@@ -81,7 +79,6 @@ export default async function ExpensesPage({
   }));
   const totals = totalsByType(helperRows);
   const realByBasket = sumRealByBasket(helperRows);
-  const budgetByBasket = sumBudgetByBasket(helperRows);
   const subs = subscriptionSummary(helperRows);
 
   // Formato moneda — decimales según moneda (default ISO 4217)
@@ -177,7 +174,6 @@ export default async function ExpensesPage({
       {tab === "basket" && (
         <BasketSection
           realByBasket={realByBasket}
-          budgetByBasket={budgetByBasket}
           donutSlices={donutSlices}
           money={money}
         />
@@ -377,15 +373,14 @@ function ExpenseTypeSection({
 
 function BasketSection({
   realByBasket,
-  budgetByBasket,
   donutSlices,
   money,
 }: {
   realByBasket: ReturnType<typeof sumRealByBasket>;
-  budgetByBasket: ReturnType<typeof sumBudgetByBasket>;
   donutSlices: DonutSlice[];
   money: Intl.NumberFormat;
 }) {
+  const total = realByBasket.total;
   return (
     <section
       style={{
@@ -396,19 +391,12 @@ function BasketSection({
       }}
     >
       <div className="card flex flex-col gap-4">
-        <div className="label">Presupuesto vs real por canasta</div>
+        <div className="label">Reparto del gasto real por canasta</div>
         {BASKETS.map((b) => {
           const real = realByBasket[b];
-          const budget = budgetByBasket[b];
-          const status = budgetStatus(real, budget);
-          const barColor =
-            status === "over"
-              ? "var(--danger)"
-              : status === "near"
-                ? "var(--gold)"
-                : "var(--accent)";
-          const pct =
-            budget > 0 ? Math.min(100, (real / budget) * 100) : real > 0 ? 100 : 0;
+          // Porcentaje que la canasta representa sobre el total real del mes.
+          // Las tres suman 100%. Si el total es 0, 0% sin dividir por cero.
+          const pct = total > 0 ? (real / total) * 100 : 0;
           return (
             <div key={b} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <div
@@ -421,12 +409,10 @@ function BasketSection({
                 <span style={{ color: "var(--text)" }}>{BASKET_LABELS_ES[b]}</span>
                 <span style={{ color: "var(--muted)" }}>
                   {money.format(real)}
-                  {budget > 0 && (
-                    <span style={{ color: "var(--hint)" }}>
-                      {" "}
-                      / {money.format(budget)}
-                    </span>
-                  )}
+                  <span style={{ color: "var(--text)" }}>
+                    {" · "}
+                    {Math.round(pct)}%
+                  </span>
                 </span>
               </div>
               <div
@@ -441,7 +427,7 @@ function BasketSection({
                   style={{
                     width: `${pct}%`,
                     height: "100%",
-                    background: barColor,
+                    background: BASKET_COLORS[b],
                   }}
                 />
               </div>
