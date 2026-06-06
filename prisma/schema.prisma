@@ -250,13 +250,24 @@ model Debt {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name           String
-  type           String // "card" | "fixed_loan" | "no_interest_loan" | "mortgage" | "other"
+  type           String // "card" | "auto_loan" | "student_loan" | "personal_loan" | "mortgage" | "other"
   balance        Decimal @db.Decimal(12, 2)
   apr            Decimal @db.Decimal(5, 2) // % anual
   minPayment     Decimal @db.Decimal(12, 2)
-  currentPayment Decimal @db.Decimal(12, 2)
-  termMonths     Int?    // para préstamos con plazo
+  currentPayment Decimal @db.Decimal(12, 2) // pago mensual real (mueve el saldo)
+  termMonths     Int?    // cuotas restantes (opcional, lo ingresa la persona)
   originalAmount Decimal? @db.Decimal(12, 2) // para calcular % reducido
+
+  // Etiqueta educativa (doctrina §2): no cambia la canasta del pago, solo
+  // genera consciencia consumo vs inversión.
+  purpose String // "consumption" | "investment"
+
+  // Fecha de corte del snapshot: a qué período corresponde el `balance` de
+  // hoy. NO es period-scoping (sigue habiendo una sola fila por deuda); es
+  // el "as-of" del saldo vivo, para amortizar mes a mes desde el punto
+  // correcto sin sobre-descontar una deuda recién agregada.
+  balanceAsOfYear  Int
+  balanceAsOfMonth Int // 1-12
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

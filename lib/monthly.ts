@@ -289,14 +289,15 @@ export async function upsertMonthlyData(
  * el período activo, para que el MonthlyRecord del nuevo período refleje
  * el estado vivo actual.
  *
- * No toca essentials/style/freedom (Expenses, FASE futura), debtTotal
- * (Debts, FASE futura), ni notRealized (lógica del Coach).
+ * Consolida ingresos (Income, flujo del mes), canastas de gasto (Expenses,
+ * flujo del mes), portfolioValue (Investments, estado actual) y debtTotal
+ * (Debts, estado actual). No toca notRealized (lógica del Coach).
  */
 export async function consolidatePeriodFromLiveEntities(
   userId: string,
   period: Period,
 ): Promise<MonthlyRecord> {
-  const [profile, incomes, investments, expenses] = await Promise.all([
+  const [profile, incomes, investments, expenses, debts] = await Promise.all([
     prisma.profile.findUnique({
       where: { userId },
       select: {
@@ -327,6 +328,12 @@ export async function consolidatePeriodFromLiveEntities(
         month: period.month,
       },
       select: { type: true, basket: true, amount: true, budget: true, isSubscription: true },
+    }),
+    prisma.debt.findMany({
+      // Debts es estado actual (no flujo del mes): se snapshotea la deuda
+      // total al período activo, igual que portfolioValue desde Investments.
+      where: { userId, isActive: true },
+      select: { balance: true },
     }),
   ]);
 
@@ -372,11 +379,16 @@ export async function consolidatePeriodFromLiveEntities(
     })),
   );
 
+  // Deuda total (estado actual): suma de saldos de deudas activas. Corrige
+  // netWorth = portfolioValue - debtTotal en upsertMonthlyData.
+  const debtTotal = debts.reduce((s, d) => s + Number(d.balance), 0);
+
   return upsertMonthlyData(userId, period, {
     planA,
     planB,
     planC,
     portfolioValue,
+    debtTotal,
     essentials: baskets.essentials,
     style: baskets.style,
     freedom: baskets.freedom,

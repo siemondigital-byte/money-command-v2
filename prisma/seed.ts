@@ -230,6 +230,36 @@ async function populatePostgres(userId: string): Promise<void> {
           },
         ],
       },
+
+      debts: {
+        create: [
+          // Consumo: tarjeta con APR alto
+          {
+            name: "Tarjeta Visa",
+            type: "card",
+            purpose: "consumption",
+            balance: 4200,
+            apr: 42,
+            minPayment: 150,
+            currentPayment: 400,
+            balanceAsOfYear: seedYear,
+            balanceAsOfMonth: seedMonth,
+          },
+          // Inversión: préstamo para un activo productivo
+          {
+            name: "Préstamo auto",
+            type: "auto_loan",
+            purpose: "investment",
+            balance: 12000,
+            apr: 9.5,
+            minPayment: 320,
+            currentPayment: 320,
+            termMonths: 36,
+            balanceAsOfYear: seedYear,
+            balanceAsOfMonth: seedMonth,
+          },
+        ],
+      },
     },
   });
 }
