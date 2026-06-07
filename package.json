@@ -14,7 +14,8 @@
     "db:deploy": "dotenv -e .env.local -- prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:studio": "dotenv -e .env.local -- prisma studio",
-    "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts"
+    "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
