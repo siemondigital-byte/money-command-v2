@@ -20,6 +20,8 @@ import {
   projectedValue,
   projectedMonthlyPassiveIncome,
   projectionTable,
+  growthSeries,
+  portfolioShares,
   type ProjectionPosition,
 } from "./investments";
 
@@ -143,5 +145,67 @@ describe("projectionTable", () => {
   it("sin posiciones -> todas las filas en 0", () => {
     const table = projectionTable([], [5, 10, 20]);
     expect(table.every((r) => r.value === 0 && r.monthlyIncome === 0)).toBe(true);
+  });
+});
+
+describe("growthSeries (gráfico apilado)", () => {
+  it("sin posiciones -> perAsset vacío, years conservados", () => {
+    const s = growthSeries([], [0, 10, 20, 30]);
+    expect(s.years).toEqual([0, 10, 20, 30]);
+    expect(s.perAsset).toEqual([]);
+  });
+
+  it("una banda coincide con projectedValue por año", () => {
+    const p = pos({ capital: 10000, monthlyContribution: 100, passiveYield: 0.08 });
+    const years = [0, 5, 10, 30];
+    const s = growthSeries([p], years);
+    expect(s.perAsset).toHaveLength(1);
+    expect(s.perAsset[0]).toEqual(years.map((y) => projectedValue([p], y)));
+  });
+
+  it("cada banda es monótona creciente", () => {
+    const ps = [
+      pos({ capital: 10000, monthlyContribution: 100, passiveYield: 0.08 }),
+      pos({ capital: 5000, monthlyContribution: 0, passiveYield: 0.04 }),
+    ];
+    const s = growthSeries(ps, [0, 10, 20, 30]);
+    for (const band of s.perAsset) {
+      for (let j = 1; j < band.length; j++) {
+        expect(band[j]).toBeGreaterThanOrEqual(band[j - 1]!);
+      }
+    }
+  });
+
+  it("la altura apilada por año = projectedValue de todo el portafolio", () => {
+    const ps = [
+      pos({ capital: 10000, monthlyContribution: 100, passiveYield: 0.08 }),
+      pos({ capital: 5000, monthlyContribution: 50, passiveYield: 0.04 }),
+    ];
+    const years = [0, 7, 15, 30];
+    const s = growthSeries(ps, years);
+    years.forEach((y, j) => {
+      const stacked = s.perAsset.reduce((sum, band) => sum + band[j]!, 0);
+      // pequeña tolerancia por redondeo por activo vs portafolio
+      expect(stacked).toBeCloseTo(projectedValue(ps, y), 0);
+    });
+  });
+});
+
+describe("portfolioShares (donut)", () => {
+  it("share por posición = capital / total, suma 1", () => {
+    const ps = [pos({ capital: 3000 }), pos({ capital: 1000 })];
+    const shares = portfolioShares(ps);
+    expect(shares[0]!.share).toBeCloseTo(0.75, 10);
+    expect(shares[1]!.share).toBeCloseTo(0.25, 10);
+    expect(shares.reduce((s, x) => s + x.share, 0)).toBeCloseTo(1, 10);
+  });
+
+  it("sin capital -> shares en 0 (no divide por cero)", () => {
+    const shares = portfolioShares([pos({ capital: 0 }), pos({ capital: 0 })]);
+    expect(shares.every((s) => s.share === 0)).toBe(true);
+  });
+
+  it("sin posiciones -> arreglo vacío", () => {
+    expect(portfolioShares([])).toEqual([]);
   });
 });

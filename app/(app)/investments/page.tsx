@@ -14,8 +14,11 @@ import {
   projectedValue,
   projectedMonthlyPassiveIncome,
   projectionTable,
+  growthSeries,
+  portfolioShares,
 } from "@/lib/investments";
 import { PortfolioDonut, type DonutSlice } from "./PortfolioDonut";
+import { GrowthChart } from "./GrowthChart";
 import { InvestmentForm } from "./InvestmentForm";
 import { deleteInvestmentAction } from "./actions";
 
@@ -29,13 +32,21 @@ const CATEGORY_LABELS_ES: Record<InvestmentCategory, string> = {
   other: "Otros",
 };
 
-const CATEGORY_COLORS: Record<InvestmentCategory, string> = {
-  fixed_income: "#4dd9ff", // var(--accent-2) cian — estable
-  equity: "#7fffb2", // var(--accent) verde neón — crecimiento
-  real_estate: "#ffd166", // var(--gold) dorado — tangible
-  speculative: "#ff6b6b", // var(--danger) rojo — volátil
-  other: "#6b6b80", // var(--muted) — neutro
-};
+/** Paleta por POSICIÓN (no por categoría): cada activo un color distinto, el
+ * mismo en la tabla, el gráfico y el donut. Se cicla si hay más posiciones. */
+const POSITION_COLORS = [
+  "#7fffb2", // verde
+  "#4dd9ff", // cian
+  "#ffd166", // dorado
+  "#ff6b6b", // coral
+  "#b388ff", // violeta
+  "#ff9f6b", // naranja
+  "#5ad1c8", // teal
+  "#f078c8", // rosa
+];
+
+/** Horizonte del gráfico: año a año de 0 a 30. */
+const GROWTH_YEARS = Array.from({ length: 31 }, (_, i) => i);
 
 export default async function InvestmentsPage({
   searchParams,
@@ -63,7 +74,7 @@ export default async function InvestmentsPage({
     })),
   );
 
-  // Proyección (capa A): cada activo con su capital, aporte y tasa única.
+  // Proyección: cada activo con su capital, aporte y tasa única (passiveYield).
   const projPositions = serialized.map((p) => ({
     capital: p.capital,
     monthlyContribution: p.monthlyContribution,
@@ -86,20 +97,41 @@ export default async function InvestmentsPage({
     maximumFractionDigits: 2,
   });
 
-  // Donut: agregado por categoría (solo las que tienen capital > 0)
-  const byCategory = new Map<InvestmentCategory, number>();
-  for (const p of serialized) {
-    const cat = p.category as InvestmentCategory;
-    byCategory.set(cat, (byCategory.get(cat) ?? 0) + p.capital);
-  }
-  const donutSlices: DonutSlice[] = INVESTMENT_CATEGORIES.filter(
-    (cat) => (byCategory.get(cat) ?? 0) > 0,
-  ).map((cat) => ({
-    category: cat,
-    label: CATEGORY_LABELS_ES[cat],
-    capital: byCategory.get(cat)!,
-    color: CATEGORY_COLORS[cat],
-  }));
+  // Reparto del portafolio por posición (helper testeado), mismo orden que serialized.
+  const shares = portfolioShares(projPositions);
+
+  // Color por posición + proyecciones por activo (reusa las funciones puras).
+  const assets = serialized.map((p, i) => {
+    const color = POSITION_COLORS[i % POSITION_COLORS.length]!;
+    const proj = {
+      capital: p.capital,
+      monthlyContribution: p.monthlyContribution,
+      passiveYield: p.passiveYield,
+    };
+    return {
+      ...p,
+      color,
+      name: p.label ?? CATEGORY_LABELS_ES[p.category as InvestmentCategory],
+      share: shares[i]!.share,
+      v5: projectedValue([proj], 5),
+      v10: projectedValue([proj], 10),
+      v20: projectedValue([proj], 20),
+      renta10: projectedMonthlyPassiveIncome([proj], 10),
+    };
+  });
+
+  // Donut por POSICIÓN (solo con capital > 0).
+  const donutSlices: DonutSlice[] = assets
+    .filter((a) => a.capital > 0)
+    .map((a) => ({
+      category: a.id,
+      label: a.name,
+      capital: a.capital,
+      color: a.color,
+    }));
+
+  // Serie año a año para el gráfico apilado.
+  const gs = growthSeries(projPositions, GROWTH_YEARS);
 
   // Categorías para el form con yields sugeridos
   const categoryOptions = INVESTMENT_CATEGORIES.map((cat) => ({
@@ -108,13 +140,7 @@ export default async function InvestmentsPage({
     suggestedYield: DEFAULT_PASSIVE_YIELDS_BY_CATEGORY[cat],
   }));
 
-  // Agrupación para la lista
-  const grouped = INVESTMENT_CATEGORIES.map((cat) => ({
-    category: cat,
-    label: CATEGORY_LABELS_ES[cat],
-    color: CATEGORY_COLORS[cat],
-    positions: serialized.filter((p) => p.category === cat),
-  })).filter((g) => g.positions.length > 0);
+  const hasAssets = serialized.length > 0;
 
   return (
     <div className="fade-up flex flex-col gap-6">
@@ -128,12 +154,13 @@ export default async function InvestmentsPage({
             marginTop: "8px",
           }}
         >
-          Posiciones agrupadas en cinco categorías. El Plan B mensual se calcula
-          como suma de (capital × yield pasivo) ÷ 12.
+          Cada activo con su tasa y su aporte mensual. Proyectamos su
+          crecimiento por interés compuesto, y tu renta pasiva de hoy es el
+          Plan B (suma de capital por su yield, dividido 12).
         </p>
       </header>
 
-      {/* KPIs */}
+      {/* KPIs (capa A) */}
       <section
         className="card"
         style={{
@@ -170,7 +197,7 @@ export default async function InvestmentsPage({
         />
       </section>
 
-      {/* Proyección (tabla) + Donut */}
+      {/* Proyección por horizonte (capa A) + Donut por posición */}
       <section
         style={{
           display: "grid",
@@ -180,15 +207,8 @@ export default async function InvestmentsPage({
         }}
       >
         <div className="card flex flex-col gap-3">
-          <div>
-            <div className="label">Proyección de interés compuesto</div>
-            <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
-              Capital actual más aportes, creciendo al retorno de cada activo y
-              reinvirtiendo. La renta es la que ese portafolio proyectado
-              generaría con sus yields.
-            </p>
-          </div>
-          {serialized.length === 0 ? (
+          <div className="label">Proyección por horizonte</div>
+          {!hasAssets ? (
             <p style={{ fontSize: "13px", color: "var(--hint)" }}>
               Cuando cargues posiciones, acá vas a ver tu valor y tu renta
               proyectados a 5, 10 y 20 años.
@@ -248,7 +268,7 @@ export default async function InvestmentsPage({
         </div>
       </section>
 
-      {/* Leyenda categorías */}
+      {/* Leyenda del donut, por posición */}
       {donutSlices.length > 0 && (
         <div
           style={{
@@ -259,203 +279,198 @@ export default async function InvestmentsPage({
             color: "var(--muted)",
           }}
         >
-          {donutSlices.map((s) => (
-            <div
-              key={s.category}
-              style={{ display: "flex", alignItems: "center", gap: "6px" }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 10,
-                  height: 10,
-                  borderRadius: 2,
-                  background: s.color,
-                }}
-              />
-              <span style={{ color: "var(--text)" }}>{s.label}</span>
-              <span>·</span>
-              <span>
-                {pct.format(totalCapital > 0 ? s.capital / totalCapital : 0)}
-              </span>
-            </div>
-          ))}
+          {assets
+            .filter((a) => a.capital > 0)
+            .map((a) => (
+              <div
+                key={a.id}
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 10,
+                    height: 10,
+                    borderRadius: 2,
+                    background: a.color,
+                  }}
+                />
+                <span style={{ color: "var(--text)" }}>{a.name}</span>
+                <span>·</span>
+                <span>{pct.format(a.share)}</span>
+              </div>
+            ))}
         </div>
       )}
 
-      {/* Lista por categoría */}
-      {grouped.length === 0 ? (
-        <div className="card">
-          <p style={{ fontSize: "13px", color: "var(--muted)" }}>
+      {/* Pieza 2 — Crecimiento por interés compuesto, 30 años (apilado) */}
+      <section className="card flex flex-col gap-3">
+        <div className="label">Crecimiento por interés compuesto — 30 años</div>
+        {!hasAssets ? (
+          <p style={{ fontSize: "13px", color: "var(--hint)" }}>
+            Acá vas a ver cómo crece cada activo, apilado, año a año hasta los 30.
+          </p>
+        ) : (
+          <>
+            {/* Leyenda: activo + su tasa */}
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+                fontSize: "11px",
+                color: "var(--muted)",
+              }}
+            >
+              {assets.map((a) => (
+                <div
+                  key={a.id}
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 10,
+                      height: 10,
+                      borderRadius: 2,
+                      background: a.color,
+                    }}
+                  />
+                  <span style={{ color: "var(--text)" }}>{a.name}</span>
+                  <span>({pct.format(a.passiveYield)})</span>
+                </div>
+              ))}
+            </div>
+            <GrowthChart
+              years={gs.years}
+              perAsset={gs.perAsset}
+              labels={assets.map((a) => a.name)}
+              colors={assets.map((a) => a.color)}
+              locale={profile.locale}
+              currency={profile.currency}
+            />
+          </>
+        )}
+      </section>
+
+      {/* Pieza 1 — Tabla fila por activo */}
+      <section className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)" }}>
+          <div className="label">Tus activos</div>
+        </div>
+        {!hasAssets ? (
+          <p style={{ fontSize: "13px", color: "var(--muted)", padding: "16px" }}>
             Sin posiciones todavía. Agregá la primera más abajo.
           </p>
-        </div>
-      ) : (
-        grouped.map((g) => (
-          <CategoryGroup
-            key={g.category}
-            label={g.label}
-            color={g.color}
-            positions={g.positions}
-            money={money}
-            pct={pct}
-            editingId={editing?.id}
-          />
-        ))
-      )}
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "13px",
+              }}
+            >
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  <Th>Activo</Th>
+                  <Th>Tipo</Th>
+                  <Th align="right">Valor</Th>
+                  <Th align="right">Aporte/mes</Th>
+                  <Th align="right">Rendimiento</Th>
+                  <Th align="right">5A</Th>
+                  <Th align="right">10A</Th>
+                  <Th align="right">Renta 10A</Th>
+                  <Th align="right">20A</Th>
+                  <Th align="right">Acción</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {assets.map((a) => {
+                  const isEditing = editing?.id === a.id;
+                  return (
+                    <tr
+                      key={a.id}
+                      style={{
+                        borderTop: "1px solid var(--border)",
+                        background: isEditing
+                          ? "rgba(127, 255, 178, 0.04)"
+                          : undefined,
+                      }}
+                    >
+                      <Td>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: 8,
+                              height: 8,
+                              borderRadius: 2,
+                              background: a.color,
+                            }}
+                          />
+                          {a.name}
+                        </span>
+                      </Td>
+                      <Td>{CATEGORY_LABELS_ES[a.category as InvestmentCategory]}</Td>
+                      <Td align="right">{money.format(a.capital)}</Td>
+                      <Td align="right">
+                        {a.monthlyContribution > 0
+                          ? money.format(a.monthlyContribution)
+                          : "—"}
+                      </Td>
+                      <Td align="right">{pct.format(a.passiveYield)}</Td>
+                      <Td align="right">{money.format(a.v5)}</Td>
+                      <Td align="right">{money.format(a.v10)}</Td>
+                      <Td align="right" accent>
+                        {money.format(a.renta10)}
+                      </Td>
+                      <Td align="right">{money.format(a.v20)}</Td>
+                      <Td align="right">
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            gap: "8px",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Link
+                            href={`/investments?edit=${a.id}#form`}
+                            style={{ color: "var(--accent-2)", fontSize: "12px" }}
+                          >
+                            Editar
+                          </Link>
+                          <form action={deleteInvestmentAction}>
+                            <input type="hidden" name="id" value={a.id} />
+                            <button
+                              type="submit"
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                color: "var(--danger)",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                fontFamily: "DM Mono, monospace",
+                                padding: 0,
+                              }}
+                            >
+                              Eliminar
+                            </button>
+                          </form>
+                        </div>
+                      </Td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       {/* Form crear / editar */}
       <InvestmentForm categories={categoryOptions} editing={editing} />
     </div>
-  );
-}
-
-function CategoryGroup({
-  label,
-  color,
-  positions,
-  money,
-  pct,
-  editingId,
-}: {
-  label: string;
-  color: string;
-  positions: ReturnType<typeof serializeInvestment>[];
-  money: Intl.NumberFormat;
-  pct: Intl.NumberFormat;
-  editingId?: string | null;
-}) {
-  const groupTotal = positions.reduce((s, p) => s + p.capital, 0);
-  const groupPlanB = positions.reduce(
-    (s, p) => s + (p.capital * p.passiveYield) / 12,
-    0,
-  );
-
-  return (
-    <section className="card flex flex-col gap-2" style={{ padding: 0 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 16px",
-          borderBottom: "1px solid var(--border)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span
-            style={{
-              display: "inline-block",
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              background: color,
-            }}
-          />
-          <div>
-            <div
-              className="label"
-              style={{ fontSize: "10px", color: "var(--muted)" }}
-            >
-              {label}
-            </div>
-            <div style={{ fontSize: "13px", color: "var(--text)" }}>
-              {positions.length} posición{positions.length === 1 ? "" : "es"}
-            </div>
-          </div>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div className="label" style={{ fontSize: "10px" }}>
-            Capital · Plan B/mes
-          </div>
-          <div style={{ fontSize: "13px", color: "var(--text)" }}>
-            {money.format(groupTotal)}
-            <span style={{ color: "var(--muted)" }}> · </span>
-            <span style={{ color: "var(--accent)" }}>
-              {money.format(groupPlanB)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          fontSize: "13px",
-        }}
-      >
-        <thead>
-          <tr>
-            <Th>Etiqueta</Th>
-            <Th align="right">Capital</Th>
-            <Th align="right">Yield</Th>
-            <Th align="right">Flujo/mes</Th>
-            <Th align="right">Acción</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {positions.map((p, idx) => {
-            const monthlyFlow = (p.capital * p.passiveYield) / 12;
-            const isEditing = editingId === p.id;
-            return (
-              <tr
-                key={p.id}
-                style={{
-                  borderTop: idx === 0 ? "none" : "1px solid var(--border)",
-                  background: isEditing
-                    ? "rgba(127, 255, 178, 0.04)"
-                    : undefined,
-                }}
-              >
-                <Td>{p.label ?? <em style={{ color: "var(--hint)" }}>—</em>}</Td>
-                <Td align="right">{money.format(p.capital)}</Td>
-                <Td align="right">{pct.format(p.passiveYield)}</Td>
-                <Td align="right" accent>
-                  {money.format(monthlyFlow)}
-                </Td>
-                <Td align="right">
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      gap: "8px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Link
-                      href={`/investments?edit=${p.id}#form`}
-                      style={{
-                        color: "var(--accent-2)",
-                        fontSize: "12px",
-                      }}
-                    >
-                      Editar
-                    </Link>
-                    <form action={deleteInvestmentAction}>
-                      <input type="hidden" name="id" value={p.id} />
-                      <button
-                        type="submit"
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: "var(--danger)",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                          fontFamily: "DM Mono, monospace",
-                          padding: 0,
-                        }}
-                      >
-                        Eliminar
-                      </button>
-                    </form>
-                  </div>
-                </Td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </section>
   );
 }
 

@@ -106,3 +106,50 @@ export function projectionTable(
     monthlyIncome: projectedMonthlyPassiveIncome(positions, years),
   }));
 }
+
+// ============================================================================
+// CAPA B — series para el gráfico apilado + reparto del donut
+// ============================================================================
+
+export interface GrowthSeries {
+  /** Marcas de año del eje X (ej. [0, 1, ..., 30]). */
+  years: number[];
+  /** perAsset[i][j] = valor proyectado del activo i en el año years[j]. */
+  perAsset: number[][];
+}
+
+/**
+ * Serie año a año del valor proyectado de cada activo, para el área apilada.
+ * Cada banda crece con la tasa y el aporte de SU activo (reusa projectedValue
+ * sobre una posición por vez). La altura apilada en cada año es el valor del
+ * portafolio completo a ese año.
+ */
+export function growthSeries(
+  positions: ProjectionPosition[],
+  years: number[],
+): GrowthSeries {
+  return {
+    years,
+    perAsset: positions.map((p) => years.map((y) => projectedValue([p], y))),
+  };
+}
+
+export interface PortfolioShare {
+  index: number;
+  /** Capital del activo / capital total. Fracción (0.37 = 37%). */
+  share: number;
+}
+
+/**
+ * Reparto del portafolio HOY por posición: capital del activo sobre el total.
+ * Las fracciones suman 1 (o 0 si no hay capital, sin dividir por cero).
+ */
+export function portfolioShares(
+  positions: ProjectionPosition[],
+): PortfolioShare[] {
+  const total = positions.reduce((s, p) => s + p.capital, 0);
+  return positions.map((p, index) => ({
+    index,
+    share: total > 0 ? p.capital / total : 0,
+  }));
+}
