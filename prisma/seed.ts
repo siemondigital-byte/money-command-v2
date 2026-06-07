@@ -270,6 +270,41 @@ async function populatePostgres(userId: string): Promise<void> {
           },
         ],
       },
+
+      goals: {
+        create: [
+          // Esenciales (category legacy: need)
+          {
+            name: "Fondo de emergencia",
+            basket: "essentials",
+            category: "need",
+            targetAmount: 15000,
+            currentAmount: 6000,
+            monthlyContribution: 500,
+            targetDate: new Date(seedYear + 1, seedMonth - 1, 1),
+          },
+          // Estilo (category legacy: want) - sin fecha objetivo
+          {
+            name: "Viaje a Japón",
+            basket: "style",
+            category: "want",
+            targetAmount: 8000,
+            currentAmount: 2000,
+            monthlyContribution: 300,
+            targetDate: null,
+          },
+          // Libertad (category legacy: patrimony)
+          {
+            name: "Salir de la tarjeta",
+            basket: "freedom",
+            category: "patrimony",
+            targetAmount: 4200,
+            currentAmount: 1000,
+            monthlyContribution: 400,
+            targetDate: new Date(seedYear + 1, seedMonth - 1, 1),
+          },
+        ],
+      },
     },
   });
 }

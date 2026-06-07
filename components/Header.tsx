@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/expenses", label: "Gastos" },
   { href: "/investments", label: "Inversiones" },
   { href: "/debts", label: "Deudas" },
+  { href: "/goals", label: "Metas" },
   { href: "/history", label: "Historial" },
   { href: "/settings", label: "Settings" },
 ];

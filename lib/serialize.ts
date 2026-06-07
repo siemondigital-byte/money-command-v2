@@ -308,7 +308,7 @@ export type SerializedGoal = Omit<
   targetAmount: number;
   currentAmount: number;
   monthlyContribution: number;
-  targetDate: string;
+  targetDate: string | null;
   achievedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -320,7 +320,7 @@ export function serializeGoal(g: Goal): SerializedGoal {
     targetAmount: dec(g.targetAmount),
     currentAmount: dec(g.currentAmount),
     monthlyContribution: dec(g.monthlyContribution),
-    targetDate: isoReq(g.targetDate),
+    targetDate: isoOpt(g.targetDate),
     achievedAt: isoOpt(g.achievedAt),
     createdAt: isoReq(g.createdAt),
     updatedAt: isoReq(g.updatedAt),

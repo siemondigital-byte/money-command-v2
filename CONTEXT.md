@@ -158,3 +158,10 @@ Ver `.env.example` para el listado completo y comentarios. Resumen:
   Hoy se deriva del `basket` (essentials→need, style→want, freedom→investment)
   solo para no romper su NOT NULL heredado; el módulo Expenses nunca la lee.
   La fuente de verdad de la canasta es `basket`.
+
+- **Eliminar columna legacy `category` de Goal cuando sea seguro.** Mismo
+  patrón que `classification` en Expense: se deriva del `basket`
+  (essentials→need, style→want, freedom→patrimony) solo para no romper su
+  NOT NULL heredado. El módulo Metas nunca la lee; la fuente de verdad es
+  `basket`. (Las columnas `isAchieved`/`achievedAt` de Goal tampoco se usan
+  en capa A.)

@@ -327,7 +327,10 @@ model Investment {
 }
 
 // ============================================================================
-// Goal — metas categorizadas (Necesidad | Deseo | Patrimonio)
+// Goal — metas categorizadas por canasta (Esenciales | Estilo | Libertad)
+//
+// Es estado actual (snapshot), NO flujo del mes: no lleva year/month, sigue
+// la convención de Investment/Debt. NO entra a la consolidación mensual.
 // ============================================================================
 model Goal {
   id     String @id @default(uuid()) @db.Uuid
@@ -335,9 +338,12 @@ model Goal {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name        String
-  category    String // "need" | "want" | "patrimony"
+  // Canasta doctrinal, igual que en Expense. Fuente de verdad del módulo.
+  basket      String // "essentials" | "style" | "freedom"
+  // LEGACY (need|want|patrimony): se deriva de basket. Ver CONTEXT.md.
+  category    String
   targetAmount Decimal @db.Decimal(12, 2)
-  targetDate  DateTime
+  targetDate  DateTime? // opcional: para medir si va a tiempo o atrasado
   currentAmount Decimal @default(0) @db.Decimal(12, 2)
   monthlyContribution Decimal @default(0) @db.Decimal(12, 2)
 
