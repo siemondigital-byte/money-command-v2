@@ -53,10 +53,6 @@ const positionSchema = z.object({
   ),
   // Capa A — proyección. No tocan el Plan B.
   monthlyContribution: numericString,
-  expectedReturnPct: numericString.refine(
-    (v) => v <= 100,
-    "El retorno no puede ser mayor a 100%",
-  ),
 });
 
 function getStr(fd: FormData, key: string) {
@@ -91,7 +87,6 @@ export async function createInvestmentAction(
     capital: getStr(formData, "capital"),
     passiveYieldPct: getStr(formData, "passiveYieldPct"),
     monthlyContribution: getStr(formData, "monthlyContribution"),
-    expectedReturnPct: getStr(formData, "expectedReturnPct"),
   });
 
   if (!parsed.success) {
@@ -107,8 +102,9 @@ export async function createInvestmentAction(
         capital: dec(parsed.data.capital),
         passiveYield: yieldDec(parsed.data.passiveYieldPct),
         monthlyContribution: dec(parsed.data.monthlyContribution),
-        // yieldDec convierte pct -> fracción con 4 decimales, sirve para el retorno
-        expectedReturn: yieldDec(parsed.data.expectedReturnPct),
+        // expectedReturn es columna legacy sin uso lógico: se espeja del yield
+        // para satisfacer el NOT NULL. Se elimina en una tanda futura.
+        expectedReturn: yieldDec(parsed.data.passiveYieldPct),
       },
     });
   } catch (err) {
@@ -146,7 +142,6 @@ export async function updateInvestmentAction(
     capital: getStr(formData, "capital"),
     passiveYieldPct: getStr(formData, "passiveYieldPct"),
     monthlyContribution: getStr(formData, "monthlyContribution"),
-    expectedReturnPct: getStr(formData, "expectedReturnPct"),
   });
 
   if (!parsed.success) {
@@ -162,8 +157,9 @@ export async function updateInvestmentAction(
         capital: dec(parsed.data.capital),
         passiveYield: yieldDec(parsed.data.passiveYieldPct),
         monthlyContribution: dec(parsed.data.monthlyContribution),
-        // yieldDec convierte pct -> fracción con 4 decimales, sirve para el retorno
-        expectedReturn: yieldDec(parsed.data.expectedReturnPct),
+        // expectedReturn es columna legacy sin uso lógico: se espeja del yield
+        // para satisfacer el NOT NULL. Se elimina en una tanda futura.
+        expectedReturn: yieldDec(parsed.data.passiveYieldPct),
       },
     });
     if (result.count === 0) {

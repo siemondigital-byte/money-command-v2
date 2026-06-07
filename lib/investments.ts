@@ -1,14 +1,13 @@
 /**
  * Lógica de proyección del módulo Investments (capa A) — helpers PUROS.
  *
- * Proyecta el portafolio con interés compuesto: cada activo crece a su
- * `expectedReturn` (retorno TOTAL anual, apreciación + yield reinvertido)
- * sumando su `monthlyContribution`. La renta pasiva proyectada se calcula
- * con los yields reales por posición sobre el valor proyectado (NO
- * portafolio × 4%, prohibido por ARQUITECTURA §8).
+ * UNA SOLA TASA por activo: `passiveYield` (yield / rendimiento anual). De esa
+ * tasa sale TODO: el crecimiento de la proyección, la renta proyectada y el
+ * Plan B. (Decisión: yield y retorno son el mismo concepto.)
  *
  * NO toca el Plan B: `passiveYield` y `monthlyPlanB` (lib/formulas) siguen
- * siendo la fuente de verdad de la renta pasiva de HOY. Acá solo se proyecta.
+ * siendo la fuente de verdad de la renta pasiva de HOY. Acá solo se proyecta,
+ * con la misma tasa.
  *
  * Reusa `futureValueWithContributions` de lib/formulas (no se reimplementa la
  * fórmula de interés compuesto).
@@ -19,9 +18,7 @@ import { futureValueWithContributions } from "./formulas";
 export interface ProjectionPosition {
   capital: number;
   monthlyContribution: number;
-  /** Retorno total anual como fracción (0.08 = 8%). */
-  expectedReturn: number;
-  /** Yield pasivo anual como fracción (0.04 = 4%). */
+  /** Yield / rendimiento anual como fracción (0.04 = 4%). Tasa única. */
   passiveYield: number;
 }
 
@@ -35,15 +32,14 @@ export function portfolioTotal(positions: ProjectionPosition[]): number {
 }
 
 /**
- * Retorno ponderado por capital: Σ(capital × expectedReturn) / Σ capital.
- * Devuelto como fracción (0.08). 0 si no hay capital. Usa expectedReturn,
- * NUNCA el yield.
+ * Rendimiento ponderado por capital: Σ(capital × passiveYield) / Σ capital.
+ * Devuelto como fracción (0.08). 0 si no hay capital.
  */
-export function weightedExpectedReturn(positions: ProjectionPosition[]): number {
+export function weightedYield(positions: ProjectionPosition[]): number {
   const total = positions.reduce((s, p) => s + p.capital, 0);
   if (total <= 0) return 0;
   const weighted = positions.reduce(
-    (s, p) => s + p.capital * p.expectedReturn,
+    (s, p) => s + p.capital * p.passiveYield,
     0,
   );
   return weighted / total;
@@ -51,7 +47,7 @@ export function weightedExpectedReturn(positions: ProjectionPosition[]): number 
 
 /**
  * Valor proyectado del portafolio a `years` años: suma del valor futuro de
- * cada activo, cada uno con su propio capital, aporte y retorno.
+ * cada activo (capital + aportes, creciendo a su rendimiento anual).
  */
 export function projectedValue(
   positions: ProjectionPosition[],
@@ -64,7 +60,7 @@ export function projectedValue(
         futureValueWithContributions(
           p.capital,
           p.monthlyContribution,
-          p.expectedReturn,
+          p.passiveYield,
           years,
         ),
       0,
@@ -74,8 +70,8 @@ export function projectedValue(
 
 /**
  * Renta pasiva MENSUAL del portafolio proyectado a `years` años: por cada
- * activo, su valor futuro × su yield pasivo / 12. Yields reales por posición
- * sobre el valor proyectado (doctrina §8), no portafolio × 4%.
+ * activo, su valor futuro × su rendimiento anual / 12. Rendimientos reales por
+ * posición sobre el valor proyectado (doctrina §8), no portafolio × 4%.
  */
 export function projectedMonthlyPassiveIncome(
   positions: ProjectionPosition[],
@@ -85,7 +81,7 @@ export function projectedMonthlyPassiveIncome(
     const fv = futureValueWithContributions(
       p.capital,
       p.monthlyContribution,
-      p.expectedReturn,
+      p.passiveYield,
       years,
     );
     return s + fv * p.passiveYield;

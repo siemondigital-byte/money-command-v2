@@ -10,7 +10,7 @@ import {
 } from "@/lib/formulas";
 import {
   portfolioTotal,
-  weightedExpectedReturn,
+  weightedYield,
   projectedValue,
   projectedMonthlyPassiveIncome,
   projectionTable,
@@ -63,15 +63,14 @@ export default async function InvestmentsPage({
     })),
   );
 
-  // Proyección (capa A): cada activo con su capital, aporte y retorno total.
+  // Proyección (capa A): cada activo con su capital, aporte y tasa única.
   const projPositions = serialized.map((p) => ({
     capital: p.capital,
     monthlyContribution: p.monthlyContribution,
-    expectedReturn: p.expectedReturn,
     passiveYield: p.passiveYield,
   }));
   const totalCapital = portfolioTotal(projPositions);
-  const wReturn = weightedExpectedReturn(projPositions); // fracción
+  const wYield = weightedYield(projPositions); // fracción
   const proj10 = projectedValue(projPositions, 10);
   const renta10 = projectedMonthlyPassiveIncome(projPositions, 10);
   const projTable = projectionTable(projPositions, [5, 10, 20]);
@@ -149,8 +148,8 @@ export default async function InvestmentsPage({
           sub={`${serialized.length} posición${serialized.length === 1 ? "" : "es"}`}
         />
         <Kpi
-          label="Retorno Ponderado"
-          value={pct.format(wReturn)}
+          label="Rendimiento Ponderado"
+          value={pct.format(wYield)}
           sub="prom. ponderado por capital"
         />
         <Kpi

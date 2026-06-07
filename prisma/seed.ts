@@ -144,7 +144,7 @@ async function populatePostgres(userId: string): Promise<void> {
             capital: 80000,
             passiveYield: 0.015,
             monthlyContribution: 500,
-            expectedReturn: 0.08,
+            expectedReturn: 0.015, // legacy, espeja el yield (tasa única)
           },
           // Renta variable de dividendos: ~$72.92/mes
           {
@@ -153,7 +153,7 @@ async function populatePostgres(userId: string): Promise<void> {
             capital: 25000,
             passiveYield: 0.035,
             monthlyContribution: 200,
-            expectedReturn: 0.07,
+            expectedReturn: 0.035, // legacy, espeja el yield (tasa única)
           },
           // Bienes raíces (renta neta): $500/mes
           {
@@ -162,7 +162,7 @@ async function populatePostgres(userId: string): Promise<void> {
             capital: 120000,
             passiveYield: 0.05,
             monthlyContribution: 0,
-            expectedReturn: 0.06,
+            expectedReturn: 0.05, // legacy, espeja el yield (tasa única)
           },
           // Especulativo sin staking: 0 flujo
           {
@@ -171,7 +171,7 @@ async function populatePostgres(userId: string): Promise<void> {
             capital: 8000,
             passiveYield: 0,
             monthlyContribution: 100,
-            expectedReturn: 0.12,
+            expectedReturn: 0, // legacy, espeja el yield (tasa única)
           },
         ],
       },

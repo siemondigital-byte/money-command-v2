@@ -58,7 +58,6 @@ export function InvestmentForm({
 
   const defaultCategory = editing?.category ?? categories[0]!.value;
   const defaultYieldPct = editing ? Number(editing.passiveYield) * 100 : "";
-  const defaultReturnPct = editing ? Number(editing.expectedReturn) * 100 : "";
 
   return (
     <section className="card flex flex-col gap-3" id="form">
@@ -122,7 +121,7 @@ export function InvestmentForm({
 
           <label className="flex flex-col gap-1">
             <span className="label">
-              Yield pasivo anual (%)
+              Yield / Rendimiento anual (%)
             </span>
             <input
               name="passiveYieldPct"
@@ -137,39 +136,17 @@ export function InvestmentForm({
           </label>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
-          }}
-        >
-          <label className="flex flex-col gap-1">
-            <span className="label">Aporte mensual</span>
-            <input
-              name="monthlyContribution"
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={editing ? Number(editing.monthlyContribution) : ""}
-              placeholder="0.00"
-            />
-          </label>
-
-          <label className="flex flex-col gap-1">
-            <span className="label">Retorno anual esperado (%)</span>
-            <input
-              name="expectedReturnPct"
-              type="number"
-              step="0.01"
-              min="0"
-              max="100"
-              required
-              defaultValue={defaultReturnPct}
-              placeholder="ej. 8 para 8%"
-            />
-          </label>
-        </div>
+        <label className="flex flex-col gap-1" style={{ maxWidth: "260px" }}>
+          <span className="label">Aporte mensual</span>
+          <input
+            name="monthlyContribution"
+            type="number"
+            step="0.01"
+            min="0"
+            defaultValue={editing ? Number(editing.monthlyContribution) : ""}
+            placeholder="0.00"
+          />
+        </label>
 
         <p
           style={{
@@ -178,11 +155,8 @@ export function InvestmentForm({
             lineHeight: 1.5,
           }}
         >
-          El yield pasivo es el % anual que la posición entrega como flujo
-          (dividendos, intereses, renta neta), y alimenta tu renta pasiva de
-          hoy. El retorno esperado es el crecimiento TOTAL anual (apreciación
-          más yield reinvertido) y se usa para proyectar a futuro. Son cosas
-          distintas.
+          La tasa anual de la posición. Se usa para tu renta pasiva y para
+          proyectar su crecimiento.
         </p>
 
         <div
