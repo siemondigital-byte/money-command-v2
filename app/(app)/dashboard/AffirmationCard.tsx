@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
- * Afirmación del día. Array de citas aspiracionales sobre dinero/inversión
- * hardcodeado en el cliente; los botones rotan. Estado local, sin llamadas
- * externas (ANEXO §1).
+ * Afirmación del día. Una frase célebre + un tip que cambian AUTOMÁTICAMENTE
+ * cada 10 segundos (setInterval en el client). Estado local, sin llamadas
+ * externas (ANEXO REDISENO §Cambios de contenido).
  */
 const QUOTES: { text: string; author: string; tip: string }[] = [
   {
     text: "No trabajes por dinero, haz que el dinero trabaje para ti.",
     author: "Robert Kiyosaki",
-    tip: "Cada peso que invertís es un empleado que trabaja 24/7 sin descanso.",
+    tip: "Cada peso que invertís es un empleado que trabaja sin descanso.",
   },
   {
     text: "El interés compuesto es la octava maravilla del mundo.",
     author: "Albert Einstein",
-    tip: "El tiempo en el mercado vale más que acertar el momento del mercado.",
+    tip: "El tiempo en el mercado vale más que acertar el momento.",
   },
   {
     text: "La riqueza es la capacidad de vivir plenamente sin trabajar.",
@@ -24,29 +24,24 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
     tip: "Tu meta no es acumular: es que tus flujos pasivos cubran tu vida.",
   },
   {
-    text: "No ahorres lo que queda después de gastar; gasta lo que queda después de ahorrar.",
+    text: "Gasta lo que queda después de ahorrar, no al revés.",
     author: "Warren Buffett",
-    tip: "Automatizá tu canasta de Libertad antes de tocar el resto del ingreso.",
+    tip: "Automatizá tu canasta de Libertad antes de tocar el resto.",
   },
   {
-    text: "Un presupuesto le dice a tu dinero a dónde ir en vez de preguntarte a dónde se fue.",
+    text: "Un presupuesto le dice a tu dinero a dónde ir.",
     author: "John Maxwell",
     tip: "Dirigir el dinero no es restringir: es elegir mejor.",
   },
   {
     text: "El riesgo viene de no saber lo que estás haciendo.",
     author: "Warren Buffett",
-    tip: "Diversificar entre tipos de activo reduce el riesgo sin sacrificar retorno.",
+    tip: "Diversificar entre tipos de activo reduce el riesgo.",
   },
   {
     text: "Construir capital es plantar árboles bajo cuya sombra no esperás sentarte.",
     author: "Proverbio adaptado",
     tip: "El capital queda intacto y crece; vos vivís de sus frutos.",
-  },
-  {
-    text: "La libertad financiera está disponible para quienes la aprenden y trabajan por ella.",
-    author: "Robert Kiyosaki",
-    tip: "Cada mes que registrás es un dato más para decidir mejor.",
   },
   {
     text: "Gastar no es despilfarrar. Despilfarrar es gastar sin dirección.",
@@ -69,19 +64,19 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
     tip: "Tu tasa de ahorro pesa más que tu salario en el largo plazo.",
   },
   {
-    text: "El mejor momento para invertir fue hace veinte años. El segundo mejor es hoy.",
+    text: "El segundo mejor momento para invertir es hoy.",
     author: "Proverbio de inversión",
     tip: "Empezar pequeño y temprano supera a empezar grande y tarde.",
   },
   {
     text: "La disciplina es el puente entre las metas y los logros.",
     author: "Jim Rohn",
-    tip: "Un aporte mensual constante es más poderoso que uno grande y esporádico.",
+    tip: "Un aporte mensual constante vence al esfuerzo esporádico.",
   },
   {
-    text: "Vivir por debajo de tus posibilidades te da la posibilidad de vivir.",
+    text: "La brecha entre tu ingreso y tu gasto es el combustible de tu libertad.",
     author: "Anónimo",
-    tip: "La brecha entre ingreso y gasto es el combustible de tu libertad.",
+    tip: "Vivir por debajo de tus posibilidades te da la posibilidad de vivir.",
   },
   {
     text: "La meta no es ser rico, es ser libre.",
@@ -92,78 +87,37 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
 
 export function AffirmationCard() {
   const [i, setI] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setI((prev) => (prev + 1) % QUOTES.length);
+    }, 10000);
+    return () => clearInterval(id);
+  }, []);
+
   const q = QUOTES[i]!;
 
-  function next() {
-    setI((prev) => (prev + 1) % QUOTES.length);
-  }
-
-  function random() {
-    setI((prev) => {
-      if (QUOTES.length <= 1) return prev;
-      let n = prev;
-      // rota a una cita distinta sin Math.random determinístico problemático
-      const step = 1 + ((prev * 7 + 3) % (QUOTES.length - 1));
-      n = (prev + step) % QUOTES.length;
-      return n === prev ? (prev + 1) % QUOTES.length : n;
-    });
-  }
-
   return (
-    <section
-      className="card fade-up"
-      style={{
-        borderRadius: "16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "14px",
-      }}
-    >
-      <div className="label">Afirmación del día</div>
+    <section className="d-card top-mint" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div className="d-section-label">Afirmación del día</div>
       <blockquote
+        key={i}
+        className="fade-up"
         style={{
           margin: 0,
           fontFamily: "Syne, sans-serif",
-          fontSize: "clamp(1.1rem, 3vw, 1.5rem)",
+          fontSize: "clamp(1rem, 2.4vw, 1.3rem)",
           fontWeight: 700,
           lineHeight: 1.3,
           color: "var(--text)",
         }}
       >
         “{q.text}”
+        <span style={{ display: "block", fontSize: "12px", color: "var(--accent-2)", fontFamily: "DM Mono, monospace", fontWeight: 400, marginTop: "8px" }}>
+          — {q.author}
+        </span>
       </blockquote>
-      <div style={{ fontSize: "12px", color: "var(--accent-2)" }}>
-        — {q.author}
-      </div>
-      <p style={{ fontSize: "13px", color: "var(--muted)", margin: 0 }}>
-        {q.tip}
-      </p>
-      <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
-        <button type="button" onClick={next} className="btn-ghost">
-          Siguiente
-        </button>
-        <button type="button" onClick={random} className="btn-ghost">
-          Otra cita
-        </button>
-      </div>
-
-      <style jsx>{`
-        .btn-ghost {
-          background: var(--surface-2);
-          color: var(--text);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 8px 16px;
-          font-family: "DM Mono", monospace;
-          font-size: 12px;
-          letter-spacing: 0.05em;
-          cursor: pointer;
-          transition: border-color 0.15s ease;
-        }
-        .btn-ghost:hover {
-          border-color: var(--border-strong);
-        }
-      `}</style>
+      <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0 }}>{q.tip}</p>
     </section>
   );
 }

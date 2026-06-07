@@ -3,11 +3,12 @@
 import { formatMoney } from "@/lib/format";
 
 /**
- * Termostato financiero: compara la temperatura ACTUAL (promedio del historial
- * de ingresos) con la DESEADA (meta de ingreso a 2 años de Settings).
+ * Termostato financiero VERTICAL y compacto (ANEXO REDISENO §2).
  *
- * Recibe primitivas ya calculadas en el server (helper puro thermostat()).
- * Visual: barra tipo medidor con el punto actual y el punto de ajuste deseado.
+ * Mide la temperatura ACTUAL (promedio del historial de ingresos) contra la
+ * DESEADA (meta de ingreso a 2 años de Settings). Medidor tipo tubo vertical
+ * con el nivel actual y la marca del ajuste deseado. Recibe primitivas ya
+ * calculadas por el helper puro thermostat().
  */
 export function Thermostat({
   current,
@@ -29,113 +30,75 @@ export function Thermostat({
   currency: string;
 }) {
   const money = (n: number) => formatMoney(n, locale, currency);
+  const moneyShort = (n: number) =>
+    formatMoney(n, locale, currency, { maxFractionDigits: 0 });
   const hasTarget = target > 0;
 
-  // Posición del marcador "actual" sobre la escala 0..target (tope 100%).
-  const currentPct = hasTarget
+  // Nivel del tubo: actual sobre la escala 0..target (tope 100%).
+  const levelPct = hasTarget
     ? Math.min(100, Math.max(0, (current / target) * 100))
     : 0;
 
   return (
-    <section
-      className="card"
-      style={{ borderRadius: "16px", display: "flex", flexDirection: "column", gap: "16px" }}
-    >
-      <div className="label">Termostato financiero</div>
+    <section className="d-card top-sky d-thermo">
+      <div className="d-section-label">Termostato</div>
 
       {!hasTarget ? (
-        <p style={{ fontSize: "13px", color: "var(--muted)", margin: 0 }}>
+        <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0 }}>
           Configurá tu meta de ingreso a 2 años en{" "}
           <a href="/settings#thermostat" style={{ color: "var(--accent-2)" }}>
             Settings
           </a>{" "}
-          para ver cuánta temperatura te falta.
+          para medir tu temperatura.
         </p>
       ) : (
-        <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            <div>
-              <div className="label">Hoy (promedio)</div>
-              <div className="kpi-medium" style={{ color: "var(--accent-2)", marginTop: 4 }}>
-                {hasHistory ? money(current) : "—"}
-              </div>
-              <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
-                {hasHistory
-                  ? "promedio de meses registrados"
-                  : "registrá ingresos para calcularlo"}
-              </p>
-            </div>
+        <div className="meter">
+          <div className="tube">
+            <div
+              className="level"
+              style={{
+                height: `${levelPct}%`,
+                background: reached
+                  ? "var(--accent)"
+                  : "linear-gradient(0deg, var(--accent-2), var(--gold))",
+              }}
+            />
+            {/* marca de ajuste deseado al tope (100% = meta) */}
+            <div className="tgt" style={{ bottom: "calc(100% - 2px)" }} />
+          </div>
+          <div className="scale">
             <div>
               <div className="label">Meta 2 años</div>
-              <div className="kpi-medium" style={{ color: "var(--gold)", marginTop: 4 }}>
-                {money(target)}
+              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "var(--gold)" }}>
+                {moneyShort(target)}
               </div>
-              <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
-                temperatura deseada
-              </p>
+            </div>
+            <div>
+              <div className="label">Hoy (prom.)</div>
+              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "var(--accent-2)" }}>
+                {hasHistory ? moneyShort(current) : "—"}
+              </div>
             </div>
             <div>
               <div className="label">{reached ? "Estado" : "Te falta"}</div>
               <div
-                className="kpi-medium"
-                style={{ color: reached ? "var(--accent)" : "var(--text)", marginTop: 4 }}
+                style={{
+                  fontFamily: "Syne, sans-serif",
+                  fontWeight: 800,
+                  fontSize: "1rem",
+                  color: reached ? "var(--accent)" : "var(--text)",
+                }}
               >
-                {reached ? "Meta alcanzada" : money(gap)}
+                {reached ? "Alcanzada" : hasHistory ? money(gap) : "—"}
               </div>
               {!reached && hasHistory && gapPct > 0 && (
-                <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
+                <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "2px" }}>
                   +{gapPct.toFixed(0)}% sobre tu actual
-                </p>
+                </div>
               )}
             </div>
           </div>
-
-          {/* Medidor: escala con marcador actual y punto de ajuste (meta) al 100% */}
-          <div style={{ marginTop: "4px" }}>
-            <div
-              style={{
-                position: "relative",
-                height: "12px",
-                borderRadius: "999px",
-                background: "var(--surface-2)",
-                border: "1px solid var(--border)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: `${currentPct}%`,
-                  background: reached
-                    ? "var(--accent)"
-                    : "linear-gradient(90deg, var(--accent-2), var(--gold))",
-                  borderRadius: "999px",
-                }}
-              />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "6px",
-                fontSize: "10px",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "var(--hint)",
-              }}
-            >
-              <span>Actual</span>
-              <span>Ajuste deseado</span>
-            </div>
-          </div>
-        </>
+        </div>
       )}
     </section>
   );

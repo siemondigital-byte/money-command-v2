@@ -5,20 +5,20 @@ import { formatMoney } from "@/lib/format";
 import { distributionAmounts, type BasketDistribution } from "@/lib/dashboard";
 
 /**
- * Distribución por canastas con BARRAS movibles + presets (ANEXO §4).
+ * PANEL DEL MÉTODO (mockup 01 · Asignación del mes).
  *
- * Precargadas con la distribución REAL del usuario. Al mover una barra, las
- * otras dos se reajustan para mantener el total en 100%. Es SIMULACIÓN: no
- * toca gastos reales ni la consolidación. El texto de brecha se recalcula al
- * mover.
+ * Arriba: tarjetas KPI con números destacados y borde de color (Ingreso verde,
+ * Gastado cian, Invertido dorado). Abajo: las TRES barras de distribución
+ * (Esenciales/Estilo/Libertad) con su target marcado, movibles para simular,
+ * con presets y texto de brecha. Es SIMULACIÓN: no toca gastos reales.
  */
 
 type BasketKey = keyof BasketDistribution;
 
-const BASKET_META: { key: BasketKey; label: string; color: string }[] = [
-  { key: "essentials", label: "Esenciales", color: "#4dd9ff" },
-  { key: "style", label: "Estilo", color: "#ffd166" },
-  { key: "freedom", label: "Libertad", color: "#7fffb2" },
+const BASKET_META: { key: BasketKey; label: string; tone: "sky" | "gold" | "mint" }[] = [
+  { key: "essentials", label: "Esenciales", tone: "sky" },
+  { key: "style", label: "Estilo", tone: "gold" },
+  { key: "freedom", label: "Libertad", tone: "mint" },
 ];
 
 const PRESETS: { label: string; dist: BasketDistribution }[] = [
@@ -32,29 +32,38 @@ function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
-export function DistributionBars({
+export function MethodPanel({
   income,
+  gastado,
+  invertido,
   realDist,
   initialDist,
+  targetDist,
   locale,
   currency,
 }: {
   income: number;
-  /** Distribución real (para comparar contra la simulación). */
+  gastado: number;
+  invertido: number;
   realDist: BasketDistribution;
-  /** Distribución inicial de las barras (real si hay datos, si no el preset). */
   initialDist: BasketDistribution;
+  /** Target por canasta desde el método de Settings (para el marcador). */
+  targetDist: BasketDistribution;
   locale: string;
   currency: string;
 }) {
+  const money = (n: number) => formatMoney(n, locale, currency);
+  const moneyShort = (n: number) =>
+    formatMoney(n, locale, currency, { maxFractionDigits: 0 });
+
   const [dist, setDist] = useState<BasketDistribution>({
     essentials: round1(initialDist.essentials),
     style: round1(initialDist.style),
     freedom: round1(initialDist.freedom),
   });
 
-  const money = (n: number) => formatMoney(n, locale, currency);
   const amounts = distributionAmounts(income, dist);
+  const targetAmounts = distributionAmounts(income, targetDist);
 
   function handleChange(key: BasketKey, raw: number) {
     const value = Math.min(100, Math.max(0, raw));
@@ -62,10 +71,8 @@ export function DistributionBars({
     const remaining = 100 - value;
     const [a, b] = others as [BasketKey, BasketKey];
     const sumOthers = dist[a] + dist[b];
-
     let next: BasketDistribution;
     if (sumOthers <= 0) {
-      // Si las otras estaban en 0, repartir el resto en partes iguales.
       next = { ...dist, [key]: value, [a]: remaining / 2, [b]: remaining / 2 };
     } else {
       next = {
@@ -82,29 +89,33 @@ export function DistributionBars({
     });
   }
 
-  function applyPreset(preset: BasketDistribution) {
-    setDist({ ...preset });
-  }
-
-  // Texto de brecha sobre Libertad (la canasta que importa para el avance).
   const realFreedom = round1(realDist.freedom);
   const simFreedom = round1(dist.freedom);
   const hasReal = realDist.essentials + realDist.style + realDist.freedom > 0;
   const diffPct = round1(simFreedom - realFreedom);
-  const diffAmount =
-    income > 0 ? Math.abs((diffPct / 100) * income) : 0;
+  const diffAmount = income > 0 ? Math.abs((diffPct / 100) * income) : 0;
 
   return (
-    <section
-      className="card"
-      style={{ borderRadius: "16px", display: "flex", flexDirection: "column", gap: "18px" }}
-    >
-      <div>
-        <div className="label">Distribución por canastas (simulación)</div>
-        <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px" }}>
-          Mové las barras para simular escenarios. Es una proyección: no cambia
-          tus gastos reales. Esenciales menos, Libertad más.
-        </p>
+    <section className="d-card top-mint" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
+      <div className="d-section-label">Asignación del mes</div>
+
+      {/* KPIs */}
+      <div className="d-kpis">
+        <div className="d-kpi hero mint top-mint">
+          <div className="lab">Ingreso del mes</div>
+          <div className="v">{money(income)}</div>
+          <div className="ctx plain">Plan A + B + C</div>
+        </div>
+        <div className="d-kpi sky top-sky">
+          <div className="lab">Gastado</div>
+          <div className="v">{moneyShort(gastado)}</div>
+          <div className="ctx plain">Esenciales + Estilo</div>
+        </div>
+        <div className="d-kpi gold top-gold">
+          <div className="lab">Invertido</div>
+          <div className="v">{moneyShort(invertido)}</div>
+          <div className="ctx plain">dirigido a Libertad</div>
+        </div>
       </div>
 
       {/* Presets */}
@@ -118,15 +129,16 @@ export function DistributionBars({
             <button
               key={p.label}
               type="button"
-              onClick={() => applyPreset(p.dist)}
+              onClick={() => setDist({ ...p.dist })}
               style={{
                 background: active ? "var(--accent)" : "var(--surface-2)",
                 color: active ? "var(--bg)" : "var(--text)",
                 border: "1px solid var(--border)",
-                borderRadius: "8px",
-                padding: "6px 12px",
+                borderRadius: "100px",
+                padding: "6px 14px",
                 fontFamily: "DM Mono, monospace",
-                fontSize: "12px",
+                fontSize: "11px",
+                letterSpacing: "0.05em",
                 cursor: "pointer",
               }}
             >
@@ -137,53 +149,37 @@ export function DistributionBars({
       </div>
 
       {/* Barras */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div className="d-bars">
         {BASKET_META.map((b) => {
           const pct = dist[b.key];
+          const tgt = round1(targetDist[b.key]);
           return (
-            <div key={b.key} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "baseline",
-                  fontSize: "13px",
-                }}
-              >
-                <span style={{ color: "var(--text)" }}>{b.label}</span>
-                <span style={{ color: "var(--muted)", fontSize: "12px" }}>
-                  {pct.toFixed(0)}% · {money(amounts[b.key])}
+            <div key={b.key} className={`d-bar ${b.tone}`}>
+              <div className="blabel">
+                <span className="cat">{b.label}</span>
+                <span className="target">
+                  Target {tgt.toFixed(0)}% · {moneyShort(targetAmounts[b.key])}
                 </span>
               </div>
-              <div
-                style={{
-                  position: "relative",
-                  height: "10px",
-                  borderRadius: "999px",
-                  background: "var(--surface-2)",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: `${pct}%`,
-                    background: b.color,
-                    borderRadius: "999px",
-                  }}
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <div className="track">
+                  <div className={`fill ${b.tone}`} style={{ width: `${pct}%` }} />
+                  <div className="marker" style={{ left: `${tgt}%` }} />
+                </div>
+                <input
+                  type="range"
+                  className={`d-range ${b.tone}`}
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={Math.round(pct)}
+                  onChange={(e) => handleChange(b.key, Number(e.target.value))}
+                  aria-label={`Ajustar ${b.label}`}
                 />
               </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={Math.round(pct)}
-                onChange={(e) => handleChange(b.key, Number(e.target.value))}
-                aria-label={`Ajustar ${b.label}`}
-                style={{ width: "100%", accentColor: b.color, cursor: "pointer" }}
-              />
+              <div className="pct">
+                {pct.toFixed(0)}%<span className="amt">{moneyShort(amounts[b.key])}</span>
+              </div>
             </div>
           );
         })}
@@ -193,10 +189,10 @@ export function DistributionBars({
       <div
         style={{
           borderTop: "1px solid var(--border)",
-          paddingTop: "12px",
-          fontSize: "13px",
+          paddingTop: "14px",
+          fontSize: "12px",
           color: "var(--muted)",
-          lineHeight: 1.5,
+          lineHeight: 1.6,
         }}
       >
         {!hasReal ? (
@@ -219,8 +215,7 @@ export function DistributionBars({
           </span>
         ) : (
           <span>
-            Este escenario coincide con tu distribución real ({realFreedom.toFixed(0)}% a
-            Libertad).
+            Este escenario coincide con tu distribución real ({realFreedom.toFixed(0)}% a Libertad).
           </span>
         )}
       </div>
