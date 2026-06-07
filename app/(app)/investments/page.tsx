@@ -8,6 +8,13 @@ import {
   monthlyPlanB,
   type InvestmentCategory,
 } from "@/lib/formulas";
+import {
+  portfolioTotal,
+  weightedExpectedReturn,
+  projectedValue,
+  projectedMonthlyPassiveIncome,
+  projectionTable,
+} from "@/lib/investments";
 import { PortfolioDonut, type DonutSlice } from "./PortfolioDonut";
 import { InvestmentForm } from "./InvestmentForm";
 import { deleteInvestmentAction } from "./actions";
@@ -48,14 +55,26 @@ export default async function InvestmentsPage({
     ? (serialized.find((p) => p.id === params.edit) ?? null)
     : null;
 
-  // KPI Plan B y agregados
+  // Renta pasiva de HOY: el Plan B de siempre (yields). Sin cambios.
   const planBMonthly = monthlyPlanB(
     serialized.map((p) => ({
       capital: p.capital,
       passiveYield: p.passiveYield,
     })),
   );
-  const totalCapital = serialized.reduce((sum, p) => sum + p.capital, 0);
+
+  // Proyección (capa A): cada activo con su capital, aporte y retorno total.
+  const projPositions = serialized.map((p) => ({
+    capital: p.capital,
+    monthlyContribution: p.monthlyContribution,
+    expectedReturn: p.expectedReturn,
+    passiveYield: p.passiveYield,
+  }));
+  const totalCapital = portfolioTotal(projPositions);
+  const wReturn = weightedExpectedReturn(projPositions); // fracción
+  const proj10 = projectedValue(projPositions, 10);
+  const renta10 = projectedMonthlyPassiveIncome(projPositions, 10);
+  const projTable = projectionTable(projPositions, [5, 10, 20]);
 
   // Formato moneda — decimales según moneda (default ISO 4217)
   const locale = profile.locale === "es" ? "es-AR" : "en-US";
@@ -115,7 +134,44 @@ export default async function InvestmentsPage({
         </p>
       </header>
 
-      {/* KPI + Donut */}
+      {/* KPIs */}
+      <section
+        className="card"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: "20px",
+        }}
+      >
+        <Kpi
+          label="Portafolio Total"
+          value={money.format(totalCapital)}
+          sub={`${serialized.length} posición${serialized.length === 1 ? "" : "es"}`}
+        />
+        <Kpi
+          label="Retorno Ponderado"
+          value={pct.format(wReturn)}
+          sub="prom. ponderado por capital"
+        />
+        <Kpi
+          label="Renta Pasiva Hoy"
+          value={money.format(planBMonthly)}
+          sub="Plan B mensual (yields)"
+          valueColor="var(--accent)"
+        />
+        <Kpi
+          label="Proyección 10A"
+          value={money.format(proj10)}
+          sub="valor estimado"
+        />
+        <Kpi
+          label="Renta 10A"
+          value={money.format(renta10)}
+          sub="renta pasiva/mes a 10 años"
+        />
+      </section>
+
+      {/* Proyección (tabla) + Donut */}
       <section
         style={{
           display: "grid",
@@ -124,51 +180,49 @@ export default async function InvestmentsPage({
           alignItems: "stretch",
         }}
       >
-        <div
-          className="card"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            gap: "12px",
-          }}
-        >
+        <div className="card flex flex-col gap-3">
           <div>
-            <div className="label">Ingreso pasivo mensual (Plan B)</div>
-            <div
-              className="kpi-large"
-              style={{ marginTop: "4px" }}
-            >
-              {money.format(planBMonthly)}
-            </div>
-            <p
-              style={{
-                fontSize: "12px",
-                color: "var(--muted)",
-                marginTop: "4px",
-              }}
-            >
-              Flujo de yields del portafolio. Capital se mantiene intacto.
+            <div className="label">Proyección de interés compuesto</div>
+            <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
+              Capital actual más aportes, creciendo al retorno de cada activo y
+              reinvirtiendo. La renta es la que ese portafolio proyectado
+              generaría con sus yields.
             </p>
           </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-              borderTop: "1px solid var(--border)",
-              paddingTop: "12px",
-            }}
-          >
-            <div>
-              <div className="label">Capital total</div>
-              <div className="kpi-medium">{money.format(totalCapital)}</div>
-            </div>
-            <div>
-              <div className="label">Posiciones</div>
-              <div className="kpi-medium">{serialized.length}</div>
-            </div>
-          </div>
+          {serialized.length === 0 ? (
+            <p style={{ fontSize: "13px", color: "var(--hint)" }}>
+              Cuando cargues posiciones, acá vas a ver tu valor y tu renta
+              proyectados a 5, 10 y 20 años.
+            </p>
+          ) : (
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "13px",
+                borderTop: "1px solid var(--border)",
+              }}
+            >
+              <thead>
+                <tr>
+                  <Th>Horizonte</Th>
+                  <Th align="right">Valor proyectado</Th>
+                  <Th align="right">Renta/mes</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {projTable.map((r) => (
+                  <tr key={r.years} style={{ borderTop: "1px solid var(--border)" }}>
+                    <Td>{r.years} años</Td>
+                    <Td align="right">{money.format(r.value)}</Td>
+                    <Td align="right" accent>
+                      {money.format(r.monthlyIncome)}
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="card" style={{ padding: "12px" }}>
@@ -403,6 +457,32 @@ function CategoryGroup({
         </tbody>
       </table>
     </section>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  sub,
+  valueColor,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  valueColor?: string;
+}) {
+  return (
+    <div>
+      <div className="label">{label}</div>
+      <div className="kpi-medium" style={{ marginTop: "4px", color: valueColor }}>
+        {value}
+      </div>
+      {sub && (
+        <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
+          {sub}
+        </p>
+      )}
+    </div>
   );
 }
 

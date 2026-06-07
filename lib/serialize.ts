@@ -264,10 +264,17 @@ export function serializeDebt(d: Debt): SerializedDebt {
 
 export type SerializedInvestment = Omit<
   Investment,
-  "capital" | "passiveYield" | "createdAt" | "updatedAt"
+  | "capital"
+  | "passiveYield"
+  | "monthlyContribution"
+  | "expectedReturn"
+  | "createdAt"
+  | "updatedAt"
 > & {
   capital: number;
   passiveYield: number;
+  monthlyContribution: number;
+  expectedReturn: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -277,6 +284,8 @@ export function serializeInvestment(i: Investment): SerializedInvestment {
     ...i,
     capital: dec(i.capital),
     passiveYield: dec(i.passiveYield),
+    monthlyContribution: dec(i.monthlyContribution),
+    expectedReturn: dec(i.expectedReturn),
     createdAt: isoReq(i.createdAt),
     updatedAt: isoReq(i.updatedAt),
   };

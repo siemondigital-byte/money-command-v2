@@ -295,9 +295,12 @@ model Debt {
 //
 // y es la ÚNICA fuente de verdad para el ingreso pasivo del usuario.
 //
+// expectedReturn (capa A de proyección) = retorno TOTAL anual esperado del
+// activo (apreciación + yield reinvertido). Distinto de passiveYield: el
+// crecimiento de la proyección usa expectedReturn; el Plan B sigue usando
+// SOLO passiveYield. Nunca se mezclan (ARQUITECTURA §8, las tres tasas).
+//
 // Lo que NO está acá:
-//   - Retorno esperado de cartera (8%): vive en Settings, se usa solo para
-//     proyección de crecimiento en Sprint 3. No se modela por posición.
 //   - Divisor del NLF (4%): vive en formulas.ts como NLF_DIVISOR. No es
 //     un rendimiento ni una tasa de retiro.
 // ============================================================================
@@ -309,7 +312,11 @@ model Investment {
   category     String  // "fixed_income" | "equity" | "real_estate" | "speculative" | "other"
   label        String?
   capital      Decimal @db.Decimal(12, 2)
-  passiveYield Decimal @db.Decimal(5, 2) // % anual de flujo pasivo
+  passiveYield Decimal @db.Decimal(6, 4) // flujo pasivo anual, fracción (0.04 = 4%). Alimenta Plan B.
+
+  // Proyección de interés compuesto (capa A). NO tocan el Plan B.
+  monthlyContribution Decimal @default(0) @db.Decimal(12, 2) // aporte mensual
+  expectedReturn      Decimal @db.Decimal(6, 4) // retorno total anual, fracción (0.08 = 8%)
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

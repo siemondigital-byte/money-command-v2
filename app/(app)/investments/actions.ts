@@ -51,6 +51,12 @@ const positionSchema = z.object({
     (v) => v <= 100,
     "El yield no puede ser mayor a 100%",
   ),
+  // Capa A — proyección. No tocan el Plan B.
+  monthlyContribution: numericString,
+  expectedReturnPct: numericString.refine(
+    (v) => v <= 100,
+    "El retorno no puede ser mayor a 100%",
+  ),
 });
 
 function getStr(fd: FormData, key: string) {
@@ -84,6 +90,8 @@ export async function createInvestmentAction(
     label: getStr(formData, "label"),
     capital: getStr(formData, "capital"),
     passiveYieldPct: getStr(formData, "passiveYieldPct"),
+    monthlyContribution: getStr(formData, "monthlyContribution"),
+    expectedReturnPct: getStr(formData, "expectedReturnPct"),
   });
 
   if (!parsed.success) {
@@ -98,6 +106,9 @@ export async function createInvestmentAction(
         label: parsed.data.label,
         capital: dec(parsed.data.capital),
         passiveYield: yieldDec(parsed.data.passiveYieldPct),
+        monthlyContribution: dec(parsed.data.monthlyContribution),
+        // yieldDec convierte pct -> fracción con 4 decimales, sirve para el retorno
+        expectedReturn: yieldDec(parsed.data.expectedReturnPct),
       },
     });
   } catch (err) {
@@ -134,6 +145,8 @@ export async function updateInvestmentAction(
     label: getStr(formData, "label"),
     capital: getStr(formData, "capital"),
     passiveYieldPct: getStr(formData, "passiveYieldPct"),
+    monthlyContribution: getStr(formData, "monthlyContribution"),
+    expectedReturnPct: getStr(formData, "expectedReturnPct"),
   });
 
   if (!parsed.success) {
@@ -148,6 +161,9 @@ export async function updateInvestmentAction(
         label: parsed.data.label,
         capital: dec(parsed.data.capital),
         passiveYield: yieldDec(parsed.data.passiveYieldPct),
+        monthlyContribution: dec(parsed.data.monthlyContribution),
+        // yieldDec convierte pct -> fracción con 4 decimales, sirve para el retorno
+        expectedReturn: yieldDec(parsed.data.expectedReturnPct),
       },
     });
     if (result.count === 0) {
