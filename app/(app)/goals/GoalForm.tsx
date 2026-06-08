@@ -61,14 +61,7 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
       <form action={formAction} className="flex flex-col gap-3">
         {isEditing && <input type="hidden" name="id" value={editing.id} />}
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: "12px",
-            alignItems: "end",
-          }}
-        >
+        <div className="form-grid">
           <label className="flex flex-col gap-1">
             <span className="label">Nombre</span>
             <input
@@ -92,14 +85,7 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
           </label>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: "12px",
-            alignItems: "end",
-          }}
-        >
+        <div className="form-grid">
           <label className="flex flex-col gap-1">
             <span className="label">Monto objetivo</span>
             <input
