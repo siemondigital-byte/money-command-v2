@@ -300,6 +300,17 @@ textarea:focus {
   }
 }
 
+/* Grilla de formularios responsive (Opción B). En desktop reparte los campos
+   en columnas; en móvil se apilan solos (auto-fit) cuando no entran, así el
+   último campo y el botón quedan completos. Reemplaza los gridTemplateColumns
+   fijos inline de los formularios de agregar/editar. */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
 /* Buttons */
 .btn-primary {
   background: var(--accent);

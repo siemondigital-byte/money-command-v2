@@ -210,6 +210,9 @@ export default async function ExpensesPage({
         </div>
 
         {subscriptionRows.length > 0 && (
+          <>
+          {/* Desktop (>= md): tabla. Oculta en móvil. */}
+          <div className="hidden md:block">
           <table
             style={{
               width: "100%",
@@ -237,6 +240,50 @@ export default async function ExpensesPage({
               ))}
             </tbody>
           </table>
+          </div>
+
+          {/* Móvil (< md): una tarjeta por suscripción. */}
+          <div
+            className="md:hidden flex flex-col gap-3"
+            style={{ borderTop: "1px solid var(--border)", paddingTop: "12px" }}
+          >
+            {subscriptionRows.map((r) => (
+              <div
+                key={r.id}
+                className="card card-elevated"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontFamily: "Syne, sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {r.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--muted)",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {money.format(r.amount)} / mes
+                  </div>
+                </div>
+                <DeleteButton id={r.id} />
+              </div>
+            ))}
+          </div>
+          </>
         )}
 
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: "12px" }}>
@@ -299,6 +346,9 @@ function ExpenseTypeSection({
       </div>
 
       {rows.length > 0 && (
+        <>
+        {/* Desktop (>= md): tabla original, sin cambios. Oculta en móvil. */}
+        <div className="hidden md:block">
         <table
           style={{
             width: "100%",
@@ -352,6 +402,83 @@ function ExpenseTypeSection({
             ))}
           </tbody>
         </table>
+        </div>
+
+        {/* Móvil (< md): una tarjeta por gasto, sin scroll horizontal. */}
+        <div className="md:hidden flex flex-col gap-3">
+          {rows.map((r) => (
+            <div
+              key={r.id}
+              className="card card-elevated"
+              style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: "12px",
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontFamily: "Syne, sans-serif",
+                      fontWeight: 700,
+                      fontSize: "1rem",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {r.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--muted)",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {CATEGORY_LABELS_ES[r.category] ?? r.category}
+                  </div>
+                </div>
+                <BasketTag basket={r.basket as Basket} />
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px 16px",
+                }}
+              >
+                <Field
+                  label="Presupuesto"
+                  value={r.budget > 0 ? money.format(r.budget) : "—"}
+                />
+                <Field label="Real" value={money.format(r.amount)} color="var(--accent)" />
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "18px",
+                  alignItems: "center",
+                  paddingTop: "12px",
+                  borderTop: "1px solid var(--border)",
+                }}
+              >
+                <Link
+                  href={`/expenses?tab=${tab}&edit=${r.id}#form`}
+                  style={{ color: "var(--accent-2)", fontSize: "13px" }}
+                >
+                  Editar
+                </Link>
+                <DeleteButton id={r.id} />
+              </div>
+            </div>
+          ))}
+        </div>
+        </>
       )}
 
       <div
@@ -385,14 +512,7 @@ function BasketSection({
 }) {
   const total = realByBasket.total;
   return (
-    <section
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 220px",
-        gap: "16px",
-        alignItems: "stretch",
-      }}
-    >
+    <section className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4 items-stretch">
       <div className="card flex flex-col gap-5">
         <div className="label">Reparto del gasto real por canasta</div>
         {BASKETS.map((b) => {
@@ -515,7 +635,10 @@ function BasketSection({
         })}
       </div>
 
-      <div className="card" style={{ padding: "12px" }}>
+      <div
+        className="card"
+        style={{ padding: "12px", maxWidth: "100%", overflow: "hidden" }}
+      >
         {donutSlices.length > 0 ? (
           <PortfolioDonut
             slices={donutSlices}
@@ -685,5 +808,34 @@ function Td({
     >
       {children}
     </td>
+  );
+}
+
+/** Par etiqueta/valor de las tarjetas de móvil. El valor envuelve si es largo
+ * (overflowWrap) para que nunca se desborde de la card. */
+function Field({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 }}>
+      <span className="label">{label}</span>
+      <span
+        style={{
+          fontFamily: "Syne, sans-serif",
+          fontWeight: 700,
+          fontSize: "0.95rem",
+          color,
+          overflowWrap: "anywhere",
+        }}
+      >
+        {value}
+      </span>
+    </div>
   );
 }

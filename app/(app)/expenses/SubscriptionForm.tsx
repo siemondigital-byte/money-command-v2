@@ -37,14 +37,7 @@ export function SubscriptionForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr auto",
-          gap: "8px",
-          alignItems: "end",
-        }}
-      >
+      <div className="form-grid">
         <label className="flex flex-col gap-1">
           <span className="label">Suscripción</span>
           <input

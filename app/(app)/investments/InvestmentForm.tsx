@@ -70,13 +70,7 @@ export function InvestmentForm({
       <form action={formAction} className="flex flex-col gap-3">
         {isEditing && <input type="hidden" name="id" value={editing.id} />}
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
-          }}
-        >
+        <div className="form-grid">
           <label className="flex flex-col gap-1">
             <span className="label">Categoría</span>
             <select name="category" defaultValue={defaultCategory}>
@@ -100,13 +94,7 @@ export function InvestmentForm({
           </label>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
-          }}
-        >
+        <div className="form-grid">
           <label className="flex flex-col gap-1">
             <span className="label">Capital actual</span>
             <input

@@ -61,14 +61,7 @@ export function IncomeRowForm({
       {isEditing && <input type="hidden" name="id" value={editing.id} />}
       <input type="hidden" name="plan" value={plan} />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr auto",
-          gap: "8px",
-          alignItems: "end",
-        }}
-      >
+      <div className="form-grid">
         <label className="flex flex-col gap-1">
           <span className="label">Nombre</span>
           <input

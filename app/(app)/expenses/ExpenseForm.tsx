@@ -65,14 +65,7 @@ export function ExpenseForm({
       {isEditing && <input type="hidden" name="id" value={editing.id} />}
       <input type="hidden" name="type" value={type} />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.6fr 1fr 1fr",
-          gap: "8px",
-          alignItems: "end",
-        }}
-      >
+      <div className="form-grid">
         <label className="flex flex-col gap-1">
           <span className="label">Nombre</span>
           <input
@@ -109,14 +102,7 @@ export function ExpenseForm({
         </label>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr auto",
-          gap: "8px",
-          alignItems: "end",
-        }}
-      >
+      <div className="form-grid">
         <label className="flex flex-col gap-1">
           <span className="label">Presupuesto</span>
           <input
