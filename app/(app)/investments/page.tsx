@@ -197,15 +197,10 @@ export default async function InvestmentsPage({
         />
       </section>
 
-      {/* Proyección por horizonte (capa A) + Donut por posición */}
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 220px",
-          gap: "16px",
-          alignItems: "stretch",
-        }}
-      >
+      {/* Proyección por horizonte (capa A) + Donut por posición.
+          Móvil: apila en 1 columna (tabla arriba, dona abajo) para que la dona
+          entre completa. Desktop (>= md): 1fr 220px, dona al costado. */}
+      <section className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4 items-stretch">
         <div className="card flex flex-col gap-3">
           <div className="label">Proyección por horizonte</div>
           {!hasAssets ? (
