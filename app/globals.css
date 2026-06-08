@@ -112,11 +112,11 @@ h3 {
    ============================================================================ */
 .app-header-inner {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   grid-template-areas:
-    'logo period burger'
-    'nav nav nav'
-    'compass compass compass';
+    'logo period'
+    'nav nav'
+    'compass compass';
   column-gap: 24px;
   row-gap: 10px;
   align-items: center;
@@ -130,45 +130,49 @@ h3 {
   justify-self: end;
   min-width: 0;
 }
-.ah-burger {
-  grid-area: burger;
-  justify-self: end;
-  display: none; /* oculto en desktop */
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px;
-  color: var(--text);
-  cursor: pointer;
-  line-height: 0;
-}
+/* Navegación como PÍLDORAS en TODOS los anchos (desktop y móvil). En móvil el
+   contenedor agrega scroll horizontal (ver media query); el estilo de cada
+   píldora es el mismo en todos lados. */
 .ah-nav {
   grid-area: nav;
   display: flex;
-  gap: 20px;
+  gap: 8px;
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+}
+.ah-nav form {
+  flex: 0 0 auto;
 }
 .ah-nav a,
 .ah-nav .ah-logout {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--muted);
   text-decoration: none;
-  background: transparent;
-  border: none;
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   cursor: pointer;
   font-family: 'DM Mono', monospace;
-  padding: 0;
+  font-size: 12.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 8px 13px;
+  border-radius: 100px;
+  transition: 0.16s;
 }
+/* Hover y sección activa: borde verde, texto claro */
 .ah-nav a:hover,
 .ah-nav .ah-logout:hover {
   color: var(--text);
+  border-color: var(--accent);
+}
+.ah-nav a.active {
+  color: var(--text);
+  border-color: var(--accent);
+  background: var(--surface-2);
 }
 .ah-compass {
   grid-area: compass;
@@ -180,7 +184,6 @@ h3 {
     grid-template-areas:
       'logo'
       'period'
-      'burger'
       'nav'
       'compass';
     column-gap: 12px;
@@ -188,39 +191,19 @@ h3 {
   .ah-period {
     justify-self: start;
   }
-  /* Hamburguesa justo DEBAJO del selector de período (no al lado del logo) */
-  .ah-burger {
-    display: inline-flex;
-    justify-self: start;
-  }
-  /* Nav colapsada: panel vertical que se despliega con la hamburguesa */
+  /* En móvil las píldoras (estilo base) se deslizan en UNA sola línea
+     horizontal, con el dedo, sin barra de scroll visible. */
   .ah-nav {
-    display: none;
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: nowrap;
     justify-content: flex-start;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    overflow: hidden;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    padding-bottom: 11px;
   }
-  .ah-nav.open {
-    display: flex;
-  }
-  .ah-nav form {
-    width: 100%;
-  }
-  .ah-nav a,
-  .ah-nav .ah-logout {
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-    width: 100%;
-  }
-  .ah-nav .ah-logout {
-    color: var(--danger);
-    border-bottom: none;
+  .ah-nav::-webkit-scrollbar {
+    display: none; /* WebKit / iOS */
   }
   /* Brújula compacta en móvil: no empuja el layout */
   .compass-whisper {

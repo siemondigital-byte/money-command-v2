@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/(auth)/actions";
 
 const NAV_ITEMS = [
@@ -16,70 +16,36 @@ const NAV_ITEMS = [
 ];
 
 /**
- * Hamburguesa + navegación del header.
+ * Navegación del header.
  *
- * Renderiza un fragmento con DOS elementos (el botón y el <nav>), que el Header
- * coloca como hijos directos del grid `.app-header-inner` mediante sus áreas
- * (`burger` y `nav`). En desktop el botón está oculto y la nav es una fila; en
- * móvil el botón despliega la nav como panel vertical (ver globals.css).
+ * Desktop (>= md): fila horizontal de enlaces de texto (sin cambios).
+ * Móvil (< md): la misma nav se muestra como una fila de PÍLDORAS deslizables
+ * horizontalmente, sin barra de scroll visible (ver globals.css). La píldora de
+ * la sección actual se marca con `.active` usando el pathname.
  */
 export function HeaderNav() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const closeMenu = () => setMenuOpen(false);
+  const pathname = usePathname() ?? "";
 
   return (
-    <>
-      <button
-        type="button"
-        className="ah-burger"
-        aria-label="Abrir menú de navegación"
-        aria-expanded={menuOpen}
-        onClick={() => setMenuOpen((v) => !v)}
-      >
-        {menuOpen ? (
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            aria-hidden="true"
+    <nav className="ah-nav">
+      {NAV_ITEMS.map((item) => {
+        const active =
+          pathname === item.href || pathname.startsWith(item.href + "/");
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={active ? "active" : undefined}
           >
-            <line x1="6" y1="6" x2="18" y2="18" />
-            <line x1="6" y1="18" x2="18" y2="6" />
-          </svg>
-        ) : (
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            aria-hidden="true"
-          >
-            <line x1="4" y1="7" x2="20" y2="7" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="17" x2="20" y2="17" />
-          </svg>
-        )}
-      </button>
-
-      <nav className={`ah-nav ${menuOpen ? "open" : ""}`}>
-        {NAV_ITEMS.map((item) => (
-          <Link key={item.href} href={item.href} onClick={closeMenu}>
             {item.label}
           </Link>
-        ))}
-        <form action={logoutAction} onSubmit={closeMenu}>
-          <button type="submit" className="ah-logout">
-            Salir
-          </button>
-        </form>
-      </nav>
-    </>
+        );
+      })}
+      <form action={logoutAction}>
+        <button type="submit" className="ah-logout">
+          Salir
+        </button>
+      </form>
+    </nav>
   );
 }
