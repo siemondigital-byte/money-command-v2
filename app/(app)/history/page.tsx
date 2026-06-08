@@ -81,8 +81,10 @@ export default async function HistoryPage({
           </p>
         </div>
       ) : (
+        <>
+        {/* Desktop (>= md): tabla original, sin cambios. Oculta en móvil. */}
         <div
-          className="card"
+          className="card hidden md:block"
           style={{ padding: 0, overflow: "hidden" }}
         >
           <div style={{ overflowX: "auto" }}>
@@ -148,6 +150,88 @@ export default async function HistoryPage({
             </table>
           </div>
         </div>
+
+        {/* Móvil (< md): tarjetas apiladas. La tabla de arriba se oculta. */}
+        <div className="md:hidden flex flex-col gap-3">
+          {rows.map((r) => (
+            <div
+              key={r.id}
+              className="card"
+              style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+            >
+              {/* Mes + Ir al mes (acción ya existente, reusada) */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "Syne, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "1.05rem",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {SHORT_MONTHS[r.month - 1]} {r.year}
+                </div>
+                <GoToPeriodButton year={r.year} month={r.month} />
+              </div>
+
+              {/* Datos del mes, con etiquetas, sin desbordarse */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px 16px",
+                }}
+              >
+                <Field
+                  label="Ingresos"
+                  value={money.format(r.incomeTotal)}
+                  color="var(--accent)"
+                />
+                <Field label="Gastos" value={money.format(r.expenseTotal)} />
+                <Field
+                  label="Tasa ahorro"
+                  value={pct.format(r.savingsRate / 100)}
+                  color="var(--accent-2)"
+                />
+                <Field
+                  label="Patrimonio"
+                  value={money.format(r.netWorth)}
+                  color="var(--gold)"
+                />
+              </div>
+
+              {/* Acciones completas y alcanzables dentro de la card */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "18px",
+                  alignItems: "center",
+                  paddingTop: "12px",
+                  borderTop: "1px solid var(--border)",
+                }}
+              >
+                <Link
+                  href={`/history?edit=${r.id}#edit`}
+                  style={{ color: "var(--accent-2)", fontSize: "13px" }}
+                >
+                  Editar
+                </Link>
+                <DeleteRecordButton
+                  id={r.id}
+                  label={`${SHORT_MONTHS[r.month - 1]} ${r.year}`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        </>
       )}
 
       {editing && (
@@ -204,5 +288,34 @@ function Td({
     >
       {children}
     </td>
+  );
+}
+
+/** Par etiqueta/valor de la tarjeta de móvil. El valor envuelve si es largo
+ * (overflowWrap) para que nunca se desborde de la card. */
+function Field({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 }}>
+      <span className="label">{label}</span>
+      <span
+        style={{
+          fontFamily: "Syne, sans-serif",
+          fontWeight: 700,
+          fontSize: "0.95rem",
+          color,
+          overflowWrap: "anywhere",
+        }}
+      >
+        {value}
+      </span>
+    </div>
   );
 }
