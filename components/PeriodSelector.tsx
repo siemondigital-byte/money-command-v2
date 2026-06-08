@@ -80,6 +80,7 @@ export function PeriodSelector({
       </span>
       <select
         name="month"
+        className="period-select"
         value={month}
         onChange={(e) => {
           const m = Number(e.target.value);
@@ -87,7 +88,6 @@ export function PeriodSelector({
           changePeriod(year, m);
         }}
         disabled={pending}
-        style={{ padding: "4px 8px", fontSize: "12px" }}
       >
         {MONTH_LABELS_ES.map((label, idx) => (
           <option key={idx + 1} value={idx + 1}>
@@ -97,6 +97,7 @@ export function PeriodSelector({
       </select>
       <select
         name="year"
+        className="period-select"
         value={year}
         onChange={(e) => {
           const y = Number(e.target.value);
@@ -104,7 +105,6 @@ export function PeriodSelector({
           changePeriod(y, month);
         }}
         disabled={pending}
-        style={{ padding: "4px 8px", fontSize: "12px" }}
       >
         {years.map((y) => (
           <option key={y} value={y}>

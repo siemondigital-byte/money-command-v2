@@ -1,19 +1,8 @@
 import Link from "next/link";
-import { logoutAction } from "@/app/(auth)/actions";
 import type { SerializedProfile } from "@/lib/serialize";
 import { PeriodSelector } from "./PeriodSelector";
+import { HeaderNav } from "./HeaderNav";
 import { activePeriod } from "@/lib/monthly";
-
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/income", label: "Ingresos" },
-  { href: "/expenses", label: "Gastos" },
-  { href: "/investments", label: "Inversiones" },
-  { href: "/debts", label: "Deudas" },
-  { href: "/goals", label: "Metas" },
-  { href: "/history", label: "Historial" },
-  { href: "/settings", label: "Settings" },
-];
 
 export function Header({ profile }: { profile: SerializedProfile }) {
   const period = activePeriod({
@@ -32,23 +21,11 @@ export function Header({ profile }: { profile: SerializedProfile }) {
       }}
     >
       <div
-        className="mx-auto"
-        style={{
-          maxWidth: "1100px",
-          padding: "14px 20px",
-          display: "grid",
-          gridTemplateColumns: "auto 1fr",
-          columnGap: "24px",
-          rowGap: "10px",
-          alignItems: "center",
-        }}
+        className="app-header-inner mx-auto"
+        style={{ maxWidth: "1100px", padding: "14px 20px" }}
       >
-        {/* Logo: ocupa las dos filas a la izquierda */}
-        <Link
-          href="/dashboard"
-          className="logo-wordmark"
-          style={{ gridRow: "1 / span 2", alignSelf: "center" }}
-        >
+        {/* Logo */}
+        <Link href="/dashboard" className="ah-logo logo-wordmark">
           <span className="logo-line">The Money</span>
           <span className="logo-line-accent">
             Command
@@ -56,64 +33,16 @@ export function Header({ profile }: { profile: SerializedProfile }) {
           </span>
         </Link>
 
-        {/* Fila 1 derecha — Período */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-          }}
-        >
-          <PeriodSelector
-            activeYear={period.year}
-            activeMonth={period.month}
-          />
+        {/* Período */}
+        <div className="ah-period">
+          <PeriodSelector activeYear={period.year} activeMonth={period.month} />
         </div>
 
-        {/* Fila 2 derecha — Nav + Salir */}
-        <nav
-          style={{
-            display: "flex",
-            gap: "20px",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            fontSize: "12px",
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            flexWrap: "wrap",
-          }}
-        >
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{ color: "var(--muted)" }}
-            >
-              {item.label}
-            </Link>
-          ))}
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "var(--muted)",
-                fontSize: "12px",
-                letterSpacing: "0.05em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                fontFamily: "DM Mono, monospace",
-                padding: 0,
-              }}
-            >
-              Salir
-            </button>
-          </form>
-        </nav>
+        {/* Hamburguesa + navegación (cliente: maneja el toggle en móvil) */}
+        <HeaderNav />
 
-        {/* Brújula debajo de todo, full-width */}
-        <div style={{ gridColumn: "1 / -1" }}>
+        {/* Brújula */}
+        <div className="ah-compass">
           <CompassWhisper profile={profile} />
         </div>
       </div>

@@ -107,6 +107,135 @@ h3 {
   line-height: 1.5;
 }
 
+/* ============================================================================
+   HEADER RESPONSIVE — desktop intacto; en móvil colapsa a hamburguesa.
+   ============================================================================ */
+.app-header-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'logo period burger'
+    'nav nav nav'
+    'compass compass compass';
+  column-gap: 24px;
+  row-gap: 10px;
+  align-items: center;
+}
+.ah-logo {
+  grid-area: logo;
+  align-self: center;
+}
+.ah-period {
+  grid-area: period;
+  justify-self: end;
+  min-width: 0;
+}
+.ah-burger {
+  grid-area: burger;
+  justify-self: end;
+  display: none; /* oculto en desktop */
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  color: var(--text);
+  cursor: pointer;
+  line-height: 0;
+}
+.ah-nav {
+  grid-area: nav;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.ah-nav a,
+.ah-nav .ah-logout {
+  color: var(--muted);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  padding: 0;
+}
+.ah-nav a:hover,
+.ah-nav .ah-logout:hover {
+  color: var(--text);
+}
+.ah-compass {
+  grid-area: compass;
+}
+
+@media (max-width: 768px) {
+  .app-header-inner {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'logo burger'
+      'period period'
+      'nav nav'
+      'compass compass';
+    column-gap: 12px;
+  }
+  .ah-period {
+    justify-self: start;
+  }
+  .ah-burger {
+    display: inline-flex;
+  }
+  /* Nav colapsada: panel vertical que se despliega con la hamburguesa */
+  .ah-nav {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .ah-nav.open {
+    display: flex;
+  }
+  .ah-nav form {
+    width: 100%;
+  }
+  .ah-nav a,
+  .ah-nav .ah-logout {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    width: 100%;
+  }
+  .ah-nav .ah-logout {
+    color: var(--danger);
+    border-bottom: none;
+  }
+  /* Brújula compacta en móvil: no empuja el layout */
+  .compass-whisper {
+    font-size: 12px;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Selector de período: 12px en desktop, 16px en móvil (anti-zoom iOS) */
+.period-select {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
 /* Wordmark oficial del header — "The Money / Command" en dos líneas */
 .logo-wordmark {
   display: inline-flex;
@@ -169,6 +298,20 @@ select:focus,
 textarea:focus {
   border-color: rgba(127, 255, 178, 0.4);
   box-shadow: 0 0 0 1px rgba(127, 255, 178, 0.2);
+}
+
+/* iOS Safari hace zoom al enfocar inputs con fuente < 16px y descuadra la
+   pantalla. En móvil forzamos >= 16px en TODOS los controles de formulario.
+   Es global; aplica también a inputs con estilos inline (el font-size de la
+   media query gana sobre el inline 14px de la regla base, no sobre inline en
+   el elemento — por eso el selector de período usa .period-select). */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea,
+  .period-select {
+    font-size: 16px;
+  }
 }
 
 /* Buttons */

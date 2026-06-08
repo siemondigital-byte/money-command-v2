@@ -19,7 +19,7 @@ import { PatrimonyBlock } from "./PatrimonyBlock";
 export const metadata = { title: "Dashboard · The Money Command" };
 
 /** Horizonte del gráfico de patrimonio (años, barra por año). */
-const PATRIMONY_YEARS = 30;
+const PATRIMONY_YEARS = 10;
 
 /** Distribución preset desde el método preferido ("50/30/20"). */
 function presetFromMethod(method: string): BasketDistribution {
