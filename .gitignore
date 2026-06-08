@@ -44,3 +44,5 @@ yarn-error.log*
 # editor
 .idea/
 .vscode/
+the_monney_command_app_brading/
+.claude/

@@ -176,19 +176,22 @@ h3 {
 
 @media (max-width: 768px) {
   .app-header-inner {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
     grid-template-areas:
-      'logo burger'
-      'period period'
-      'nav nav'
-      'compass compass';
+      'logo'
+      'period'
+      'burger'
+      'nav'
+      'compass';
     column-gap: 12px;
   }
   .ah-period {
     justify-self: start;
   }
+  /* Hamburguesa justo DEBAJO del selector de período (no al lado del logo) */
   .ah-burger {
     display: inline-flex;
+    justify-self: start;
   }
   /* Nav colapsada: panel vertical que se despliega con la hamburguesa */
   .ah-nav {
