@@ -70,6 +70,8 @@ export default async function HistoryPage({
         </p>
       </header>
 
+      <AddMonthHint />
+
       {rows.length === 0 ? (
         <div className="card">
           <p style={{ fontSize: "13px", color: "var(--muted)" }}>
@@ -243,6 +245,58 @@ export default async function HistoryPage({
         </section>
       )}
     </div>
+  );
+}
+
+/**
+ * Botón "+ Agregar mes" que GUÍA al usuario hacia el selector de PERÍODO del
+ * header (donde un mes nuevo se crea solo al seleccionarlo). Usa <details>
+ * nativo: es interactivo sin JS de cliente, así esta página sigue siendo un
+ * Server Component. NO crea meses ni toca la consolidación; solo explica.
+ */
+function AddMonthHint() {
+  return (
+    <details>
+      <summary
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+          listStyle: "none",
+          cursor: "pointer",
+          width: "fit-content",
+          background: "var(--surface-2)",
+          color: "var(--accent)",
+          border: "1px solid var(--border)",
+          borderRadius: "8px",
+          padding: "8px 14px",
+          fontFamily: "DM Mono, monospace",
+          fontSize: "13px",
+          letterSpacing: "0.02em",
+        }}
+      >
+        + Agregar mes
+      </summary>
+      <div
+        style={{
+          marginTop: "10px",
+          maxWidth: "440px",
+          padding: "12px 14px",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "8px",
+          fontFamily: "DM Mono, monospace",
+          fontSize: "12px",
+          lineHeight: 1.6,
+          color: "var(--muted)",
+        }}
+      >
+        Para registrar un mes nuevo, elegilo arriba en{" "}
+        <strong style={{ color: "var(--text)" }}>PERÍODO</strong> (mes y año), en
+        la parte superior de la pantalla. El mes se crea solo al seleccionarlo, y
+        después podés cargar sus ingresos, gastos e inversiones.
+      </div>
+    </details>
   );
 }
 
