@@ -72,5 +72,20 @@ function CompassWhisper({ profile }: { profile: SerializedProfile }) {
   if (year) parts.push(`para el año ${year}`);
   if (contribution) parts.push(`porque quiero contribuir ${contribution}`);
 
-  return <p className="compass-whisper">{parts.join(" · ")}</p>;
+  return (
+    <p
+      className="compass-whisper"
+      // En móvil, globals.css recortaba la frase a 2 líneas (-webkit-line-clamp).
+      // Acá lo neutralizamos para que se lea completa, en varias líneas, sin
+      // recortes ni desborde horizontal. En desktop el estilo base no cambia.
+      style={{
+        display: "block",
+        overflow: "visible",
+        WebkitLineClamp: "none",
+        overflowWrap: "anywhere",
+      }}
+    >
+      {parts.join(" · ")}
+    </p>
+  );
 }
