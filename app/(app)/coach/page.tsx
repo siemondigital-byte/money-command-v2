@@ -5,7 +5,9 @@ import { portfolioTotal, weightedYield } from "@/lib/investments";
 import { DEFAULT_PORTFOLIO_RETURN } from "@/lib/formulas";
 import { freedomNumber } from "@/lib/dashboard";
 import { buildScorecard, type CoachInputs } from "@/lib/coach";
+import { conceptIndexForDate } from "@/lib/coach-content";
 import { Scorecard } from "./Scorecard";
+import { ConceptOfTheDay } from "./ConceptOfTheDay";
 
 export const metadata = { title: "Coach · The Money Command" };
 
@@ -85,6 +87,10 @@ export default async function CoachPage() {
 
   const scorecard = buildScorecard(input);
 
+  // Concepto del día: índice determinístico por fecha (mismo día → mismo
+  // concepto). Se calcula en el server para evitar mismatch de hidratación.
+  const conceptIndex = conceptIndexForDate(new Date());
+
   return (
     <div className="fade-up flex flex-col gap-6">
       <header>
@@ -97,6 +103,8 @@ export default async function CoachPage() {
           datos.
         </p>
       </header>
+
+      <ConceptOfTheDay initialIndex={conceptIndex} />
 
       <Scorecard scorecard={scorecard} />
     </div>
