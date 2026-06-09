@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { activePeriod } from "@/lib/monthly";
 import { effectivePlanB } from "@/lib/income";
+import { formatMoney } from "@/lib/format";
 import { portfolioTotal, weightedYield, projectedValue } from "@/lib/investments";
 import { DEFAULT_PORTFOLIO_RETURN } from "@/lib/formulas";
 import {
@@ -171,7 +172,7 @@ export default async function DashboardPage() {
       <MethodPanel
         income={incomeTotal}
         gastado={essentials + style}
-        invertido={freedom}
+        invertido={totalContribution}
         realDist={realDist}
         initialDist={initialDist}
         targetDist={preset}
@@ -204,6 +205,20 @@ export default async function DashboardPage() {
           currency={currency}
         />
       </div>
+
+      {/* Capital invertido total (Σ capital de posiciones activas de Inversiones) */}
+      <section className="d-card top-gold">
+        <div className="d-section-label">Capital invertido</div>
+        <div
+          className="kpi-large"
+          style={{ color: "var(--gold)", marginTop: "6px" }}
+        >
+          {formatMoney(portfolio, locale, currency)}
+        </div>
+        <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px" }}>
+          Suma del capital de tus posiciones activas en Inversiones.
+        </p>
+      </section>
 
       {/* 3. Patrimonio / Inversiones (sin dona) */}
       <PatrimonyBlock

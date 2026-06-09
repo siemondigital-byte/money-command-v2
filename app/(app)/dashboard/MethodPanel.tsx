@@ -114,7 +114,7 @@ export function MethodPanel({
         <div className="d-kpi gold top-gold">
           <div className="lab">Invertido</div>
           <div className="v">{moneyShort(invertido)}</div>
-          <div className="ctx plain">dirigido a Libertad</div>
+          <div className="ctx plain">aporte mensual a inversión</div>
         </div>
       </div>
 
