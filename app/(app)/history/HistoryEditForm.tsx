@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { SerializedMonthlyRecord } from "@/lib/serialize";
 import {
   updateMonthlyRecordAction,
@@ -33,6 +34,13 @@ export function HistoryEditForm({
     HistoryActionResult,
     FormData
   >(updateMonthlyRecordAction, {});
+  const router = useRouter();
+
+  // Al guardar con éxito, cerrar el editor y volver a la vista de tarjetas:
+  // limpia el ?edit= de la URL. Mismo patrón que GoalForm y los otros forms.
+  useEffect(() => {
+    if (state.ok) router.replace(onDoneHref);
+  }, [state.ok, router, onDoneHref]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
