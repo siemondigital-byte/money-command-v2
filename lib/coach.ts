@@ -2,42 +2,47 @@
  * Coach de Finanzas — Scorecard de salud financiera (helpers PUROS).
  *
  * Solo LEE y calcula; no toca DB, ni la consolidación, ni el flujo mensual.
- * Cinco métricas 0-100 + un total PONDERADO (Deuda y Fondo de emergencia pesan
- * el doble: son lo urgente). Todo testeable sin Prisma.
- *
- * Las canastas y categorías son las doctrinales del resto de la app
- * (essentials/style/freedom; fixed_income/equity/real_estate/speculative/other).
+ * Fórmula oficial por PUNTOS FIJOS que suman 100:
+ *   1. Tasa de ahorro            — 30 pts (por tramos)
+ *   2. Fondo de emergencia       — 20 pts (meses cubiertos / 6)
+ *   3. Ratio deuda/ingreso       — 20 pts (por tramos)
+ *   4. Diversificación           — 15 pts (tipos con peso >5%)
+ *   5. Progreso a libertad       — 15 pts (patrimonio neto / NLF)
+ * El total es la suma (0-100). Patrimonio neto y Número de Libertad se reciben
+ * ya calculados por la app (no se recalculan acá). Texto en TUTEO.
  */
 
 export type CoachMetricKey =
   | "savings"
-  | "debt"
   | "emergency"
-  | "investing"
-  | "diversification";
+  | "debt"
+  | "diversification"
+  | "freedom";
 
 export interface CoachMetric {
   key: CoachMetricKey;
   label: string;
-  /** Puntaje 0-100 (entero). */
+  /** Puntos obtenidos (0..max). */
   score: number;
+  /** Puntos máximos de esta métrica. */
+  max: number;
   subtitle: string;
 }
 
 export interface Scorecard {
   metrics: CoachMetric[];
-  /** Total ponderado 0-100 (entero). */
+  /** Total = suma de los 5 (0-100). */
   total: number;
-  /** Etiqueta cualitativa del total. */
+  /** Etiqueta cualitativa por rango (Excepcional…Es ahora o nunca). */
   rangeLabel: string;
-  /** Mensaje corto que prioriza lo más urgente. */
-  priorityMessage: string;
+  /** Mensaje exacto por rango. */
+  message: string;
 }
 
 export interface CoachDebt {
   name: string;
-  balance: number;
   apr: number; // % anual (ej. 24.9)
+  currentPayment: number; // pago mensual real
 }
 
 export interface CoachGoal {
@@ -48,57 +53,49 @@ export interface CoachGoal {
 
 export interface CoachInvestment {
   capital: number;
-  monthlyContribution: number;
   category: string;
 }
 
 export interface CoachInputs {
-  /** Ingreso del mes activo (consolidado). */
   incomeMonth: number;
-  /** Gasto del mes activo (consolidado). */
   expenseMonth: number;
-  /** Gasto mensual promedio (histórico) para el fondo de emergencia. */
   avgMonthlyExpense: number;
+  /** Patrimonio neto (el mismo que usa el Dashboard). */
+  netWorth: number;
+  /** Número de Libertad Financiera (calculado por la app). */
+  nlf: number;
   debts: CoachDebt[];
   goals: CoachGoal[];
   investments: CoachInvestment[];
 }
 
 // ============================================================================
-// Pesos y utilidades
+// Constantes
 // ============================================================================
 
-/** Deuda y emergencia pesan el doble (lo urgente). */
-const WEIGHTS: Record<CoachMetricKey, number> = {
-  savings: 1,
-  debt: 2,
-  emergency: 2,
-  investing: 1,
-  diversification: 1,
+const MAX: Record<CoachMetricKey, number> = {
+  savings: 30,
+  emergency: 20,
+  debt: 20,
+  diversification: 15,
+  freedom: 15,
 };
 
 const LABELS: Record<CoachMetricKey, string> = {
   savings: "Tasa de ahorro",
-  debt: "Gestión de deudas",
   emergency: "Fondo de emergencia",
-  investing: "Consistencia inversora",
-  diversification: "Diversificación",
-};
-
-const ACTIONS: Record<CoachMetricKey, string> = {
-  savings: "subir tu tasa de ahorro",
-  debt: "acelerar el pago de tus deudas",
-  emergency: "completar tu fondo de emergencia",
-  investing: "configurar aportes mensuales a tus inversiones",
-  diversification: "diversificar tu portafolio",
+  debt: "Ratio deuda/ingreso",
+  diversification: "Diversificación de portafolio",
+  freedom: "Progreso a libertad financiera",
 };
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
 }
 
-function score0to100(n: number): number {
-  return clamp(Math.round(n), 0, 100);
+/** Redondea a 1 decimal y deja como número (24 → 24, 24.9 → 24.9). */
+function fmtApr(apr: number): number {
+  return Math.round(apr * 10) / 10;
 }
 
 interface MetricResult {
@@ -107,53 +104,22 @@ interface MetricResult {
 }
 
 // ============================================================================
-// 1. Tasa de ahorro — meta 30%
+// 1. Tasa de ahorro — 30 pts (por tramos)
 // ============================================================================
 
 export function savingsMetric(income: number, expense: number): MetricResult {
   const rate = income > 0 ? ((income - expense) / income) * 100 : 0;
-  const score = score0to100((rate / 30) * 100);
+  let score: number;
+  if (rate >= 30) score = 30;
+  else if (rate >= 20) score = 27;
+  else if (rate >= 10) score = 20;
+  else if (rate >= 5) score = 10;
+  else score = 0;
   return { score, subtitle: `${rate.toFixed(0)}% actual · meta 30%` };
 }
 
 // ============================================================================
-// 2. Gestión de deudas — penaliza saldo alto y APR alto; sin deudas = alto
-// ============================================================================
-
-export function debtMetric(debts: CoachDebt[], incomeMonth: number): MetricResult {
-  if (debts.length === 0) {
-    return { score: 100, subtitle: "Sin deudas — excelente" };
-  }
-  const totalBalance = debts.reduce((s, d) => s + d.balance, 0);
-  const weightedApr =
-    totalBalance > 0
-      ? debts.reduce((s, d) => s + d.balance * d.apr, 0) / totalBalance
-      : 0;
-
-  // Penalización por tasa: APR 30% → -60 (techo). APR 24.9% ≈ -50.
-  const aprPenalty = clamp((weightedApr / 30) * 60, 0, 60);
-
-  // Penalización por saldo: relativo al ingreso anual. 1 año de ingreso en
-  // deuda → -40 (techo). Sin ingreso cargado pero con deuda → penaliza pleno.
-  const annualIncome = incomeMonth * 12;
-  const balanceRatio =
-    annualIncome > 0 ? totalBalance / annualIncome : totalBalance > 0 ? 1 : 0;
-  const balancePenalty = clamp(balanceRatio * 40, 0, 40);
-
-  const score = score0to100(100 - aprPenalty - balancePenalty);
-
-  // Deuda más cara (mayor APR) para el subtítulo.
-  const worst = debts.reduce((m, d) => (d.apr > m.apr ? d : m), debts[0]!);
-  const subtitle =
-    worst.apr > 0
-      ? `${worst.name || "Deuda"} al ${worst.apr.toFixed(1)}% APR — acelerar`
-      : `${debts.length} deuda${debts.length === 1 ? "" : "s"} sin interés`;
-
-  return { score, subtitle };
-}
-
-// ============================================================================
-// 3. Fondo de emergencia — meta de canasta Esenciales con "fondo"/"emergencia"
+// 2. Fondo de emergencia — 20 pts (meses cubiertos / 6)
 // ============================================================================
 
 export function emergencyMetric(
@@ -161,142 +127,198 @@ export function emergencyMetric(
   avgMonthlyExpense: number,
 ): MetricResult {
   const goal = goals.find(
-    (g) =>
-      g.basket === "essentials" && /fondo|emergencia/i.test(g.name),
+    (g) => g.basket === "essentials" && /fondo|emergencia/i.test(g.name),
   );
   if (!goal) {
     return {
       score: 0,
-      subtitle: "definí una meta de fondo de emergencia en Metas",
+      subtitle: "define una meta de fondo de emergencia en Metas",
     };
   }
   if (avgMonthlyExpense <= 0) {
     return {
       score: 0,
-      subtitle: "cargá tus gastos para medir los meses cubiertos",
+      subtitle: "carga tus gastos para medir los meses cubiertos",
     };
   }
   const months = goal.currentAmount / avgMonthlyExpense;
-  const score = score0to100((months / 6) * 100);
+  const score = Math.round(clamp((months / 6) * 20, 0, 20));
   return { score, subtitle: `${months.toFixed(1)} de 6 meses completados` };
 }
 
 // ============================================================================
-// 4. Consistencia inversora — posiciones con aporte mensual configurado
+// 3. Ratio deuda/ingreso — 20 pts (por tramos)
 // ============================================================================
 
-export function investingMetric(investments: CoachInvestment[]): MetricResult {
-  if (investments.length === 0) {
-    return { score: 0, subtitle: "sin posiciones de inversión" };
-  }
-  const withContribution = investments.filter(
-    (p) => p.monthlyContribution > 0,
-  ).length;
-  const total = investments.length;
-  const score = score0to100((withContribution / total) * 100);
+export function debtMetric(
+  debts: CoachDebt[],
+  incomeMonth: number,
+): MetricResult {
+  const payments = debts.reduce((s, d) => s + d.currentPayment, 0);
 
-  let subtitle: string;
-  if (withContribution === 0) {
-    subtitle = "sin aportes mensuales configurados";
-  } else if (withContribution === total) {
-    subtitle = "aportes mensuales regulares en todas tus posiciones";
-  } else {
-    subtitle = `${withContribution} de ${total} posiciones con aporte mensual`;
+  if (incomeMonth <= 0) {
+    if (payments <= 0) {
+      return { score: 20, subtitle: "Sin deudas — ratio 0%" };
+    }
+    return {
+      score: 0,
+      subtitle: "carga tus ingresos para medir el ratio deuda/ingreso",
+    };
+  }
+
+  const ratio = (payments / incomeMonth) * 100;
+  let score: number;
+  if (ratio >= 50) score = 0;
+  else if (ratio >= 30) score = 10;
+  else if (ratio >= 15) score = 15;
+  else score = 20;
+
+  if (debts.length === 0) {
+    return { score, subtitle: "Sin deudas — ratio 0%" };
+  }
+
+  let subtitle = `Ratio deuda/ingreso: ${Math.round(ratio)}%`;
+  const worst = debts.reduce((m, d) => (d.apr > m.apr ? d : m), debts[0]!);
+  if (worst.apr > 0) {
+    subtitle += ` · ${worst.name || "Deuda"} al ${fmtApr(worst.apr)}% — acelerar`;
   }
   return { score, subtitle };
 }
 
 // ============================================================================
-// 5. Diversificación — cantidad de activos y reparto entre tipos
+// 4. Diversificación — 15 pts (tipos distintos con peso >5%)
 // ============================================================================
 
 export function diversificationMetric(
   investments: CoachInvestment[],
 ): MetricResult {
   const withCapital = investments.filter((p) => p.capital > 0);
-  if (withCapital.length === 0) {
+  const portfolio = withCapital.reduce((s, p) => s + p.capital, 0);
+  if (portfolio <= 0) {
     return { score: 0, subtitle: "sin activos en portafolio" };
   }
-  const count = withCapital.length;
-  const distinctTypes = new Set(withCapital.map((p) => p.category)).size;
 
-  // 60% del puntaje por variedad de tipos (4 tipos → pleno), 40% por cantidad
-  // de activos (5+ → pleno).
-  const score = score0to100(
-    (distinctTypes / 4) * 60 + (Math.min(count, 5) / 5) * 40,
-  );
-  const subtitle = `${count} activo${count === 1 ? "" : "s"} en portafolio${
-    distinctTypes > 1 ? ` · ${distinctTypes} tipos` : ""
-  }`;
+  const byType = new Map<string, number>();
+  for (const p of withCapital) {
+    byType.set(p.category, (byType.get(p.category) ?? 0) + p.capital);
+  }
+  const significantTypes = [...byType.values()].filter(
+    (c) => c / portfolio > 0.05,
+  ).length;
+
+  let score: number;
+  if (significantTypes >= 3) score = 15;
+  else if (significantTypes === 2) score = 8;
+  else if (significantTypes === 1) score = 3;
+  else score = 0;
+
+  const subtitle = `${withCapital.length} activo${
+    withCapital.length === 1 ? "" : "s"
+  } · ${significantTypes} tipo${significantTypes === 1 ? "" : "s"}`;
   return { score, subtitle };
 }
 
 // ============================================================================
-// Total ponderado + etiqueta + mensaje de prioridad
+// 5. Progreso a libertad financiera — 15 pts (patrimonio neto / NLF)
 // ============================================================================
 
-export function rangeLabel(total: number): string {
-  if (total >= 80) return "Salud financiera sólida";
-  if (total >= 60) return "Buen progreso";
-  if (total >= 40) return "En camino";
-  if (total >= 20) return "Necesita atención";
-  return "Punto de partida";
+export function freedomMetric(netWorth: number, nlf: number): MetricResult {
+  if (nlf <= 0) {
+    return {
+      score: 0,
+      subtitle: "carga tus gastos para calcular tu Número de Libertad",
+    };
+  }
+  const score = Math.round(clamp((netWorth / nlf) * 15, 0, 15));
+  const pct = clamp(Math.round((netWorth / nlf) * 100), 0, 100);
+  return { score, subtitle: `${pct}% del camino a tu Número de Libertad` };
 }
 
-/**
- * Mensaje de prioridad: arma la acción según las métricas más bajas, ponderando
- * la urgencia (deuda y emergencia pesan el doble). Toma hasta 2.
- */
-export function priorityMessage(metrics: CoachMetric[]): string {
-  const concerns = metrics
-    .map((m) => ({
-      key: m.key,
-      score: m.score,
-      concern: (100 - m.score) * WEIGHTS[m.key],
-    }))
-    .filter((m) => m.score < 70)
-    .sort((a, b) => b.concern - a.concern);
+// ============================================================================
+// Rango (etiqueta + mensaje exacto) y armado del scorecard
+// ============================================================================
 
-  if (concerns.length === 0) {
-    return "Vas muy bien — mantené el rumbo.";
-  }
-  const top = concerns.slice(0, 2).map((c) => ACTIONS[c.key]);
-  return `Prioriza ${top.join(" y ")}.`;
+interface Range {
+  min: number;
+  label: string;
+  message: string;
+}
+
+const RANGES: Range[] = [
+  {
+    min: 90,
+    label: "Excepcional",
+    message:
+      "Tu salud financiera es excepcional. Estás en el 1% que aplica el sistema con consistencia. Mantén el ritmo y acelera las palancas que ya dominas.",
+  },
+  {
+    min: 75,
+    label: "Vas en serio",
+    message:
+      "Salud financiera excelente. Tienes los cimientos firmes. Tu próximo nivel está en optimizar la palanca con menor puntaje individual.",
+  },
+  {
+    min: 60,
+    label: "Bien, pero te falta",
+    message:
+      "Salud financiera buena. Estás avanzando, pero hay áreas claras de mejora. Identifica la palanca más débil y enfócate ahí este mes.",
+  },
+  {
+    min: 40,
+    label: "Te estás quedando corto",
+    message:
+      "Tu salud financiera necesita atención. No es crisis, pero estás dejando años de libertad sobre la mesa. Prioridad: completar fondo de emergencia y subir tasa de ahorro al 20%.",
+  },
+  {
+    min: 20,
+    label: "Así no llegas",
+    message:
+      "Estás en zona de alerta. Esto se soluciona con sistema, no con suerte. Empieza por reducir deuda de consumo y construir fondo de emergencia. No mires el largo plazo todavía, enfócate en estabilizar.",
+  },
+  {
+    min: 0,
+    label: "Es ahora o nunca",
+    message:
+      "Estás en crisis financiera. Necesitas actuar esta semana. Pasos: 1) Lista todas tus deudas y sus APR. 2) Corta cualquier gasto no esencial. 3) Busca ingreso adicional inmediato. El sistema funciona, pero hay que empezar por la base.",
+  },
+];
+
+export function scorecardRange(total: number): { label: string; message: string } {
+  const r = RANGES.find((x) => total >= x.min) ?? RANGES[RANGES.length - 1]!;
+  return { label: r.label, message: r.message };
 }
 
 export function buildScorecard(input: CoachInputs): Scorecard {
   const results: Record<CoachMetricKey, MetricResult> = {
     savings: savingsMetric(input.incomeMonth, input.expenseMonth),
-    debt: debtMetric(input.debts, input.incomeMonth),
     emergency: emergencyMetric(input.goals, input.avgMonthlyExpense),
-    investing: investingMetric(input.investments),
+    debt: debtMetric(input.debts, input.incomeMonth),
     diversification: diversificationMetric(input.investments),
+    freedom: freedomMetric(input.netWorth, input.nlf),
   };
 
   const order: CoachMetricKey[] = [
     "savings",
-    "debt",
     "emergency",
-    "investing",
+    "debt",
     "diversification",
+    "freedom",
   ];
 
   const metrics: CoachMetric[] = order.map((key) => ({
     key,
     label: LABELS[key],
     score: results[key].score,
+    max: MAX[key],
     subtitle: results[key].subtitle,
   }));
 
-  const totalWeight = order.reduce((s, key) => s + WEIGHTS[key], 0);
-  const total = score0to100(
-    metrics.reduce((s, m) => s + m.score * WEIGHTS[m.key], 0) / totalWeight,
+  const total = clamp(
+    Math.round(metrics.reduce((s, m) => s + m.score, 0)),
+    0,
+    100,
   );
 
-  return {
-    metrics,
-    total,
-    rangeLabel: rangeLabel(total),
-    priorityMessage: priorityMessage(metrics),
-  };
+  const range = scorecardRange(total);
+  return { metrics, total, rangeLabel: range.label, message: range.message };
 }

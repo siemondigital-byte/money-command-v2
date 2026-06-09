@@ -1,6 +1,9 @@
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { activePeriod } from "@/lib/monthly";
+import { portfolioTotal, weightedYield } from "@/lib/investments";
+import { DEFAULT_PORTFOLIO_RETURN } from "@/lib/formulas";
+import { freedomNumber } from "@/lib/dashboard";
 import { buildScorecard, type CoachInputs } from "@/lib/coach";
 import { Scorecard } from "./Scorecard";
 
@@ -43,14 +46,31 @@ export default async function CoachPage() {
       ? expenseMonths.reduce((s, n) => s + n, 0) / expenseMonths.length
       : 0;
 
+  // Patrimonio Neto y Número de Libertad: los MISMOS valores/helpers del
+  // Dashboard (no se recalculan ni se toca su lógica).
+  const netWorth = Number(record?.netWorth ?? 0);
+  const projPositions = investments.map((p) => ({
+    capital: Number(p.capital),
+    monthlyContribution: Number(p.monthlyContribution),
+    passiveYield: Number(p.passiveYield),
+  }));
+  const portfolio = portfolioTotal(projPositions);
+  const wYield = weightedYield(projPositions);
+  const freedomRate =
+    portfolio > 0 && wYield > 0 ? wYield : DEFAULT_PORTFOLIO_RETURN;
+  const monthlyExpense = expenseMonth > 0 ? expenseMonth : avgMonthlyExpense;
+  const nlf = freedomNumber(monthlyExpense, freedomRate);
+
   const input: CoachInputs = {
     incomeMonth,
     expenseMonth,
     avgMonthlyExpense,
+    netWorth,
+    nlf,
     debts: debts.map((d) => ({
       name: d.name ?? "Deuda",
-      balance: Number(d.balance),
       apr: Number(d.apr),
+      currentPayment: Number(d.currentPayment),
     })),
     goals: goals.map((g) => ({
       name: g.name,
@@ -59,7 +79,6 @@ export default async function CoachPage() {
     })),
     investments: investments.map((p) => ({
       capital: Number(p.capital),
-      monthlyContribution: Number(p.monthlyContribution),
       category: p.category,
     })),
   };

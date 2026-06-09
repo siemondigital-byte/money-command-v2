@@ -6,16 +6,17 @@ import type { Scorecard as ScorecardData } from "@/lib/coach";
  * son full-width y las filas apilan en móvil.
  */
 
-/** Color de la barra/puntaje según el valor (verde alto, dorado medio, coral bajo). */
-function scoreColor(score: number): string {
-  if (score >= 70) return "var(--accent)";
-  if (score >= 40) return "var(--gold)";
+/** Color según el % alcanzado de su máximo (verde ≥70%, dorado 40-69%, coral <40%). */
+function pctColor(pct: number): string {
+  if (pct >= 70) return "var(--accent)";
+  if (pct >= 40) return "var(--gold)";
   return "var(--danger)";
 }
 
 export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
-  const { metrics, total, rangeLabel, priorityMessage } = scorecard;
-  const totalColor = scoreColor(total);
+  const { metrics, total, rangeLabel, message } = scorecard;
+  // El total ya es 0-100 (máximos suman 100): su % = el total.
+  const totalColor = pctColor(total);
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,7 +81,7 @@ export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
             lineHeight: 1.5,
           }}
         >
-          {priorityMessage}
+          {message}
         </p>
       </section>
 
@@ -92,7 +93,8 @@ export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
         <div className="label">Las 5 métricas</div>
 
         {metrics.map((m) => {
-          const color = scoreColor(m.score);
+          const pct = m.max > 0 ? (m.score / m.max) * 100 : 0;
+          const color = pctColor(pct);
           return (
             <div
               key={m.key}
@@ -116,16 +118,21 @@ export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
                 >
                   {m.label}
                 </span>
-                <span
-                  style={{
-                    fontFamily: "Syne, sans-serif",
-                    fontWeight: 800,
-                    fontSize: "1.1rem",
-                    color,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {m.score}
+                <span style={{ whiteSpace: "nowrap" }}>
+                  <span
+                    style={{
+                      fontFamily: "Syne, sans-serif",
+                      fontWeight: 800,
+                      fontSize: "1.1rem",
+                      color,
+                    }}
+                  >
+                    {m.score}
+                  </span>
+                  <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                    {" "}
+                    / {m.max}
+                  </span>
                 </span>
               </div>
 
@@ -139,7 +146,7 @@ export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
               >
                 <div
                   style={{
-                    width: `${m.score}%`,
+                    width: `${pct}%`,
                     height: "100%",
                     background: color,
                     borderRadius: 999,
