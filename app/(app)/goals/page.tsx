@@ -208,8 +208,10 @@ export default async function GoalsPage({
         </>
       )}
 
-      {/* Form crear / editar */}
-      <GoalForm editing={editing} />
+      {/* Form crear / editar. El key remonta el form en cada apertura (meta
+          distinta o crear), reseteando useActionState → evita el cierre
+          prematuro y el "Falta el id" (state.ok pegado de un guardado previo). */}
+      <GoalForm key={editing?.id ?? "new"} editing={editing} />
     </div>
   );
 }
