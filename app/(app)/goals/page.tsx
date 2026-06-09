@@ -12,6 +12,7 @@ import {
   totalMonthlyContribution,
 } from "@/lib/goals";
 import { GoalForm } from "./GoalForm";
+import { GoalsProgressChart, type GoalBar } from "./GoalsProgressChart";
 import { deleteGoalAction } from "./actions";
 
 export const metadata = { title: "Metas · The Money Command" };
@@ -57,6 +58,29 @@ export default async function GoalsPage({
   });
 
   const hasGoals = goals.length > 0;
+
+  // --- Datos para los dos bloques nuevos (solo LECTURA de helpers existentes) ---
+  // 1) Barras de progreso (% que ya calcula lib/goals.ts).
+  const progressBars: GoalBar[] = goals.map((g) => ({
+    label: g.name,
+    pct: Math.round(progress(g) * 100),
+    color: BASKET_COLORS[g.basket as Basket],
+  }));
+
+  // 2) Timeline ordenado por cercanía; las no alcanzables (sin aporte) al final.
+  const timelineItems = goals
+    .map((g) => ({
+      id: g.id,
+      name: g.name,
+      color: BASKET_COLORS[g.basket as Basket],
+      months: monthsToGoal(g), // number | null
+    }))
+    .sort((a, b) => {
+      if (a.months === null && b.months === null) return 0;
+      if (a.months === null) return 1;
+      if (b.months === null) return -1;
+      return a.months - b.months;
+    });
 
   return (
     <div className="fade-up flex flex-col gap-6">
@@ -121,6 +145,67 @@ export default async function GoalsPage({
             />
           );
         })
+      )}
+
+      {/* Bloques de visualización (aditivos, debajo de la lista de metas) */}
+      {hasGoals && (
+        <>
+          {/* 1. Gráfico de barras de progreso */}
+          <section className="card flex flex-col gap-4">
+            <div className="label">Progreso de todas las metas</div>
+            <GoalsProgressChart bars={progressBars} />
+          </section>
+
+          {/* 2. Timeline — cuándo se alcanza cada meta (más cercana arriba) */}
+          <section className="card flex flex-col gap-4">
+            <div className="label">Timeline — cuándo alcanzarás cada meta</div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {timelineItems.map((it, idx) => (
+                <div
+                  key={it.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "10px 0",
+                    borderTop: idx === 0 ? "none" : "1px solid var(--border)",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: it.color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      fontSize: "13px",
+                      color: "var(--text)",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {it.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontFamily: "DM Mono, monospace",
+                      whiteSpace: "nowrap",
+                      color: it.months === null ? "var(--muted)" : "var(--accent)",
+                    }}
+                  >
+                    {whenLabel(it.months, now)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
       )}
 
       {/* Form crear / editar */}
@@ -317,6 +402,17 @@ function TimingBadge({
     return <span style={{ color: "var(--danger)" }}>no se alcanza</span>;
   }
   return null;
+}
+
+/** Texto de "cuándo se alcanza" para el timeline. null = sin aporte; <12 meses
+ * = meses; >=12 = el año estimado (now + meses). Reusa monthsToGoal de lib. */
+function whenLabel(months: number | null, now: Date): string {
+  if (months === null) return "sin aporte no se alcanza";
+  if (months === 0) return "ya alcanzada";
+  if (months < 12) return `${months} ${months === 1 ? "mes" : "meses"}`;
+  const d = new Date(now);
+  d.setMonth(d.getMonth() + months);
+  return String(d.getFullYear());
 }
 
 function Kpi({
