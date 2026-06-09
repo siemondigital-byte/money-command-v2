@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/investments", label: "Inversiones" },
   { href: "/debts", label: "Deudas" },
   { href: "/goals", label: "Metas" },
+  { href: "/coach", label: "Coach" },
   { href: "/history", label: "Historial" },
   { href: "/settings", label: "Settings" },
 ];
