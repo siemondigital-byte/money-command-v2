@@ -209,6 +209,9 @@ export default async function InvestmentsPage({
               proyectados a 5, 10 y 20 años.
             </p>
           ) : (
+            <>
+            {/* Desktop (>= md): tabla original, sin cambios. Oculta en móvil. */}
+            <div className="hidden md:block">
             <table
               style={{
                 width: "100%",
@@ -236,6 +239,46 @@ export default async function InvestmentsPage({
                 ))}
               </tbody>
             </table>
+            </div>
+
+            {/* Móvil (< md): una tarjeta por horizonte, sin scroll horizontal. */}
+            <div className="md:hidden flex flex-col gap-3">
+              {projTable.map((r) => (
+                <div
+                  key={r.years}
+                  className="card card-elevated"
+                  style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "Syne, sans-serif",
+                      fontWeight: 700,
+                      fontSize: "1rem",
+                    }}
+                  >
+                    {r.years} años
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "12px 16px",
+                    }}
+                  >
+                    <Field
+                      label="Valor proyectado"
+                      value={money.format(r.value)}
+                    />
+                    <Field
+                      label="Renta/mes"
+                      value={money.format(r.monthlyIncome)}
+                      color="var(--accent)"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
           )}
         </div>
 
@@ -540,5 +583,34 @@ function Td({
     >
       {children}
     </td>
+  );
+}
+
+/** Par etiqueta/valor de las tarjetas de móvil. El valor envuelve si es largo
+ * (overflowWrap) para que nunca se desborde de la card. */
+function Field({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 }}>
+      <span className="label">{label}</span>
+      <span
+        style={{
+          fontFamily: "Syne, sans-serif",
+          fontWeight: 700,
+          fontSize: "0.95rem",
+          color,
+          overflowWrap: "anywhere",
+        }}
+      >
+        {value}
+      </span>
+    </div>
   );
 }
