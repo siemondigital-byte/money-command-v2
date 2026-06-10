@@ -25,7 +25,27 @@ export function Header({ profile }: { profile: SerializedProfile }) {
         style={{ maxWidth: "1100px", padding: "14px 20px" }}
       >
         {/* Logo */}
-        <Link href="/dashboard" className="ah-logo logo-wordmark">
+        <Link
+          href="/dashboard"
+          className="ah-logo logo-wordmark"
+          style={{ position: "relative" }}
+        >
+          {/* Punto verde con glow (marca), arriba a la izquierda del wordmark.
+              Absoluto: no mueve el logo de su lugar actual. */}
+          <span
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "-16px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              background: "var(--accent)",
+              boxShadow: "0 0 12px var(--accent)",
+            }}
+          />
           <span className="logo-line">The Money</span>
           <span className="logo-line-accent">
             Command
