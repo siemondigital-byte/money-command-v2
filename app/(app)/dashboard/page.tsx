@@ -20,7 +20,7 @@ import { PatrimonyBlock } from "./PatrimonyBlock";
 export const metadata = { title: "Dashboard · The Money Command" };
 
 /** Horizonte del gráfico de patrimonio (años, barra por año). */
-const PATRIMONY_YEARS = 10;
+const PATRIMONY_YEARS = 30;
 
 /** Distribución preset desde el método preferido ("50/30/20"). */
 function presetFromMethod(method: string): BasketDistribution {
@@ -115,32 +115,31 @@ export default async function DashboardPage() {
   const defaultIncome = incomeTotal > 0 ? incomeTotal : avgIncome;
   const defaultSaving = totalContribution > 0 ? totalContribution : freedom;
 
-  // --- Patrimonio: series año a año (Capital + Interés) con projectedValue ---
+  // --- Patrimonio: serie año a año (capital aportado + retorno) con
+  // projectedValue. Pasamos los montos reales por año para el tooltip dinámico.
   let balance = 0;
   let capitalAported = 0;
   let interestGained = 0;
-  const cols: { k: number; i: number }[] = [];
-  const xLabels: string[] = [];
+  const points: {
+    year: number;
+    capital: number;
+    interest: number;
+    value: number;
+  }[] = [];
+  let maxValue = 1;
   if (hasAssets) {
-    const series = Array.from({ length: PATRIMONY_YEARS }, (_, idx) => {
-      const y = idx + 1;
+    for (let y = 1; y <= PATRIMONY_YEARS; y++) {
       const value = projectedValue(projPositions, y);
       const principal = portfolio + totalContribution * 12 * y;
       const interest = Math.max(0, value - principal);
-      return { y, value, principal, interest };
-    });
-    const maxValue = series[series.length - 1]!.value || 1;
-    const last = series[series.length - 1]!;
-    balance = last.value;
-    capitalAported = last.principal;
-    interestGained = last.interest;
-    for (const s of series) {
-      cols.push({
-        k: (s.principal / maxValue) * 100,
-        i: (s.interest / maxValue) * 100,
-      });
-      xLabels.push(s.y % 5 === 0 ? `${s.y}A` : "");
+      points.push({ year: y, capital: principal, interest, value });
     }
+    const last = points[points.length - 1]!;
+    balance = last.value;
+    capitalAported = last.capital;
+    interestGained = last.interest;
+    // Serie monótona creciente: el último año es el valor máximo.
+    maxValue = last.value || 1;
   }
 
   const hasRecord = record !== null;
@@ -226,8 +225,8 @@ export default async function DashboardPage() {
         balance={balance}
         capital={capitalAported}
         interest={interestGained}
-        cols={cols}
-        xLabels={xLabels}
+        points={points}
+        maxValue={maxValue}
         hasAssets={hasAssets}
         locale={locale}
         currency={currency}
