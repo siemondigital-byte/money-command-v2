@@ -333,3 +333,163 @@ export function conceptIndexForDate(date: Date): number {
   const n = COACH_CONCEPTS.length;
   return ((dayOfYear % n) + n) % n;
 }
+
+// ============================================================================
+// Recordatorios del día (30 frases ancla)
+// ============================================================================
+
+/**
+ * 30 recordatorios / frases ancla, texto EXACTO del documento. Rotan uno por
+ * día (mismo criterio determinístico por fecha que el concepto del día).
+ */
+export const COACH_REMINDERS: string[] = [
+  `"La riqueza no es complicada. Es un sistema."`,
+  `"La diferencia entre ricos y pobres no es la cantidad de dinero que ganan. Es lo que hacen con el dinero que ganan." — Warren Buffett`,
+  `"Lo que se mide se mejora. Y lo que se escribe se hace real."`,
+  `"Haz hoy lo que otros no están dispuestos a hacer. Tendrás mañana lo que otros no pueden tener."`,
+  `"Páguese a usted primero. Si no ve el dinero, no lo extraña."`,
+  `"Diferir la gratificación no significa privarte de vivir. Significa gastar mejor, no gastar menos."`,
+  `"El tiempo es tu mejor amigo. Cada año que NO empiezas es un año compuesto que NUNCA recuperas."`,
+  `"La pregunta correcta no es '¿por qué ellos ganan más?' sino '¿en qué persona me tengo que convertir para ganar lo que ellos ganan?'."`,
+  `"El éxito sigue sistemas, no apellidos. Tú aportas la ejecución."`,
+  `"Tu pasado financiero no determina tu futuro financiero."`,
+  `"La consistencia gana sobre la brillantez."`,
+  `"El mayor activo no está en el banco — está entre tus orejas."`,
+  `"Lo que no se escribe, no existe para el subconsciente."`,
+  `"Una meta sin fecha es un sueño."`,
+  `"Las personas ricas no son más inteligentes que tú. Tienen un sistema que automatiza la construcción de riqueza."`,
+  `"No hay atajos. Hay sistemas. Y los que los ejecutan, ganan."`,
+  `"La libertad financiera no es el final del camino. Es el punto de partida del camino que realmente elegiste."`,
+  `"Sin propósito, el dinero es destino. Con propósito, es vehículo."`,
+  `"Las personas que no tienen metas se condenan a trabajar para los que sí las tienen."`,
+  `"Aquello que temes es exactamente donde está tu próximo crecimiento."`,
+  `"Tu termostato financiero determina tu vida material más que tu salario."`,
+  `"El primer gasto del mes es a ti mismo."`,
+  `"Cada decisión consciente de hoy construye la libertad de mañana."`,
+  `"El consumo es fácil. La construcción requiere intención."`,
+  `"Empieza imperfecto. Ajusta en el camino. Aprende haciendo."`,
+  `"Lo que crees, lo creas."`,
+  `"Soy responsable. Nadie puede hacerme sentir nada sin mi permiso."`,
+  `"La libertad financiera empieza el día en que decides que eres diferente con el dinero."`,
+  `"No hay momento perfecto. Hay este momento, y nada más."`,
+  `"El interés compuesto premia la consistencia, no la inteligencia."`,
+];
+
+export function reminderIndexForDate(date: Date): number {
+  const startOfYear = Date.UTC(date.getUTCFullYear(), 0, 0);
+  const today = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+  );
+  const dayOfYear = Math.floor((today - startOfYear) / 86_400_000);
+  const n = COACH_REMINDERS.length;
+  return ((dayOfYear % n) + n) % n;
+}
+
+// ============================================================================
+// Retos de la semana (15 retos)
+// ============================================================================
+
+export interface CoachChallenge {
+  id: string;
+  titulo: string;
+  descripcion: string;
+}
+
+/**
+ * 15 retos de la semana, texto EXACTO del documento. Rotan uno por semana
+ * (cada 7 días), determinístico por número de semana (continuo entre años).
+ */
+export const COACH_CHALLENGES: CoachChallenge[] = [
+  {
+    id: "R01",
+    titulo: "El Reto del Termostato",
+    descripcion: `Esta semana, escribe en papel tres números: tu ingreso promedio de los últimos 12 meses, el máximo que ganaste en un mes, y lo que querrías ganar dentro de 2 años. Divide el tercero por el primero. Ese cociente es la brecha que el sistema necesita cerrar.`,
+  },
+  {
+    id: "R02",
+    titulo: "El Reto del Costo Real",
+    descripcion: `Elige UN gasto recurrente o grande que hiciste el mes pasado. Calcula su costo real: cuánto valdría ese dinero invertido al 8% durante 10 años. Compara esa cifra con lo que recibiste. ¿Volverías a hacer el gasto sabiendo eso?`,
+  },
+  {
+    id: "R03",
+    titulo: "El Reto de los 30 Días",
+    descripcion: `Esta semana, cualquier compra no esencial mayor a $100, anótala en una lista con la fecha. Espera 30 días antes de comprarla. Si dentro de 30 días todavía la quieres, cómprala. Si no, evitaste un gasto impulsivo. Lleva la cuenta.`,
+  },
+  {
+    id: "R04",
+    titulo: "El Reto del Ahorro Automático",
+    descripcion: `Si todavía no lo hiciste, esta semana configura una transferencia automática del 10% (o lo que puedas) de tu ingreso a una cuenta separada el día que cobras. No tiene que ser perfecto — tiene que existir. Después subes el %.`,
+  },
+  {
+    id: "R05",
+    titulo: "El Reto de las Suscripciones",
+    descripcion: `Esta semana revisa TODAS tus suscripciones activas (Netflix, Spotify, gimnasio, apps, software, plataformas). Calcula el total mensual y el anual. Cancela las que usaste menos de 3 veces el mes pasado. Anota cuánto ahorraste y mándalo a inversión.`,
+  },
+  {
+    id: "R06",
+    titulo: "El Reto del Diagnóstico",
+    descripcion: `Esta semana completa los 10 pasos del Diagnóstico Financiero del Capítulo 3: ingreso neto, gastos totales, ahorro mensual, tasa de ahorro, deuda total, ratio deuda/ingreso, fondo de emergencia, patrimonio neto. Es la foto de partida. Sin ella no puedes medir progreso.`,
+  },
+  {
+    id: "R07",
+    titulo: "El Reto del Propósito",
+    descripcion: `Esta semana, completa esta frase con honestidad real: "Estoy construyendo este patrimonio para poder ___, para el año ___, porque quiero contribuir ___." Escribila en papel. Ponela donde la veas. Esa frase es tu brújula.`,
+  },
+  {
+    id: "R08",
+    titulo: "El Reto de la Negociación",
+    descripcion: `Esta semana llama a UN proveedor de servicios (internet, teléfono, seguros) y negocia. Di que viste ofertas competidoras y pide mejor tarifa. Tasa de éxito típica: 50-60%. Ahorro mensual típico: $30-80. Ese ahorro va directo a inversión.`,
+  },
+  {
+    id: "R09",
+    titulo: "El Reto del Café Hormiga",
+    descripcion: `Esta semana, suma cada café fuera de casa, snack y compra menor a $10. Anotalo todo. Al final de la semana, multiplica por 4 para ver el costo mensual. Después por 12 para el anual. Probablemente te sorprenda.`,
+  },
+  {
+    id: "R10",
+    titulo: "El Reto de la Categorización",
+    descripcion: `Esta semana, revisa los últimos 30 gastos de tu cuenta bancaria. Marca cada uno como Esencial / Estilo / Libertad. ¿Cuántos eran Esencial real? ¿Cuántos Estilo automáticos sin disfrute consciente? Esa lectura sola cambia tu próximo mes.`,
+  },
+  {
+    id: "R11",
+    titulo: "El Reto del Score Crediticio",
+    descripcion: `Esta semana, consigue tu reporte de crédito (en muchos países es gratis una vez al año). Revísalo en busca de errores — el 20% de los reportes tienen errores que bajan el score injustamente. Si encuentras errores, dispútalos. Una corrección puede subir tu score 30-50 puntos.`,
+  },
+  {
+    id: "R12",
+    titulo: "El Reto de la Inversión Mínima",
+    descripcion: `Si nunca invertiste, esta semana abre una cuenta de corretaje (Interactive Brokers, Fidelity, o el equivalente en tu país). NO tienes que invertir grande — solo abrirla. La barrera psicológica de "no sé cómo" es más grande que la real. Una vez abierta, compra $50 de un fondo indexado del S&P 500. Empezaste.`,
+  },
+  {
+    id: "R13",
+    titulo: "El Reto de la Conversación",
+    descripcion: `Esta semana habla de dinero con alguien — pareja, amigo, familiar. No para presumir, no para quejarte — para compartir lo que estás aprendiendo. La regla del libro: el conocimiento que se comparte se consolida. Y a veces, esa conversación abre algo en la otra persona también.`,
+  },
+  {
+    id: "R14",
+    titulo: "El Reto del Libro Adicional",
+    descripcion: `Esta semana empieza UN libro más sobre finanzas. Cualquiera de la lista del libro: "The Millionaire Next Door", "Rich Dad Poor Dad", "The Intelligent Investor", "Atomic Habits", "Secrets of the Millionaire Mind". La educación financiera tiene el ROI más alto de todos los activos.`,
+  },
+  {
+    id: "R15",
+    titulo: "El Reto de la Carta al Futuro",
+    descripcion: `Esta semana escribe una carta a tu yo dentro de 2 años. Describile cómo es el proceso que estás empezando, qué te asusta, qué esperas lograr. Guardala en sobre cerrado. Abrila en 2 años. Vas a ver cuánto cambiaste — y eso refuerza la identidad de constructor de patrimonio.`,
+  },
+];
+
+/**
+ * Índice del reto de la semana: rota cada 7 días, determinístico por número de
+ * semana desde la época (continuo entre años, sin doble-mostrar en el cambio
+ * de año).
+ */
+export function challengeIndexForDate(date: Date): number {
+  const days = Math.floor(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) /
+      86_400_000,
+  );
+  const week = Math.floor(days / 7);
+  const n = COACH_CHALLENGES.length;
+  return ((week % n) + n) % n;
+}
