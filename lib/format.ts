@@ -25,14 +25,13 @@ export interface MoneyOptions {
 /**
  * Formatea un monto como moneda según locale + currency del Profile.
  *
- * Por default usa los decimales canónicos de cada moneda (ISO 4217):
- *   USD/EUR/MXN/ARS/BRL/PEN → 2 decimales
- *   COP/CLP                 → 0 decimales (entero)
+ * Por default se muestra SIN decimales (redondeado al entero más cercano), en
+ * toda la app. Si hiciera falta, se pueden pedir decimales vía opts.
  *
  * No convierte tasas — es puramente cosmético: símbolo y decimales según
  * la moneda elegida en Settings.
  *
- * Ejemplo: formatMoney(1234.5, "es", "USD") → "US$ 1.234,50"
+ * Ejemplo: formatMoney(1234.5, "es", "USD") → "US$ 1.235"
  *          formatMoney(1234.5, "es", "COP") → "$ 1.235"
  */
 export function formatMoney(
@@ -41,26 +40,23 @@ export function formatMoney(
   currency: string,
   opts: MoneyOptions = {},
 ): string {
-  const fmtOpts: Intl.NumberFormatOptions = {
+  return new Intl.NumberFormat(bcp47(locale), {
     style: "currency",
     currency,
-  };
-  if (opts.maxFractionDigits !== undefined) {
-    fmtOpts.maximumFractionDigits = opts.maxFractionDigits;
-  }
-  if (opts.minFractionDigits !== undefined) {
-    fmtOpts.minimumFractionDigits = opts.minFractionDigits;
-  }
-  return new Intl.NumberFormat(bcp47(locale), fmtOpts).format(amount);
+    // Default: 0 decimales (entero). opts puede pedir decimales si se necesita.
+    maximumFractionDigits: opts.maxFractionDigits ?? 0,
+    minimumFractionDigits: opts.minFractionDigits ?? 0,
+  }).format(amount);
 }
 
 /**
- * Formatea un porcentaje: pasa el ratio (0.235), devuelve "23.5%".
+ * Formatea un porcentaje: pasa el ratio (0.235), devuelve "24%".
+ * Por default sin decimales.
  */
 export function formatPct(
   ratio: number,
   locale: string,
-  maxFractionDigits = 1,
+  maxFractionDigits = 0,
 ): string {
   return new Intl.NumberFormat(bcp47(locale), {
     style: "percent",

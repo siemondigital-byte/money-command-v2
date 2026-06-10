@@ -86,6 +86,8 @@ export default async function ExpensesPage({
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: profile.currency,
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   });
 
   // Las suscripciones tienen su propia sección; no se listan en Fijos/Variables.
@@ -623,7 +625,7 @@ function BasketSection({
                         >
                           <span>{Math.round(pctOfBasket)}% de la canasta</span>
                           <span>·</span>
-                          <span>{pctOfTotal.toFixed(1)}% del total</span>
+                          <span>{Math.round(pctOfTotal)}% del total</span>
                         </div>
                       </div>
                     );

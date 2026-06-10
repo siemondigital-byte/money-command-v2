@@ -1,8 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { formatMoney } from "@/lib/format";
 import { distributionAmounts, type BasketDistribution } from "@/lib/dashboard";
+
+// Monto de la tarjeta KPI: fuente fluida (clamp) que achica el número cuando es
+// largo + overflowWrap, para que NUNCA se corte ni desborde su tarjeta. La hero
+// (Ingreso del mes) queda apenas más grande.
+const HERO_AMOUNT: CSSProperties = {
+  fontSize: "clamp(1.2rem, 4.2vw, 2rem)",
+  overflowWrap: "anywhere",
+  minWidth: 0,
+};
+const AMOUNT: CSSProperties = {
+  fontSize: "clamp(1.05rem, 3.6vw, 1.7rem)",
+  overflowWrap: "anywhere",
+  minWidth: 0,
+};
 
 /**
  * PANEL DEL MÉTODO (mockup 01 · Asignación del mes).
@@ -99,21 +113,25 @@ export function MethodPanel({
     <section className="d-card top-mint" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
       <div className="d-section-label">Asignación del mes</div>
 
-      {/* KPIs */}
-      <div className="d-kpis">
+      {/* KPIs — tres columnas parejas (en vez de 2fr 1fr 1fr). En móvil apilan.
+          El monto usa fuente fluida (clamp) + overflowWrap para no cortarse. */}
+      <div
+        className="grid grid-cols-1 md:grid-cols-3"
+        style={{ gap: "14px" }}
+      >
         <div className="d-kpi hero mint top-mint">
           <div className="lab">Ingreso del mes</div>
-          <div className="v">{money(income)}</div>
+          <div className="v" style={HERO_AMOUNT}>{money(income)}</div>
           <div className="ctx plain">Plan A + B + C</div>
         </div>
         <div className="d-kpi sky top-sky">
           <div className="lab">Gastado</div>
-          <div className="v">{moneyShort(gastado)}</div>
+          <div className="v" style={AMOUNT}>{moneyShort(gastado)}</div>
           <div className="ctx plain">Esenciales + Estilo</div>
         </div>
         <div className="d-kpi gold top-gold">
           <div className="lab">Invertido</div>
-          <div className="v">{moneyShort(invertido)}</div>
+          <div className="v" style={AMOUNT}>{moneyShort(invertido)}</div>
           <div className="ctx plain">aporte mensual a inversión</div>
         </div>
       </div>

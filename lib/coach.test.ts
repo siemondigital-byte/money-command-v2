@@ -44,7 +44,7 @@ describe("emergencyMetric (20 pts)", () => {
       2000, // 3 meses → (3/6)*20 = 10
     );
     expect(r.score).toBe(10);
-    expect(r.subtitle).toBe("3.0 de 6 meses completados");
+    expect(r.subtitle).toBe("3 de 6 meses completados");
   });
   it("cubre 6+ meses → 20 (techo)", () => {
     const r = emergencyMetric(
@@ -103,7 +103,7 @@ describe("debtMetric (20 pts, ratio pagos/ingreso)", () => {
       ],
       5000,
     );
-    expect(r.subtitle).toContain("Tarjeta al 24.9%");
+    expect(r.subtitle).toContain("Tarjeta al 25%");
   });
 });
 

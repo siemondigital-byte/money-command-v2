@@ -134,7 +134,7 @@ export function FreedomBlock({
               <span>Interés compuesto</span>
               <span style={{ color: "var(--accent)" }}>tasa</span>
             </div>
-            <div className="iv">{ratePct.toFixed(1)}%</div>
+            <div className="iv">{Math.round(ratePct)}%</div>
             <input
               type="range"
               className="d-range"
@@ -173,7 +173,7 @@ export function FreedomBlock({
           <div>
             <div className="head">
               <span>Tu número de libertad</span>
-              <span className="rule">{ratePct.toFixed(1)}% anual</span>
+              <span className="rule">{Math.round(ratePct)}% anual</span>
             </div>
             {hasExpense ? (
               <>
@@ -194,7 +194,7 @@ export function FreedomBlock({
             <div className="prog">
               <div className="row">
                 <span>Estado actual</span>
-                <span className="yrs">{progressActual.toFixed(1)}%</span>
+                <span className="yrs">{Math.round(progressActual)}%</span>
               </div>
               <div className="bar">
                 <div className="seg now" style={{ width: `${progressActual}%` }} />
@@ -206,7 +206,7 @@ export function FreedomBlock({
                     ? "no converge"
                     : years === 0
                       ? "logrado"
-                      : `${years.toFixed(1)} años`}
+                      : `${Math.round(years)} años`}
                 </span>
               </div>
               <div className="bar">

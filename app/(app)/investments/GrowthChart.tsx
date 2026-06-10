@@ -114,7 +114,7 @@ export function GrowthChart({
                   style: "currency",
                   currency,
                   notation: "compact",
-                  maximumFractionDigits: 1,
+                  maximumFractionDigits: 0,
                 }).format(Number(value)),
             },
           },

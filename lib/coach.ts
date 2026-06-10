@@ -93,9 +93,9 @@ function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
 }
 
-/** Redondea a 1 decimal y deja como número (24 → 24, 24.9 → 24.9). */
+/** APR al entero más cercano para mostrar sin decimales (24.9 → 25). */
 function fmtApr(apr: number): number {
-  return Math.round(apr * 10) / 10;
+  return Math.round(apr);
 }
 
 interface MetricResult {
@@ -143,7 +143,10 @@ export function emergencyMetric(
   }
   const months = goal.currentAmount / avgMonthlyExpense;
   const score = Math.round(clamp((months / 6) * 20, 0, 20));
-  return { score, subtitle: `${months.toFixed(1)} de 6 meses completados` };
+  return {
+    score,
+    subtitle: `${Math.round(months)} de 6 meses completados`,
+  };
 }
 
 // ============================================================================

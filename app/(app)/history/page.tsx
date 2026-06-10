@@ -46,10 +46,12 @@ export default async function HistoryPage({
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: profile.currency,
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   });
   const pct = new Intl.NumberFormat(locale, {
     style: "percent",
-    maximumFractionDigits: 1,
+    maximumFractionDigits: 0,
   });
 
   return (

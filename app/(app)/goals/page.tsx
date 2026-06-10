@@ -47,6 +47,8 @@ export default async function GoalsPage({
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: profile.currency,
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   });
   const pct = new Intl.NumberFormat(locale, {
     style: "percent",
