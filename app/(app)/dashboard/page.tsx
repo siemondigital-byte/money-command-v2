@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { activePeriod } from "@/lib/monthly";
 import { effectivePlanB } from "@/lib/income";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatPct } from "@/lib/format";
 import { portfolioTotal, weightedYield, projectedValue } from "@/lib/investments";
 import { DEFAULT_PORTFOLIO_RETURN } from "@/lib/formulas";
 import {
@@ -214,6 +214,35 @@ export default async function DashboardPage() {
         >
           {formatMoney(portfolio, locale, currency)}
         </div>
+        {portfolio > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: "8px",
+              flexWrap: "wrap",
+              marginTop: "6px",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "Syne, sans-serif",
+                fontWeight: 700,
+                fontSize: "1.1rem",
+                color: "var(--accent)",
+              }}
+            >
+              {formatPct(wYield, locale)}
+            </span>
+            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+              rentabilidad ponderada · genera{" "}
+              {formatMoney(portfolio * wYield, locale, currency, {
+                maxFractionDigits: 0,
+              })}
+              /año
+            </span>
+          </div>
+        )}
         <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px" }}>
           Suma del capital de tus posiciones activas en Inversiones.
         </p>
