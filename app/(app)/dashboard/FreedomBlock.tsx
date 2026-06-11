@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatMoney } from "@/lib/format";
+import { MoneyAmount } from "./MoneyAmount";
 import { futureValueWithContributions } from "@/lib/formulas";
 import {
   freedomNumber,
@@ -177,7 +178,9 @@ export function FreedomBlock({
             </div>
             {hasExpense ? (
               <>
-                <div className="big">{money(nlf)}</div>
+                <div className="big">
+                  <MoneyAmount value={nlf} locale={locale} currency={currency} />
+                </div>
                 <div className="ctx">
                   El capital que necesitás invertido para que su retorno cubra
                   tus gastos. El capital queda intacto: vivís de los flujos.

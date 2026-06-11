@@ -2,6 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { formatMoney } from "@/lib/format";
+import { MoneyAmount } from "./MoneyAmount";
 
 // Cada tarjeta es un "contenedor de consulta" (container query). Así el tamaño
 // del monto se mide contra el ancho de SU tarjeta (unidad cqi), no contra el
@@ -18,12 +19,12 @@ const CARD_CONTAINER: CSSProperties = { containerType: "inline-size" };
 // eso allí los montos quedan grandes igual que ahora. En escritorio/tablet, las
 // tarjetas son más angostas y manda cqi, así el número se achica solo lo justo.
 const HERO_AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.15rem, 10cqi, 2.1rem)",
+  fontSize: "clamp(1.3rem, 11cqi, 2.2rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
 const AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.05rem, 9.5cqi, 1.9rem)",
+  fontSize: "clamp(1.2rem, 10cqi, 2rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
@@ -104,18 +105,22 @@ export function PatrimonyBlock({
           >
             <div className="d-kpi hero mint top-mint" style={CARD_CONTAINER}>
               <div className="lab">Balance acumulado · {horizon}A</div>
-              <div className="v" style={HERO_AMOUNT}>{moneyShort(balance)}</div>
+              <div className="v" style={HERO_AMOUNT}>
+                <MoneyAmount value={balance} locale={locale} currency={currency} />
+              </div>
               <div className="ctx plain">Capital + retorno</div>
             </div>
             <div className="d-kpi sky top-sky" style={CARD_CONTAINER}>
               <div className="lab">Capital aportado</div>
-              <div className="v" style={AMOUNT}>{moneyShort(capital)}</div>
+              <div className="v" style={AMOUNT}>
+                <MoneyAmount value={capital} locale={locale} currency={currency} />
+              </div>
               <div className="ctx plain">depósito + aportes</div>
             </div>
             <div className="d-kpi mint top-gold" style={CARD_CONTAINER}>
               <div className="lab">Retorno generado</div>
               <div className="v" style={{ ...AMOUNT, color: "var(--gold)" }}>
-                {moneyShort(interest)}
+                <MoneyAmount value={interest} locale={locale} currency={currency} />
               </div>
               <div className="ctx plain">crecimiento compuesto</div>
             </div>

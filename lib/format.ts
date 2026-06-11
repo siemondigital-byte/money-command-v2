@@ -50,6 +50,41 @@ export function formatMoney(
 }
 
 /**
+ * Separa un monto formateado en su SÍMBOLO de moneda y el NÚMERO, para poder
+ * mostrar el símbolo (ej. "US$") más chico que el número y que no se coma el
+ * ancho de la tarjeta. Sin decimales por default, igual que formatMoney.
+ *
+ * Ejemplo: splitMoney(432000, "es", "USD") → { symbol: "US$", number: "432.000" }
+ */
+export function splitMoney(
+  amount: number,
+  locale: string,
+  currency: string,
+  opts: MoneyOptions = {},
+): { symbol: string; number: string } {
+  const parts = new Intl.NumberFormat(bcp47(locale), {
+    style: "currency",
+    currency,
+    maximumFractionDigits: opts.maxFractionDigits ?? 0,
+    minimumFractionDigits: opts.minFractionDigits ?? 0,
+  }).formatToParts(amount);
+
+  let symbol = "";
+  let number = "";
+  for (const p of parts) {
+    if (p.type === "currency") {
+      symbol += p.value;
+    } else if (p.type === "literal" && p.value.trim() === "") {
+      // espacio entre símbolo y número: lo reemplazamos por el margen del span
+      continue;
+    } else {
+      number += p.value;
+    }
+  }
+  return { symbol, number };
+}
+
+/**
  * Formatea un porcentaje: pasa el ratio (0.235), devuelve "24%".
  * Por default sin decimales.
  */
