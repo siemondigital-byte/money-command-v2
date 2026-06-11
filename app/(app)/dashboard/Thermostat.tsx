@@ -40,7 +40,13 @@ export function Thermostat({
     : 0;
 
   return (
-    <section className="d-card top-sky d-thermo">
+    <section
+      className="d-card top-sky d-thermo"
+      // En desktop, .d-mid estira esta tarjeta para igualar a la Calculadora
+      // (align-items: stretch). alignSelf:start evita ese estirado y mantiene
+      // el termostato compacto, sin hueco bajo el tubo.
+      style={{ alignSelf: "start" }}
+    >
       <div className="d-section-label">Termostato</div>
 
       {!hasTarget ? (
@@ -53,7 +59,14 @@ export function Thermostat({
         </p>
       ) : (
         <div className="meter">
-          <div className="tube">
+          {/* El tubo tiene ancho fijo (26px) y NO se puede encoger: flexShrink:0
+              + minWidth evitan que, en la columna angosta de escritorio, el
+              flexbox lo aplaste a ~1px para dejarle lugar al monto de la escala.
+              Height fija para conservar su forma de tubo en todas las vistas. */}
+          <div
+            className="tube"
+            style={{ height: "200px", flexShrink: 0, minWidth: "26px" }}
+          >
             <div
               className="level"
               style={{
@@ -66,7 +79,7 @@ export function Thermostat({
             {/* marca de ajuste deseado al tope (100% = meta) */}
             <div className="tgt" style={{ bottom: "calc(100% - 2px)" }} />
           </div>
-          <div className="scale">
+          <div className="scale" style={{ minWidth: 0 }}>
             <div>
               <div className="label">Meta 2 años</div>
               <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "var(--gold)" }}>
