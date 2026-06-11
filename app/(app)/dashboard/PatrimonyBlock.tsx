@@ -1,7 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { formatMoney } from "@/lib/format";
+
+// Cada tarjeta es un "contenedor de consulta" (container query). Así el tamaño
+// del monto se mide contra el ancho de SU tarjeta (unidad cqi), no contra el
+// viewport. Esto resuelve el conflicto móvil/escritorio: en móvil la tarjeta es
+// ancha → número grande; en escritorio las 3 tarjetas son angostas → el número
+// se achica solo lo necesario para entrar (US$ 2.437.863 sin partirse). Los
+// montos quedan grandes y consistentes con el resto del Dashboard.
+const CARD_CONTAINER: CSSProperties = { containerType: "inline-size" };
+
+// El número más largo (US$ 2.437.863, Syne bold) mide ~8,5em de ancho. Para que
+// entre con margen en cualquier ancho de tarjeta, el coeficiente cqi debe dejar
+// ~15% de aire: 10cqi (10% del ancho de la tarjeta) → 8,5 × 0,10 = 0,85 → entra.
+// En móvil la tarjeta es ancha y manda el TECHO del clamp (2.1rem / 1.9rem), por
+// eso allí los montos quedan grandes igual que ahora. En escritorio/tablet, las
+// tarjetas son más angostas y manda cqi, así el número se achica solo lo justo.
+const HERO_AMOUNT: CSSProperties = {
+  fontSize: "clamp(1.15rem, 10cqi, 2.1rem)",
+  overflowWrap: "anywhere",
+  minWidth: 0,
+};
+const AMOUNT: CSSProperties = {
+  fontSize: "clamp(1.05rem, 9.5cqi, 1.9rem)",
+  overflowWrap: "anywhere",
+  minWidth: 0,
+};
 
 /**
  * Patrimonio / Inversiones (mockup 03). Tarjetas KPI + gráfico de barras
@@ -71,21 +96,25 @@ export function PatrimonyBlock({
         </p>
       ) : (
         <>
-          {/* KPIs */}
-          <div className="d-kpis patrimony">
-            <div className="d-kpi hero mint top-mint">
+          {/* KPIs — tres columnas parejas (en vez de 2fr 1fr 1fr). En móvil
+              apilan. Monto con fuente fluida (clamp) + overflowWrap. */}
+          <div
+            className="grid grid-cols-1 md:grid-cols-3"
+            style={{ gap: "14px" }}
+          >
+            <div className="d-kpi hero mint top-mint" style={CARD_CONTAINER}>
               <div className="lab">Balance acumulado · {horizon}A</div>
-              <div className="v">{moneyShort(balance)}</div>
+              <div className="v" style={HERO_AMOUNT}>{moneyShort(balance)}</div>
               <div className="ctx plain">Capital + retorno</div>
             </div>
-            <div className="d-kpi sky top-sky">
+            <div className="d-kpi sky top-sky" style={CARD_CONTAINER}>
               <div className="lab">Capital aportado</div>
-              <div className="v">{moneyShort(capital)}</div>
+              <div className="v" style={AMOUNT}>{moneyShort(capital)}</div>
               <div className="ctx plain">depósito + aportes</div>
             </div>
-            <div className="d-kpi mint top-gold">
+            <div className="d-kpi mint top-gold" style={CARD_CONTAINER}>
               <div className="lab">Retorno generado</div>
-              <div className="v" style={{ color: "var(--gold)" }}>
+              <div className="v" style={{ ...AMOUNT, color: "var(--gold)" }}>
                 {moneyShort(interest)}
               </div>
               <div className="ctx plain">crecimiento compuesto</div>
