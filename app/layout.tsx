@@ -1,10 +1,33 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ServiceWorkerRegister } from "./ServiceWorkerRegister";
 
 export const metadata: Metadata = {
   title: "The Money Command",
   description:
     "Construye libertad financiera con estructura, planeación y consecución de metas.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "The Money Command",
+  // Favicon de pestaña (icono redondo de la app) + icono de iOS. Usa los PNG que
+  // ya existen en /public; no se regeneran.
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/icon-192.png",
+    apple: "/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "The Money Command",
+    // Barra de estado oscura, acorde al tema oscuro de la app.
+    statusBarStyle: "black",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#7fffb2",
 };
 
 export default function RootLayout({
@@ -26,7 +49,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }
