@@ -9,6 +9,7 @@ import { DEFAULT_PORTFOLIO_RETURN } from "@/lib/formulas";
 import {
   thermostat,
   realDistribution,
+  unassignedAllocation,
   type BasketDistribution,
 } from "@/lib/dashboard";
 import { AffirmationCard } from "./AffirmationCard";
@@ -99,11 +100,28 @@ export default async function DashboardPage() {
     profile.thermostatTarget !== null ? Number(profile.thermostatTarget) : 0;
   const thermo = thermostat(avgIncome, targetIncome);
 
-  // --- Distribución real por canastas (del período; degrada al preset) ---
-  const realDist = realDistribution({ essentials, style, freedom });
-  const hasRealDist = essentials + style + freedom > 0;
+  // --- Distribución real por canastas, como % del INGRESO (no del total de
+  // gastos). Libertad incluye el aporte mensual a inversión (totalContribution),
+  // por doctrina: invertir = destinar a la libertad. Degrada al preset si no hay
+  // nada asignado todavía. ---
+  const realDist = realDistribution(
+    { essentials, style, freedom },
+    incomeTotal,
+    totalContribution,
+  );
+  const hasRealDist = essentials + style + freedom + totalContribution > 0;
   const preset = presetFromMethod(profile.preferredMethod);
   const initialDist = hasRealDist ? realDist : preset;
+
+  // "Sin asignar": ingreso − gastos − aporte a inversión. Puede ser negativo
+  // (asignó más que su ingreso). Las 3 canastas + sin asignar suman 100%.
+  const unassigned = unassignedAllocation(
+    incomeTotal,
+    essentials,
+    style,
+    freedom,
+    totalContribution,
+  );
 
   // --- Libertad: gasto mensual real (período; si 0, promedio del historial) ---
   const expenseMonths = records.map((r) => Number(r.expenseTotal)).filter((n) => n > 0);
@@ -175,6 +193,8 @@ export default async function DashboardPage() {
         realDist={realDist}
         initialDist={initialDist}
         targetDist={preset}
+        unassignedAmount={unassigned.amount}
+        unassignedPct={unassigned.pct}
         locale={locale}
         currency={currency}
       />

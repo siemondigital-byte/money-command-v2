@@ -3,6 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import { formatMoney } from "@/lib/format";
 import { distributionAmounts, type BasketDistribution } from "@/lib/dashboard";
+import { MoneyAmount } from "./MoneyAmount";
 
 // Monto de la tarjeta KPI: fuente fluida (clamp) que achica el número cuando es
 // largo + overflowWrap, para que NUNCA se corte ni desborde su tarjeta. La hero
@@ -53,6 +54,8 @@ export function MethodPanel({
   realDist,
   initialDist,
   targetDist,
+  unassignedAmount,
+  unassignedPct,
   locale,
   currency,
 }: {
@@ -63,6 +66,10 @@ export function MethodPanel({
   initialDist: BasketDistribution;
   /** Target por canasta desde el método de Settings (para el marcador). */
   targetDist: BasketDistribution;
+  /** Sin asignar (ingreso − gastos − aporte inversión). Puede ser negativo. */
+  unassignedAmount: number;
+  /** Sin asignar como % del ingreso. */
+  unassignedPct: number;
   locale: string;
   currency: string;
 }) {
@@ -70,37 +77,24 @@ export function MethodPanel({
   const moneyShort = (n: number) =>
     formatMoney(n, locale, currency, { maxFractionDigits: 0 });
 
+  // Sin redondear el valor inicial: así el monto (income × %) cae exacto sobre el
+  // real de la canasta al cargar (ej. US$ 3.500), sin arrastre de redondeo. La UI
+  // muestra el % redondeado igual.
   const [dist, setDist] = useState<BasketDistribution>({
-    essentials: round1(initialDist.essentials),
-    style: round1(initialDist.style),
-    freedom: round1(initialDist.freedom),
+    essentials: initialDist.essentials,
+    style: initialDist.style,
+    freedom: initialDist.freedom,
   });
 
   const amounts = distributionAmounts(income, dist);
   const targetAmounts = distributionAmounts(income, targetDist);
 
+  // Cada canasta es un % del ingreso y se mueve independiente. Lo que no se
+  // asigna queda como "sin asignar" (no se fuerza a que las tres sumen 100). La
+  // simulación sigue igual: arrastrás una barra y ves su % y su monto.
   function handleChange(key: BasketKey, raw: number) {
     const value = Math.min(100, Math.max(0, raw));
-    const others = BASKET_META.map((b) => b.key).filter((k) => k !== key);
-    const remaining = 100 - value;
-    const [a, b] = others as [BasketKey, BasketKey];
-    const sumOthers = dist[a] + dist[b];
-    let next: BasketDistribution;
-    if (sumOthers <= 0) {
-      next = { ...dist, [key]: value, [a]: remaining / 2, [b]: remaining / 2 };
-    } else {
-      next = {
-        ...dist,
-        [key]: value,
-        [a]: (dist[a] / sumOthers) * remaining,
-        [b]: (dist[b] / sumOthers) * remaining,
-      };
-    }
-    setDist({
-      essentials: round1(next.essentials),
-      style: round1(next.style),
-      freedom: round1(next.freedom),
-    });
+    setDist({ ...dist, [key]: round1(value) });
   }
 
   const realFreedom = round1(realDist.freedom);
@@ -116,23 +110,36 @@ export function MethodPanel({
       {/* KPIs — tres columnas parejas (en vez de 2fr 1fr 1fr). En móvil apilan.
           El monto usa fuente fluida (clamp) + overflowWrap para no cortarse. */}
       <div
-        className="grid grid-cols-1 md:grid-cols-3"
+        className="grid grid-cols-1 md:grid-cols-4"
         style={{ gap: "14px" }}
       >
         <div className="d-kpi hero mint top-mint">
           <div className="lab">Ingreso del mes</div>
-          <div className="v" style={HERO_AMOUNT}>{money(income)}</div>
+          <div className="v" style={HERO_AMOUNT}>
+            <MoneyAmount value={income} locale={locale} currency={currency} />
+          </div>
           <div className="ctx plain">Plan A + B + C</div>
         </div>
         <div className="d-kpi sky top-sky">
           <div className="lab">Gastado</div>
-          <div className="v" style={AMOUNT}>{moneyShort(gastado)}</div>
+          <div className="v" style={AMOUNT}>
+            <MoneyAmount value={gastado} locale={locale} currency={currency} />
+          </div>
           <div className="ctx plain">Esenciales + Estilo</div>
         </div>
         <div className="d-kpi gold top-gold">
           <div className="lab">Invertido</div>
-          <div className="v" style={AMOUNT}>{moneyShort(invertido)}</div>
+          <div className="v" style={AMOUNT}>
+            <MoneyAmount value={invertido} locale={locale} currency={currency} />
+          </div>
           <div className="ctx plain">aporte mensual a inversión</div>
+        </div>
+        <div className="d-kpi coral top-coral">
+          <div className="lab">Sin asignar</div>
+          <div className="v" style={AMOUNT}>
+            <MoneyAmount value={unassignedAmount} locale={locale} currency={currency} />
+          </div>
+          <div className="ctx plain">{unassignedPct.toFixed(0)}% del ingreso</div>
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import {
   thermostat,
   realDistribution,
+  unassignedAllocation,
   distributionAmounts,
   freedomNumber,
   freedomNumberInflated,
@@ -57,25 +58,49 @@ describe("thermostat", () => {
   });
 });
 
-describe("realDistribution", () => {
-  it("reparte en % sobre el total destinado", () => {
-    const r = realDistribution({ essentials: 5000, style: 3000, freedom: 2000 });
-    expect(r.essentials).toBeCloseTo(50);
-    expect(r.style).toBeCloseTo(30);
-    expect(r.freedom).toBeCloseTo(20);
+describe("realDistribution (% del ingreso; Libertad incluye inversión)", () => {
+  it("ejemplo de Andrea: 47% / 11% / 19% del ingreso", () => {
+    // ingreso 7475, esenciales 3500, estilo 820, libertad 0, aporte inversión 1400
+    const r = realDistribution({ essentials: 3500, style: 820, freedom: 0 }, 7475, 1400);
+    expect(Math.round(r.essentials)).toBe(47);
+    expect(Math.round(r.style)).toBe(11);
+    expect(Math.round(r.freedom)).toBe(19); // (0 + 1400) / 7475
   });
 
-  it("suma ~100", () => {
-    const r = realDistribution({ essentials: 1, style: 1, freedom: 1 });
-    expect(r.essentials + r.style + r.freedom).toBeCloseTo(100);
+  it("Libertad suma gastos freedom + aporte a inversión", () => {
+    const r = realDistribution({ essentials: 0, style: 0, freedom: 500 }, 2000, 500);
+    expect(r.freedom).toBeCloseTo(50); // (500 + 500) / 2000
   });
 
-  it("sin datos degrada a ceros (sin div/0)", () => {
-    expect(realDistribution({ essentials: 0, style: 0, freedom: 0 })).toEqual({
-      essentials: 0,
-      style: 0,
-      freedom: 0,
-    });
+  it("sin ingreso degrada a ceros (sin div/0)", () => {
+    expect(
+      realDistribution({ essentials: 100, style: 50, freedom: 0 }, 0, 0),
+    ).toEqual({ essentials: 0, style: 0, freedom: 0 });
+  });
+});
+
+describe("unassignedAllocation (sin asignar)", () => {
+  it("ejemplo de Andrea: US$ 1.755 (23%)", () => {
+    const r = unassignedAllocation(7475, 3500, 820, 0, 1400);
+    expect(r.amount).toBe(1755);
+    expect(Math.round(r.pct)).toBe(23);
+  });
+
+  it("las 3 canastas + sin asignar suman 100% del ingreso", () => {
+    const income = 7475;
+    const d = realDistribution({ essentials: 3500, style: 820, freedom: 0 }, income, 1400);
+    const u = unassignedAllocation(income, 3500, 820, 0, 1400);
+    expect(d.essentials + d.style + d.freedom + u.pct).toBeCloseTo(100);
+  });
+
+  it("puede ser negativo (asignó más que el ingreso)", () => {
+    const r = unassignedAllocation(3000, 2500, 600, 0, 400);
+    expect(r.amount).toBe(-500);
+    expect(r.pct).toBeLessThan(0);
+  });
+
+  it("ingreso 0 -> {0, 0} (sin div/0)", () => {
+    expect(unassignedAllocation(0, 0, 0, 0, 0)).toEqual({ amount: 0, pct: 0 });
   });
 });
 

@@ -79,26 +79,56 @@ export interface BasketDistribution {
 }
 
 /**
- * Distribución real del usuario por canasta, en % sobre el total destinado
- * (esenciales + estilo + libertad). Comparable con los presets (50/30/20…) y
- * con las barras simulables.
+ * Distribución real del usuario por canasta, como % del INGRESO del período.
  *
- * Si no hay nada cargado (total 0) devuelve {0,0,0} y la UI degrada al preset
- * del método preferido.
+ * Doctrina (decisión de Andrea): invertir = destinar a la libertad. Por eso la
+ * canasta Libertad incluye el APORTE MENSUAL A INVERSIÓN (`contribution`) además
+ * de los gastos categorizados como "freedom". Todo se mide sobre el ingreso, así
+ * el % y el monto son coherentes entre sí:
+ *   - Esenciales% = gastos esenciales / ingreso
+ *   - Estilo%     = gastos estilo / ingreso
+ *   - Libertad%   = (gastos libertad + aporte inversión) / ingreso
+ *
+ * Los tres NO suman 100: lo que falta es "sin asignar" (ver unassignedAllocation).
+ * Si no hay ingreso (<=0) devuelve {0,0,0} (evita div/0) y la UI degrada al preset.
  */
-export function realDistribution(input: BasketDistribution): BasketDistribution {
-  const total = input.essentials + input.style + input.freedom;
-  if (total <= 0) return { essentials: 0, style: 0, freedom: 0 };
+export function realDistribution(
+  input: BasketDistribution,
+  income: number,
+  contribution = 0,
+): BasketDistribution {
+  if (income <= 0) return { essentials: 0, style: 0, freedom: 0 };
   return {
-    essentials: (input.essentials / total) * 100,
-    style: (input.style / total) * 100,
-    freedom: (input.freedom / total) * 100,
+    essentials: (input.essentials / income) * 100,
+    style: (input.style / income) * 100,
+    freedom: ((input.freedom + contribution) / income) * 100,
   };
 }
 
 /**
- * Convierte una distribución en % en montos sobre un ingreso dado.
- * (income × pct / 100 por canasta). Usado por la simulación de las barras.
+ * "Sin asignar" del mes: el ingreso que no fue ni gastado ni invertido.
+ *   monto = ingreso − esenciales − estilo − gastos libertad − aporte inversión
+ *   pct   = monto / ingreso × 100
+ *
+ * Puede ser NEGATIVO (asignaste más que tu ingreso ese mes): NO se limita a 0.
+ * Con esto, las tres canastas + sin asignar suman el 100% del ingreso.
+ */
+export function unassignedAllocation(
+  income: number,
+  essentials: number,
+  style: number,
+  freedom: number,
+  contribution: number,
+): { amount: number; pct: number } {
+  const amount = round2(income - essentials - style - freedom - contribution);
+  const pct = income > 0 ? round2((amount / income) * 100) : 0;
+  return { amount, pct };
+}
+
+/**
+ * Convierte una distribución en % (sobre el ingreso) en montos.
+ * (income × pct / 100 por canasta). Usado por la simulación de las barras: como
+ * el % ya es sobre el ingreso, el monto resultante es coherente con la barra.
  */
 export function distributionAmounts(
   income: number,

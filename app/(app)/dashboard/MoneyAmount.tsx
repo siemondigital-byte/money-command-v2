@@ -16,8 +16,13 @@ export function MoneyAmount({
   currency: string;
 }) {
   const { symbol, number } = splitMoney(value, locale, currency);
+  // El signo negativo va ANTES del símbolo y a tamaño completo (ej. "-US$ 500",
+  // no "US$ -500"), para que el monto negativo de "sin asignar" se lea claro.
+  const negative = number.startsWith("-");
+  const digits = negative ? number.slice(1) : number;
   return (
     <>
+      {negative && "-"}
       <span
         style={{
           fontSize: "0.55em",
@@ -30,7 +35,7 @@ export function MoneyAmount({
       >
         {symbol}
       </span>
-      {number}
+      {digits}
     </>
   );
 }
