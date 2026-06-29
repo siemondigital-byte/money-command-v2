@@ -250,6 +250,11 @@ model Expense {
   @@index([userId, isAntExpense])
   @@index([userId, year, month])
   @@index([userId, goalId])
+  // Blindaje contra duplicados de la generación automática de Metas (Etapa 3b):
+  // a lo sumo UN gasto por meta y período. Para gastos sin meta (goalId NULL),
+  // Postgres trata los NULL como distintos, así que NO restringe los gastos
+  // normales: solo impide dos gastos de la MISMA meta en el mismo year/month.
+  @@unique([goalId, year, month])
   @@map("expenses")
 }
 

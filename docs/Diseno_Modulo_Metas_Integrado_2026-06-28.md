@@ -21,28 +21,19 @@ El dinero que se destina a una meta es PARTE del gasto de su canasta, no dinero 
 
 La app no inventa dinero ni lo mueve: ayuda a la persona a decidir, con su presupuesto real enfrente, si puede comprar algo de una vez o si tiene que juntar mes a mes, y a hacer el seguimiento de ese plan.
 
-## 1.d. Dos tipos de meta (elegidos al crear)
+## 1.d. Modelo final: un solo tipo de meta (generación automática)
 
-Cada meta es de UN tipo, que la persona elige al crearla. Nunca ambos sobre la misma meta (eso evita doble conteo).
+DECISIÓN FINAL de Andrea (reemplaza el modelo de "dos tipos"): hay UN solo modelo de meta, y el módulo de Gastos NO se toca.
 
-**Tipo "ahorro programado" (automática):**
-- La meta genera un gasto real en su canasta cada mes, por el monto de la cuota definida.
-- Ese gasto cuenta en la canasta (Esenciales/Estilo) como cualquier otro gasto: ocupa lugar en el presupuesto de esa canasta, suma a la consolidación como gasto real.
-- A la vez, ese mismo gasto es el aporte a la meta (queda vinculado a ella vía goalId).
-- Un solo movimiento de dinero: contado una vez como gasto, que además avanza la meta. Cero doble conteo.
-- Para ahorro disciplinado y constante ("aparto US$ 300/mes para el viaje, siempre").
+- Una meta vive 100% en el módulo de Metas. La persona la crea ahí con: nombre, monto objetivo, canasta (Esenciales o Estilo, OBLIGATORIO), plazo deseado y cuota mensual.
+- El sistema genera AUTOMÁTICAMENTE, cada mes, un gasto real en esa canasta por el valor de la cuota. Ese gasto:
+  - Cuenta en la canasta como cualquier otro gasto (ocupa lugar en el presupuesto, entra a la consolidación como gasto real).
+  - Queda vinculado a la meta (goalId), y es a la vez el aporte que avanza la meta.
+  - Es un solo movimiento: contado una vez como gasto, que además avanza la meta. Cero doble conteo.
+- La generación es automática y "pegajosa": se repite mes a mes con el valor de la cuota, hasta que la persona la cambie (modificar la cuota, pausar la meta vía isActive, o hasta que se alcance el objetivo, isAchieved).
+- El módulo de Gastos NO se modifica: la persona no vincula gastos a mano. Todo el trabajo de metas es en el módulo de Metas; el gasto aparece solo.
 
-**Tipo "compra etiquetada" (manual):**
-- La persona vincula gastos reales a la meta cuando ocurren (al cargar un gasto, lo marca como "va a esta meta").
-- El progreso es la suma de esos gastos marcados.
-- Para ahorro irregular ("cuando puedo, le meto al cambio de teléfono").
-
-Ambos tipos:
-- El dinero sale de la canasta de gasto (Esenciales/Estilo), nunca de inversiones.
-- El gasto se cuenta una sola vez (en su canasta); la meta solo lo re-lee para el progreso.
-- Cero efecto neto sobre los totales más allá del gasto que ya existe.
-
-Diferencia clave de construcción: el tipo "automática" CREA un gasto cada mes (la meta es la fuente del gasto); el tipo "etiquetada" VINCULA gastos que la persona ya carga por su cuenta. El campo goalId de la Etapa 1 sirve para los dos (en automática, el gasto generado lleva el goalId; en etiquetada, la persona se lo asigna).
+Nota sobre el campo goalType (Etapa 2.5): se agregó pensando en dos tipos (automatic/tagged). Con esta decisión final, en la práctica todas las metas son "automatic". El campo queda en el schema sin daño (default "tagged" para metas viejas), pero el modelo operativo es un único flujo automático. No hace falta deshacerlo.
 
 ## 1.c. La herramienta debe confrontar con el presupuesto real
 
@@ -154,11 +145,11 @@ El rediseño NO se hace de un prompt. Se hace por etapas, validando cada una ant
 
 **Etapa 2.5 — Modelo del tipo de meta (NUEVA, pendiente):** agregar al schema un campo para el tipo de meta (automática / etiquetada). Migración chica, aditiva. Define cómo se comporta cada meta.
 
-**Etapa 3a — Vinculación en Gastos:** en el formulario de Gastos, permitir vincular un gasto a una meta de tipo etiquetada (selector opcional, solo metas de la misma canasta). 
+**Etapa 3a — DESCARTADA:** se había planeado vincular gastos a metas desde el formulario de Gastos. Se descarta: el módulo de Gastos NO se toca. La meta genera su gasto sola.
 
-**Etapa 3b — Generación automática:** para metas de tipo automática, generar el gasto mensual de la cuota en su canasta (vinculado a la meta).
+**Etapa 3b — Generación automática del gasto (CORAZÓN del rediseño):** cuando una meta tiene cuota, el sistema crea/mantiene un gasto real mensual en su canasta, vinculado a la meta (goalId). Debe ser idempotente (no duplicar el gasto del mes), respetar el período (year/month), actualizarse si cambia la cuota, y entrar a la consolidación como gasto real sin romper nada. Es la etapa más delicada: el sistema crea gastos solo.
 
-**Etapa 3c — Interfaz de Metas:** rediseñar la página de Metas para crear metas (eligiendo tipo), y mostrar cuota sugerida, % de canasta, viabilidad, progreso real, proyección plan vs ritmo.
+**Etapa 3c — Interfaz de Metas:** rediseñar la página de Metas para crear/editar metas (nombre, monto, canasta obligatoria, plazo, cuota) y mostrar cuota sugerida, % de canasta, viabilidad, progreso real, proyección plan vs ritmo.
 
 **Etapa 4 — Conexión con Dashboard:** mostrar las metas como bloque de contexto en el Dashboard, sin afectar KPIs (más allá del gasto real que ya cuenta).
 
