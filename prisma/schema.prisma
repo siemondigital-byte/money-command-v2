@@ -354,6 +354,14 @@ model Goal {
   basket      String // "essentials" | "style" | "freedom"
   // LEGACY (need|want|patrimony): se deriva de basket. Ver CONTEXT.md.
   category    String
+  // Tipo de meta (rediseño Metas, Etapa 2.5):
+  //   "automatic" — ahorro programado: genera un gasto real en su canasta cada
+  //                 mes por el monto de monthlyContribution (anclado en createdAt,
+  //                 generacion idempotente). Implementacion de la generacion: Etapa 3b.
+  //   "tagged"    — compra etiquetada: la persona vincula gastos reales (goalId)
+  //                 cuando ocurren. Es el comportamiento de la Etapa 1.
+  // Default "tagged": las metas existentes y nuevas son etiquetadas salvo opt-in.
+  goalType    String @default("tagged")
   targetAmount Decimal @db.Decimal(12, 2)
   targetDate  DateTime? // opcional: para medir si va a tiempo o atrasado
   // DEPRECADO (rediseño Metas integrado): el progreso ya NO se lee de acá.

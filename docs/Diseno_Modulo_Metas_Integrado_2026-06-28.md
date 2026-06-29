@@ -21,16 +21,28 @@ El dinero que se destina a una meta es PARTE del gasto de su canasta, no dinero 
 
 La app no inventa dinero ni lo mueve: ayuda a la persona a decidir, con su presupuesto real enfrente, si puede comprar algo de una vez o si tiene que juntar mes a mes, y a hacer el seguimiento de ese plan.
 
-## 1.b. Un solo tipo de meta (no dos)
+## 1.d. Dos tipos de meta (elegidos al crear)
 
-No hay "compra puntual" vs "ahorro a plazo" como tipos distintos. Es UN solo mecanismo que responde a las dos situaciones según los números de la persona:
+Cada meta es de UN tipo, que la persona elige al crearla. Nunca ambos sobre la misma meta (eso evita doble conteo).
 
-- La persona define: qué quiere comprar, cuánto cuesta, para cuándo lo quiere, y en qué canasta cae.
-- La app calcula si, dado su presupuesto de esa canasta, le alcanza de un solo pago en el plazo que quiere, o cuánto tiene que apartar por mes para llegar.
-- Si le alcanza de una: la meta se cumple comprando ese mes.
-- Si no le alcanza de una: la app reparte el objetivo en cuotas mensuales auto-impuestas (las "cuotas" del método, sin tarjeta ni interés) y la persona va juntando.
+**Tipo "ahorro programado" (automática):**
+- La meta genera un gasto real en su canasta cada mes, por el monto de la cuota definida.
+- Ese gasto cuenta en la canasta (Esenciales/Estilo) como cualquier otro gasto: ocupa lugar en el presupuesto de esa canasta, suma a la consolidación como gasto real.
+- A la vez, ese mismo gasto es el aporte a la meta (queda vinculado a ella vía goalId).
+- Un solo movimiento de dinero: contado una vez como gasto, que además avanza la meta. Cero doble conteo.
+- Para ahorro disciplinado y constante ("aparto US$ 300/mes para el viaje, siempre").
 
-La diferencia entre "lo compro ya" y "lo junto en 6 meses" no es un tipo de meta: es el resultado del mismo cálculo aplicado a la realidad presupuestaria de la persona.
+**Tipo "compra etiquetada" (manual):**
+- La persona vincula gastos reales a la meta cuando ocurren (al cargar un gasto, lo marca como "va a esta meta").
+- El progreso es la suma de esos gastos marcados.
+- Para ahorro irregular ("cuando puedo, le meto al cambio de teléfono").
+
+Ambos tipos:
+- El dinero sale de la canasta de gasto (Esenciales/Estilo), nunca de inversiones.
+- El gasto se cuenta una sola vez (en su canasta); la meta solo lo re-lee para el progreso.
+- Cero efecto neto sobre los totales más allá del gasto que ya existe.
+
+Diferencia clave de construcción: el tipo "automática" CREA un gasto cada mes (la meta es la fuente del gasto); el tipo "etiquetada" VINCULA gastos que la persona ya carga por su cuenta. El campo goalId de la Etapa 1 sirve para los dos (en automática, el gasto generado lleva el goalId; en etiquetada, la persona se lo asigna).
 
 ## 1.c. La herramienta debe confrontar con el presupuesto real
 
@@ -136,15 +148,19 @@ El cambio más grande de construcción: pasar de un `currentAmount` único a un 
 
 El rediseño NO se hace de un prompt. Se hace por etapas, validando cada una antes de la siguiente, como toda la app:
 
-**Etapa 0 — Decisión pendiente:** elegir Enfoque 1 (registro manual) o Enfoque 2 (vincular gastos). Recomendado: Enfoque 1.
+**Etapa 1 — COMPLETADA:** campo goalId en Expense (vínculo gasto-meta), relación onDelete SetNull, índice. currentAmount deprecado. Migración aplicada.
 
-**Etapa 1 — Modelo de datos:** ajustar el schema para soportar aportes mensuales por meta (una tabla/relación de aportes con fecha y monto), conservando nombre, monto objetivo, canasta y plazo. Migración de Prisma. Sin tocar la consolidación.
+**Etapa 2 — COMPLETADA:** lógica de cálculo en lib/goals.ts (cuota sugerida, % de canasta, viabilidad 30/60, progreso real, ritmo dinámico que cuenta meses en cero). Con tests.
 
-**Etapa 2 — Lógica de cálculo:** actualizar lib/goals.ts con cuota sugerida, % de canasta, acumulado real, faltante, progreso, y tiempo estimado dinámico. Con sus tests.
+**Etapa 2.5 — Modelo del tipo de meta (NUEVA, pendiente):** agregar al schema un campo para el tipo de meta (automática / etiquetada). Migración chica, aditiva. Define cómo se comporta cada meta.
 
-**Etapa 3 — Interfaz del módulo Metas:** rediseñar la página de Metas para crear/editar metas con el modelo nuevo, registrar aportes mensuales, y mostrar cuota sugerida + % de canasta + progreso + proyección dinámica.
+**Etapa 3a — Vinculación en Gastos:** en el formulario de Gastos, permitir vincular un gasto a una meta de tipo etiquetada (selector opcional, solo metas de la misma canasta). 
 
-**Etapa 4 — Conexión con Dashboard:** mostrar las metas como bloque de contexto en el Dashboard, sin afectar KPIs.
+**Etapa 3b — Generación automática:** para metas de tipo automática, generar el gasto mensual de la cuota en su canasta (vinculado a la meta).
+
+**Etapa 3c — Interfaz de Metas:** rediseñar la página de Metas para crear metas (eligiendo tipo), y mostrar cuota sugerida, % de canasta, viabilidad, progreso real, proyección plan vs ritmo.
+
+**Etapa 4 — Conexión con Dashboard:** mostrar las metas como bloque de contexto en el Dashboard, sin afectar KPIs (más allá del gasto real que ya cuenta).
 
 Cada etapa es uno o más prompts de Code, diagnóstico primero donde toque zonas sensibles, validación local antes de pushear.
 
