@@ -231,6 +231,17 @@ model Expense {
   unitAmount      Decimal? @db.Decimal(12, 2) // ej. $5 por café
   frequencyPerMonth Int?    // ej. 20 días al mes
 
+  // Vínculo opcional a una Meta (rediseño Metas integrado, Etapa 1).
+  // Un gasto real puede etiquetarse como aporte a una meta: además de contar en
+  // su canasta como siempre, suma al progreso de esa meta (progreso = suma de
+  // gastos vinculados). Es solo presentación: NO altera la consolidación.
+  //
+  // onDelete: SetNull es CRÍTICO. Un Expense es un gasto real que entra al
+  // MonthlyRecord; al borrar una meta el gasto NO se debe borrar (corromperia
+  // los totales). Solo se desvincula (goalId -> NULL).
+  goalId String? @db.Uuid
+  goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -238,6 +249,7 @@ model Expense {
   @@index([userId, isActive])
   @@index([userId, isAntExpense])
   @@index([userId, year, month])
+  @@index([userId, goalId])
   @@map("expenses")
 }
 
@@ -344,8 +356,17 @@ model Goal {
   category    String
   targetAmount Decimal @db.Decimal(12, 2)
   targetDate  DateTime? // opcional: para medir si va a tiempo o atrasado
+  // DEPRECADO (rediseño Metas integrado): el progreso ya NO se lee de acá.
+  // Ahora el progreso = suma de gastos vinculados (Expense.goalId). Se conserva
+  // la columna para no perder datos historicos; no se escribe ni se lee mas.
   currentAmount Decimal @default(0) @db.Decimal(12, 2)
+  // Cuota "pegajosa": el aporte/cuota mensual que define la persona (su plan).
+  // Se mantiene hasta que la modifique; base de la proyeccion por plan.
   monthlyContribution Decimal @default(0) @db.Decimal(12, 2)
+
+  // Gastos reales vinculados a esta meta (back-relation de Expense.goalId).
+  // El progreso de la meta se calcula sumando estos gastos. Presentacion pura.
+  expenses Expense[]
 
   isActive   Boolean  @default(true)
   isAchieved Boolean  @default(false)

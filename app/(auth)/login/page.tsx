@@ -2,7 +2,7 @@ import Link from "next/link";
 import { loginAction } from "@/app/(auth)/actions";
 import { AuthForm, Field } from "@/app/(auth)/_components/AuthForm";
 
-export const metadata = { title: "Iniciar sesión · The Money Command" };
+export const metadata = { title: "Sign in · The Money Command" };
 
 export default async function LoginPage({
   searchParams,
