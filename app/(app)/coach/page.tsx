@@ -105,7 +105,7 @@ export default async function CoachPage() {
         <div className="label mb-1">Coach</div>
         <h1>Tu salud financiera</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
-          Cinco métricas que el Coach lee de tus módulos (ingresos, gastos,
+          Cinco métricas que el Coach lee de tus módulos (ingresos, egresos,
           deudas, inversiones y metas) para darte una foto de tu salud financiera
           y decirte qué priorizar. Es solo lectura: no cambia ninguno de tus
           datos.

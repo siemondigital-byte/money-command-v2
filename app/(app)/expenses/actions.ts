@@ -166,7 +166,7 @@ export async function updateExpenseAction(
         amount: dec(parsed.data.amount),
       },
     });
-    if (r.count === 0) return { error: "Gasto no encontrado o sin permiso" };
+    if (r.count === 0) return { error: "Egreso no encontrado o sin permiso" };
   } catch (err) {
     console.error("[updateExpense] failed:", err);
     return {

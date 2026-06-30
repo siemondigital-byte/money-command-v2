@@ -7,7 +7,7 @@ import { logoutAction } from "@/app/(auth)/actions";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/income", label: "Ingresos" },
-  { href: "/expenses", label: "Gastos" },
+  { href: "/expenses", label: "Egresos" },
   { href: "/investments", label: "Inversiones" },
   { href: "/debts", label: "Deudas" },
   { href: "/goals", label: "Metas" },

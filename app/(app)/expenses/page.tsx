@@ -18,7 +18,7 @@ import { ExpenseForm } from "./ExpenseForm";
 import { SubscriptionForm } from "./SubscriptionForm";
 import { deleteExpenseAction } from "./actions";
 
-export const metadata = { title: "Gastos · The Money Command" };
+export const metadata = { title: "Egresos · The Money Command" };
 
 const MONTH_LABELS_ES = [
   "Enero",
@@ -108,11 +108,11 @@ export default async function ExpensesPage({
     <div className="fade-up flex flex-col gap-6">
       <header>
         <div className="label mb-1">
-          Gastos · {MONTH_LABELS_ES[period.month - 1]} {period.year}
+          Egresos · {MONTH_LABELS_ES[period.month - 1]} {period.year}
         </div>
         <h1>Dirigí tu dinero</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
-          Registrá tus gastos del período y asigná cada uno a una canasta:
+          Registrá tus egresos del período y asigná cada uno a una canasta:
           Esenciales, Estilo o Libertad. El total real y el desglose por canasta
           se consolidan en el período activo.
         </p>
@@ -186,7 +186,7 @@ export default async function ExpensesPage({
       {tab === "variable" && (
         <section className="card flex flex-col gap-4">
         <div>
-          <div className="label">Suscripciones y gastos hormiga</div>
+          <div className="label">Suscripciones y egresos hormiga</div>
           <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
             Se suman dentro de Estilo. Mirá lo que pesan al mes, al año y a
             futuro.
@@ -316,7 +316,7 @@ function ExpenseTypeSection({
   const subtotal = rows
     .filter((r) => r.isActive)
     .reduce((s, r) => s + r.amount, 0);
-  const label = type === "fixed" ? "Gastos fijos" : "Gastos variables";
+  const label = type === "fixed" ? "Egresos fijos" : "Egresos variables";
 
   return (
     <section className="card flex flex-col gap-3">
@@ -492,7 +492,7 @@ function ExpenseTypeSection({
             className="label"
             style={{ marginBottom: "8px", color: "var(--muted)" }}
           >
-            Editar gasto
+            Editar egreso
           </div>
         )}
         <ExpenseForm type={type} editing={editing} onDoneHref={`/expenses?tab=${tab}`} />
@@ -516,9 +516,12 @@ function BasketSection({
   return (
     <section className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4 items-stretch">
       <div className="card flex flex-col gap-5">
-        <div className="label">Reparto del gasto real por canasta</div>
+        <div className="label">Reparto del egreso real por canasta</div>
         {BASKETS.map((b) => {
           const real = realByBasket[b];
+          // Ocultar la fila completa de una canasta sin gastos en el período
+          // (total = 0): no se muestra "$0 · 0%", simplemente no aparece.
+          if (real <= 0) return null;
           // NIVEL 1 — % de la canasta sobre el total real del mes.
           // Las tres suman 100%. Si el total es 0, 0% sin dividir por cero.
           const pct = total > 0 ? (real / total) * 100 : 0;
@@ -658,7 +661,7 @@ function BasketSection({
               textAlign: "center",
             }}
           >
-            Sin gastos para graficar
+            Sin egresos para graficar
           </div>
         )}
       </div>

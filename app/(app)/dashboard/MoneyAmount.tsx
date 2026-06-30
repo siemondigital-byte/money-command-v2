@@ -1,4 +1,4 @@
-import { splitMoney } from "@/lib/format";
+import { splitMoneyShort } from "@/lib/format";
 
 /**
  * Monto grande con el SÍMBOLO de moneda en chico (≈0.55em del número). Así el
@@ -15,7 +15,7 @@ export function MoneyAmount({
   locale: string;
   currency: string;
 }) {
-  const { symbol, number } = splitMoney(value, locale, currency);
+  const { symbol, number } = splitMoneyShort(value, locale, currency);
   // El signo negativo va ANTES del símbolo y a tamaño completo (ej. "-US$ 500",
   // no "US$ -500"), para que el monto negativo de "sin asignar" se lea claro.
   const negative = number.startsWith("-");

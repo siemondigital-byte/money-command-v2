@@ -103,7 +103,7 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
           />
         </Row>
         <Field
-          label="Gasto mensual deseado en libertad (opcional)"
+          label="Egreso mensual deseado en libertad (opcional)"
           name="freedomMonthlySpend"
           type="number"
           step="0.01"

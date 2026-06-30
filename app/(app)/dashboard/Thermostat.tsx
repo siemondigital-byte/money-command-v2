@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMoney } from "@/lib/format";
+import { formatMoneyShort } from "@/lib/format";
 
 /**
  * Termostato financiero VERTICAL y compacto (ANEXO REDISENO §2).
@@ -29,9 +29,8 @@ export function Thermostat({
   locale: string;
   currency: string;
 }) {
-  const money = (n: number) => formatMoney(n, locale, currency);
-  const moneyShort = (n: number) =>
-    formatMoney(n, locale, currency, { maxFractionDigits: 0 });
+  const money = (n: number) => formatMoneyShort(n, locale, currency);
+  const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
   const hasTarget = target > 0;
 
   // Nivel del tubo: actual sobre la escala 0..target (tope 100%).
@@ -82,13 +81,13 @@ export function Thermostat({
           <div className="scale" style={{ minWidth: 0 }}>
             <div>
               <div className="label">Meta 2 años</div>
-              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "var(--gold)" }}>
+              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-0.03em", lineHeight: 1, color: "var(--gold)" }}>
                 {moneyShort(target)}
               </div>
             </div>
             <div>
               <div className="label">Hoy (prom.)</div>
-              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "var(--accent-2)" }}>
+              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-0.03em", lineHeight: 1, color: "var(--accent-2)" }}>
                 {hasHistory ? moneyShort(current) : "—"}
               </div>
             </div>
@@ -98,7 +97,9 @@ export function Thermostat({
                 style={{
                   fontFamily: "Syne, sans-serif",
                   fontWeight: 800,
-                  fontSize: "1rem",
+                  fontSize: "1.5rem",
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
                   color: reached ? "var(--accent)" : "var(--text)",
                 }}
               >

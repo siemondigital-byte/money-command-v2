@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { formatMoney } from "@/lib/format";
+import { formatMoneyShort } from "@/lib/format";
 import { distributionAmounts, type BasketDistribution } from "@/lib/dashboard";
 import { MoneyAmount } from "./MoneyAmount";
 
@@ -73,9 +73,8 @@ export function MethodPanel({
   locale: string;
   currency: string;
 }) {
-  const money = (n: number) => formatMoney(n, locale, currency);
-  const moneyShort = (n: number) =>
-    formatMoney(n, locale, currency, { maxFractionDigits: 0 });
+  const money = (n: number) => formatMoneyShort(n, locale, currency);
+  const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
 
   // Sin redondear el valor inicial: así el monto (income × %) cae exacto sobre el
   // real de la canasta al cargar (ej. US$ 3.500), sin arrastre de redondeo. La UI
@@ -222,7 +221,7 @@ export function MethodPanel({
       >
         {!hasReal ? (
           <span>
-            Todavía no hay gastos cargados para comparar. Estás viendo el preset
+            Todavía no hay egresos cargados para comparar. Estás viendo el preset
             de tu método preferido.
           </span>
         ) : diffPct > 0 ? (

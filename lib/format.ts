@@ -98,3 +98,73 @@ export function formatPct(
     maximumFractionDigits: maxFractionDigits,
   }).format(ratio);
 }
+
+/**
+ * Formato compacto SOLO para millones: abrevia con "M" (un decimal si aporta)
+ * los montos de 1.000.000 o más. Los menores se muestran completos, con
+ * separador de miles y SIN decimales (igual que formatMoney).
+ *
+ * Pensado para el Dashboard (tarjetas KPI, barras del método, termostato,
+ * Calculadora de Libertad), donde los montos grandes no deben desbordar.
+ *
+ *   formatMoneyShort(1_200_000, "es", "USD") → "US$ 1,2M"
+ *   formatMoneyShort(2_000_000, "es", "USD") → "US$ 2M"
+ *   formatMoneyShort(955_882,   "es", "USD") → "US$ 955.882"
+ *   formatMoneyShort(14_516,    "en", "USD") → "$14,516"
+ */
+export function formatMoneyShort(
+  amount: number,
+  locale: string,
+  currency: string,
+): string {
+  if (Math.abs(amount) >= 1_000_000) {
+    const millions = Math.round((amount / 1_000_000) * 10) / 10;
+    const hasFraction = millions % 1 !== 0;
+    const num = new Intl.NumberFormat(bcp47(locale), {
+      style: "currency",
+      currency,
+      minimumFractionDigits: hasFraction ? 1 : 0,
+      maximumFractionDigits: 1,
+    }).format(millions);
+    return `${num}M`;
+  }
+  return formatMoney(amount, locale, currency);
+}
+
+/**
+ * Igual que formatMoneyShort pero separando símbolo y número (para MoneyAmount,
+ * que muestra el símbolo más chico). Para millones el número incluye la "M".
+ *
+ *   splitMoneyShort(1_200_000, "es", "USD") → { symbol: "US$", number: "1,2M" }
+ *   splitMoneyShort(14_516,    "es", "USD") → { symbol: "US$", number: "14.516" }
+ */
+export function splitMoneyShort(
+  amount: number,
+  locale: string,
+  currency: string,
+): { symbol: string; number: string } {
+  if (Math.abs(amount) >= 1_000_000) {
+    const millions = Math.round((amount / 1_000_000) * 10) / 10;
+    const hasFraction = millions % 1 !== 0;
+    const parts = new Intl.NumberFormat(bcp47(locale), {
+      style: "currency",
+      currency,
+      minimumFractionDigits: hasFraction ? 1 : 0,
+      maximumFractionDigits: 1,
+    }).formatToParts(millions);
+
+    let symbol = "";
+    let number = "";
+    for (const p of parts) {
+      if (p.type === "currency") {
+        symbol += p.value;
+      } else if (p.type === "literal" && p.value.trim() === "") {
+        continue;
+      } else {
+        number += p.value;
+      }
+    }
+    return { symbol, number: `${number}M` };
+  }
+  return splitMoney(amount, locale, currency);
+}

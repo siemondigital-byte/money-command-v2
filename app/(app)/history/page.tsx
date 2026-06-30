@@ -103,7 +103,7 @@ export default async function HistoryPage({
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
                   <Th>Mes</Th>
                   <Th align="right">Ingresos</Th>
-                  <Th align="right">Gastos</Th>
+                  <Th align="right">Egresos</Th>
                   <Th align="right">Tasa ahorro</Th>
                   <Th align="right">Patrimonio</Th>
                   <Th align="right">Acción</Th>
@@ -198,7 +198,7 @@ export default async function HistoryPage({
                   value={money.format(r.incomeTotal)}
                   color="var(--accent)"
                 />
-                <Field label="Gastos" value={money.format(r.expenseTotal)} />
+                <Field label="Egresos" value={money.format(r.expenseTotal)} />
                 <Field
                   label="Tasa ahorro"
                   value={pct.format(r.savingsRate / 100)}
@@ -296,7 +296,7 @@ function AddMonthHint() {
         Para registrar un mes nuevo, elegilo arriba en{" "}
         <strong style={{ color: "var(--text)" }}>PERÍODO</strong> (mes y año), en
         la parte superior de la pantalla. El mes se crea solo al seleccionarlo, y
-        después podés cargar sus ingresos, gastos e inversiones.
+        después podés cargar sus ingresos, egresos e inversiones.
       </div>
     </details>
   );

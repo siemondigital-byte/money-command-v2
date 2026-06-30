@@ -56,7 +56,7 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
   {
     text: "El dinero es tiempo de tu vida convertido en números.",
     author: "El Sistema Infalible de Riqueza",
-    tip: "Antes de un gasto, preguntá cuántas horas de vida cuesta.",
+    tip: "Antes de un egreso, preguntá cuántas horas de vida cuesta.",
   },
   {
     text: "No es cuánto ganás, es cuánto conservás y multiplicás.",
@@ -74,7 +74,7 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
     tip: "Un aporte mensual constante vence al esfuerzo esporádico.",
   },
   {
-    text: "La brecha entre tu ingreso y tu gasto es el combustible de tu libertad.",
+    text: "La brecha entre tu ingreso y tu egreso es el combustible de tu libertad.",
     author: "Anónimo",
     tip: "Vivir por debajo de tus posibilidades te da la posibilidad de vivir.",
   },

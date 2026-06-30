@@ -88,7 +88,7 @@ export function HistoryEditForm({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Gastos</span>
+          <span className="label">Egresos</span>
           <input
             name="expenseTotal"
             type="number"
@@ -112,7 +112,7 @@ export function HistoryEditForm({
       </div>
 
       <p style={{ fontSize: "11px", color: "var(--hint)" }}>
-        La tasa de ahorro se recalcula sola a partir de Ingresos y Gastos. Si
+        La tasa de ahorro se recalcula sola a partir de Ingresos y Egresos. Si
         cambiás el mes/año a uno que ya tiene registro, no se sobrescribe.
       </p>
 

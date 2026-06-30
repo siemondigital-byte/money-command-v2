@@ -138,7 +138,7 @@ export function emergencyMetric(
   if (avgMonthlyExpense <= 0) {
     return {
       score: 0,
-      subtitle: "carga tus gastos para medir los meses cubiertos",
+      subtitle: "carga tus egresos para medir los meses cubiertos",
     };
   }
   const months = goal.currentAmount / avgMonthlyExpense;
@@ -229,7 +229,7 @@ export function freedomMetric(netWorth: number, nlf: number): MetricResult {
   if (nlf <= 0) {
     return {
       score: 0,
-      subtitle: "carga tus gastos para calcular tu Número de Libertad",
+      subtitle: "carga tus egresos para calcular tu Número de Libertad",
     };
   }
   const score = Math.round(clamp((netWorth / nlf) * 15, 0, 15));
@@ -282,7 +282,7 @@ const RANGES: Range[] = [
     min: 0,
     label: "Es ahora o nunca",
     message:
-      "Estás en crisis financiera. Necesitas actuar esta semana. Pasos: 1) Lista todas tus deudas y sus APR. 2) Corta cualquier gasto no esencial. 3) Busca ingreso adicional inmediato. El sistema funciona, pero hay que empezar por la base.",
+      "Estás en crisis financiera. Necesitas actuar esta semana. Pasos: 1) Lista todas tus deudas y sus APR. 2) Corta cualquier egreso no esencial. 3) Busca ingreso adicional inmediato. El sistema funciona, pero hay que empezar por la base.",
   },
 ];
 

@@ -3,7 +3,8 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { activePeriod } from "@/lib/monthly";
 import { effectivePlanB } from "@/lib/income";
-import { formatMoney, formatPct } from "@/lib/format";
+import { formatMoneyShort, formatPct } from "@/lib/format";
+import { MoneyAmount } from "./MoneyAmount";
 import { portfolioTotal, weightedYield, projectedValue } from "@/lib/investments";
 import { DEFAULT_PORTFOLIO_RETURN } from "@/lib/formulas";
 import {
@@ -180,7 +181,7 @@ export default async function DashboardPage() {
         <p style={{ fontSize: "12px", color: "var(--hint)" }}>
           Este período todavía no tiene datos. Cargá{" "}
           <Link href="/income" style={{ color: "var(--accent-2)" }}>ingresos</Link> y{" "}
-          <Link href="/expenses" style={{ color: "var(--accent-2)" }}>gastos</Link> para verlo
+          <Link href="/expenses" style={{ color: "var(--accent-2)" }}>egresos</Link> para verlo
           completo.
         </p>
       )}
@@ -226,13 +227,29 @@ export default async function DashboardPage() {
       </div>
 
       {/* Capital invertido total (Σ capital de posiciones activas de Inversiones) */}
-      <section className="d-card top-gold">
+      {/* containerType inline-size: el monto se mide contra el ancho de la
+          tarjeta (cqi), igual que las tarjetas de Patrimonio, para que el número
+          quede del MISMO tamaño que ellas en desktop y móvil. */}
+      <section className="d-card top-gold" style={{ containerType: "inline-size" }}>
+        {/* Mismo patrón visual que las tarjetas de Patrimonio: label arriba,
+            número grande y prominente (Syne + MoneyAmount), texto descriptivo
+            debajo. Stack vertical, consistente en desktop y móvil. */}
         <div className="d-section-label">Capital invertido</div>
         <div
-          className="kpi-large"
-          style={{ color: "var(--gold)", marginTop: "6px" }}
+          style={{
+            fontFamily: "Syne, sans-serif",
+            fontWeight: 800,
+            // Mismo clamp que el HERO_AMOUNT de las tarjetas de Patrimonio.
+            fontSize: "clamp(1.3rem, 11cqi, 2.2rem)",
+            letterSpacing: "-0.03em",
+            lineHeight: 1,
+            marginTop: "10px",
+            color: "var(--gold)",
+            overflowWrap: "anywhere",
+            minWidth: 0,
+          }}
         >
-          {formatMoney(portfolio, locale, currency)}
+          <MoneyAmount value={portfolio} locale={locale} currency={currency} />
         </div>
         {portfolio > 0 && (
           <div
@@ -241,7 +258,7 @@ export default async function DashboardPage() {
               alignItems: "baseline",
               gap: "8px",
               flexWrap: "wrap",
-              marginTop: "6px",
+              marginTop: "12px",
             }}
           >
             <span
@@ -256,9 +273,7 @@ export default async function DashboardPage() {
             </span>
             <span style={{ fontSize: "12px", color: "var(--muted)" }}>
               rentabilidad ponderada · genera{" "}
-              {formatMoney(portfolio * wYield, locale, currency, {
-                maxFractionDigits: 0,
-              })}
+              {formatMoneyShort(portfolio * wYield, locale, currency)}
               /año
             </span>
           </div>

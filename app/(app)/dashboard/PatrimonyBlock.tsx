@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { formatMoney } from "@/lib/format";
+import { formatMoneyShort } from "@/lib/format";
 import { MoneyAmount } from "./MoneyAmount";
 
 // Cada tarjeta es un "contenedor de consulta" (container query). Así el tamaño
@@ -68,8 +68,7 @@ export function PatrimonyBlock({
   locale: string;
   currency: string;
 }) {
-  const moneyShort = (n: number) =>
-    formatMoney(n, locale, currency, { maxFractionDigits: 0 });
+  const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
 
   const [active, setActive] = useState<number | null>(null);
   // Por defecto, el último año (así el tooltip siempre muestra algo coherente

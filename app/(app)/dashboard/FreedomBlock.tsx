@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatMoney } from "@/lib/format";
+import { formatMoneyShort } from "@/lib/format";
 import { MoneyAmount } from "./MoneyAmount";
 import { futureValueWithContributions } from "@/lib/formulas";
 import {
@@ -45,9 +45,8 @@ export function FreedomBlock({
   locale: string;
   currency: string;
 }) {
-  const money = (n: number) => formatMoney(n, locale, currency);
-  const moneyShort = (n: number) =>
-    formatMoney(n, locale, currency, { maxFractionDigits: 0 });
+  const money = (n: number) => formatMoneyShort(n, locale, currency);
+  const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
 
   const baseRate = Math.round(defaultRatePct * 100) / 100;
   const [ratePct, setRatePct] = useState(baseRate);
@@ -155,7 +154,6 @@ export function FreedomBlock({
           <div className="d-input read">
             <div className="lbl">
               <span>Edad objetivo de libertad</span>
-              <span>se lee</span>
             </div>
             <div className="iv">
               {ageFreedomTarget !== null ? `${ageFreedomTarget} años` : "—"}
@@ -183,12 +181,12 @@ export function FreedomBlock({
                 </div>
                 <div className="ctx">
                   El capital que necesitás invertido para que su retorno cubra
-                  tus gastos. El capital queda intacto: vivís de los flujos.
+                  tus egresos. El capital queda intacto: vivís de los flujos.
                 </div>
               </>
             ) : (
               <div className="ctx" style={{ marginTop: "16px" }}>
-                Cargá tus gastos del mes para calcular tu Número de Libertad.
+                Cargá tus egresos del mes para calcular tu Número de Libertad.
               </div>
             )}
           </div>
