@@ -114,6 +114,12 @@ Ver `.env.example` para el listado completo y comentarios. Resumen:
 | `DATABASE_URL` | Prisma runtime (pooler 6543) | NO — contiene password |
 | `DIRECT_URL` | Prisma migrate (pooler 5432) | NO — contiene password |
 | `NEXT_PUBLIC_SITE_URL` | Auth callback y emails | sí |
+| `GEMINI_API_KEY` | solo servidor — capa de IA (`lib/ai`, Gemini) | NO — secreta |
+
+`GEMINI_API_KEY`: key de Google Gemini para la capa de IA (`lib/ai`). Es
+server-only (sin prefijo `NEXT_PUBLIC_`), se lee solo con `process.env.GEMINI_API_KEY`
+dentro de `lib/ai/gemini.ts` y nunca llega al cliente. Agregar la línea
+`GEMINI_API_KEY=...` a `.env.local` (el valor no se commitea).
 
 ---
 
