@@ -508,8 +508,11 @@ export default async function InvestmentsPage({
         )}
       </section>
 
-      {/* Form crear / editar */}
-      <InvestmentForm categories={categoryOptions} editing={editing} />
+      {/* Form crear / editar. El key remonta el form al cambiar editing (entre
+          posiciones o de editar→crear), reseteando useActionState → evita el
+          "Falta el id" (binding/estado pegado de un guardado previo). Mismo
+          patrón que GoalForm. */}
+      <InvestmentForm key={editing?.id ?? "new"} categories={categoryOptions} editing={editing} />
     </div>
   );
 }
