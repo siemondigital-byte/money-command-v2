@@ -36,9 +36,14 @@ export function GoalsProgressChart({ bars }: { bars: GoalBar[] }) {
         datasets: [
           {
             data: bars.map((b) => b.pct),
-            backgroundColor: bars.map((b) => b.color),
+            // Relleno translúcido + contorno brillante del color (mismo estilo
+            // "delineado/glow" que el resto de los gráficos: Patrimonio, donut).
+            backgroundColor: bars.map((b) => `${b.color}33`),
+            borderColor: bars.map((b) => b.color),
+            borderWidth: 1.5,
             borderRadius: 4,
             maxBarThickness: 22,
+            hoverBackgroundColor: bars.map((b) => `${b.color}55`),
           },
         ],
       },

@@ -41,10 +41,9 @@ export function Thermostat({
   return (
     <section
       className="d-card top-sky d-thermo"
-      // En desktop, .d-mid estira esta tarjeta para igualar a la Calculadora
-      // (align-items: stretch). alignSelf:start evita ese estirado y mantiene
-      // el termostato compacto, sin hueco bajo el tubo.
-      style={{ alignSelf: "start" }}
+      // .d-mid tiene align-items: stretch, así el termostato iguala la altura
+      // de la Calculadora de Libertad en desktop (sin alignSelf:start que lo
+      // dejaba compacto).
     >
       <div className="d-section-label">Termostato</div>
 

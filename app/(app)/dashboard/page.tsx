@@ -5,6 +5,7 @@ import { activePeriod } from "@/lib/monthly";
 import { effectivePlanB } from "@/lib/income";
 import { formatMoneyShort, formatPct } from "@/lib/format";
 import { MoneyAmount } from "./MoneyAmount";
+import { PortfolioDonut } from "@/app/(app)/investments/PortfolioDonut";
 import { portfolioTotal, weightedYield, projectedValue } from "@/lib/investments";
 import { DEFAULT_PORTFOLIO_RETURN } from "@/lib/formulas";
 import {
@@ -23,6 +24,20 @@ export const metadata = { title: "Dashboard · The Money Command" };
 
 /** Horizonte del gráfico de patrimonio (años, barra por año). */
 const PATRIMONY_YEARS = 30;
+
+/** Etiquetas y paleta por posición del donut de Capital invertido. Mismo
+ *  criterio que el módulo Inversiones (cada activo un color, se cicla). */
+const INVESTMENT_CATEGORY_LABELS_ES: Record<string, string> = {
+  fixed_income: "Renta fija",
+  equity: "Renta variable",
+  real_estate: "Bienes raíces",
+  speculative: "Cripto / Especulativo",
+  other: "Otros",
+};
+const POSITION_COLORS = [
+  "#7fffb2", "#4dd9ff", "#ffd166", "#ff6b6b",
+  "#b388ff", "#ff9f6b", "#5ad1c8", "#f078c8",
+];
 
 /** Distribución preset desde el método preferido ("50/30/20"). */
 function presetFromMethod(method: string): BasketDistribution {
@@ -79,6 +94,17 @@ export default async function DashboardPage() {
   const defaultRatePct =
     portfolio > 0 && wYield > 0 ? wYield * 100 : DEFAULT_PORTFOLIO_RETURN * 100;
   const hasAssets = projPositions.length > 0 && portfolio > 0;
+
+  // Donut de Capital invertido: una porción por posición con capital > 0
+  // (mismo color/orden que el módulo Inversiones). Solo presentación.
+  const investmentSlices = investments
+    .map((p, i) => ({
+      category: p.id,
+      label: p.label ?? INVESTMENT_CATEGORY_LABELS_ES[p.category] ?? "Otros",
+      capital: Number(p.capital),
+      color: POSITION_COLORS[i % POSITION_COLORS.length]!,
+    }))
+    .filter((s) => s.capital > 0);
 
   // Renta pasiva = Plan B existente (respeta override). NO se recalcula.
   const passiveIncome = effectivePlanB({
@@ -226,61 +252,139 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Capital invertido total (Σ capital de posiciones activas de Inversiones) */}
-      {/* containerType inline-size: el monto se mide contra el ancho de la
-          tarjeta (cqi), igual que las tarjetas de Patrimonio, para que el número
-          quede del MISMO tamaño que ellas en desktop y móvil. */}
-      <section className="d-card top-gold" style={{ containerType: "inline-size" }}>
-        {/* Mismo patrón visual que las tarjetas de Patrimonio: label arriba,
-            número grande y prominente (Syne + MoneyAmount), texto descriptivo
-            debajo. Stack vertical, consistente en desktop y móvil. */}
+      {/* Capital invertido total (Σ capital de posiciones activas de Inversiones).
+          Dos columnas en desktop: monto + textos a la izquierda, donut por
+          posición a la derecha. Apiladas en móvil. */}
+      <section className="d-card top-gold">
         <div className="d-section-label">Capital invertido</div>
         <div
-          style={{
-            fontFamily: "Syne, sans-serif",
-            fontWeight: 800,
-            // Mismo clamp que el HERO_AMOUNT de las tarjetas de Patrimonio.
-            fontSize: "clamp(1.3rem, 11cqi, 2.2rem)",
-            letterSpacing: "-0.03em",
-            lineHeight: 1,
-            marginTop: "10px",
-            color: "var(--gold)",
-            overflowWrap: "anywhere",
-            minWidth: 0,
-          }}
+          className="flex flex-col md:flex-row md:items-center"
+          style={{ gap: "24px", marginTop: "12px" }}
         >
-          <MoneyAmount value={portfolio} locale={locale} currency={currency} />
-        </div>
-        {portfolio > 0 && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: "8px",
-              flexWrap: "wrap",
-              marginTop: "12px",
-            }}
-          >
-            <span
+          {/* IZQUIERDA: monto (container query, mismo tamaño que Patrimonio) + textos */}
+          <div style={{ flex: "1 1 0", minWidth: 0, containerType: "inline-size" }}>
+            <div
               style={{
                 fontFamily: "Syne, sans-serif",
-                fontWeight: 700,
-                fontSize: "1.1rem",
-                color: "var(--accent)",
+                fontWeight: 800,
+                fontSize: "clamp(1.5rem, 12cqi, 2.6rem)",
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
+                color: "var(--gold)",
+                overflowWrap: "anywhere",
+                minWidth: 0,
               }}
             >
-              {formatPct(wYield, locale)}
-            </span>
-            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-              rentabilidad ponderada · genera{" "}
-              {formatMoneyShort(portfolio * wYield, locale, currency)}
-              /año
-            </span>
+              <MoneyAmount value={portfolio} locale={locale} currency={currency} />
+            </div>
+            {portfolio > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  marginTop: "12px",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "Syne, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "1.1rem",
+                    color: "var(--accent)",
+                  }}
+                >
+                  {formatPct(wYield, locale)}
+                </span>
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                  rentabilidad ponderada · genera{" "}
+                  {formatMoneyShort(portfolio * wYield, locale, currency)}
+                  /año
+                </span>
+              </div>
+            )}
+            <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px" }}>
+              Suma del capital de tus posiciones activas en Inversiones.
+            </p>
           </div>
-        )}
-        <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px" }}>
-          Suma del capital de tus posiciones activas en Inversiones.
-        </p>
+
+          {/* DERECHA: torta por posición + leyenda (solo si hay posiciones).
+              flex:1 con el donut centrado, para que quede balanceado y no pegado
+              al borde. El donut ya usa el estilo translúcido + contorno. */}
+          {investmentSlices.length > 0 && (
+            <div
+              style={{
+                flex: "1 1 0",
+                minWidth: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ width: "100%", maxWidth: "240px" }}>
+                <PortfolioDonut
+                  slices={investmentSlices}
+                  formattedTotal={formatMoneyShort(portfolio, locale, currency)}
+                />
+              </div>
+              {/* Leyenda por posición */}
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "240px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  marginTop: "10px",
+                }}
+              >
+                {investmentSlices.map((s) => (
+                  <div
+                    key={s.category}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "11px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "2px",
+                        background: s.color,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        color: "var(--text)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {s.label}
+                    </span>
+                    <span
+                      style={{
+                        color: "var(--muted)",
+                        fontFamily: "DM Mono, monospace",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {formatMoneyShort(s.capital, locale, currency)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* 3. Patrimonio / Inversiones (sin dona) */}

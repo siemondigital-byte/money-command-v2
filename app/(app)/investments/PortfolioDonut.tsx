@@ -38,9 +38,12 @@ export function PortfolioDonut({
         datasets: [
           {
             data: slices.map((s) => s.capital),
-            backgroundColor: slices.map((s) => s.color),
-            borderColor: "#13131a",
-            borderWidth: 2,
+            // Relleno translúcido + contorno brillante del color, para igualar el
+            // estilo "delineado/glow" de las barras de Patrimonio (uniformidad).
+            backgroundColor: slices.map((s) => `${s.color}33`),
+            borderColor: slices.map((s) => s.color),
+            borderWidth: 1.5,
+            hoverBackgroundColor: slices.map((s) => `${s.color}55`),
           },
         ],
       },
