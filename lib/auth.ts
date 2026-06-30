@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import type { Profile, User } from "@prisma/client";
+import { Prisma, type Profile, type User } from "@prisma/client";
 
 /**
  * Devuelve el usuario autenticado de Supabase + asegura que existe la fila
@@ -46,35 +46,64 @@ export async function getOptionalUser() {
 /**
  * Crea (si no existe) la fila User + Profile en Postgres correspondiente al
  * usuario de Supabase Auth. Idempotente.
+ *
+ * IDENTIDAD ANCLADA AL EMAIL (no al id). El `authId` de Supabase puede cambiar
+ * si el usuario de Auth se recrea (p. ej. la automatización de control de
+ * acceso lo regenera con un UUID nuevo). En ese caso la fila espejo de Postgres
+ * conserva su id viejo —donde cuelgan TODOS los datos (Profile, Expenses, Goals,
+ * MonthlyRecord, etc.)— y debe seguir siendo la identidad operativa. Por eso el
+ * upsert busca por `email`: si la fila existe, la devuelve tal cual (id viejo
+ * intacto, sin tocar la PK ni sus FKs en cascada); solo crea cuando el email no
+ * existe todavía, usando el `authId` como id de la fila nueva.
+ *
+ * Que el `authId` de Supabase difiera del `user.id` de Postgres es inocuo: la
+ * app usa `user.id` (Postgres) aguas abajo. El `authId` solo sirve como id
+ * inicial al crear una fila nueva.
  */
 async function ensureUserRow(
   authId: string,
   email: string,
 ): Promise<{ user: User; profile: Profile }> {
-  const existing = await prisma.user.findUnique({
-    where: { id: authId },
-    include: { profile: true },
-  });
-
-  if (existing && existing.profile) {
-    return { user: existing, profile: existing.profile };
-  }
-
-  if (existing && !existing.profile) {
-    const profile = await prisma.profile.create({
-      data: { userId: existing.id },
+  try {
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {}, // existe → devolver la fila tal cual (id viejo + datos intactos)
+      create: { id: authId, email, profile: { create: {} } },
+      include: { profile: true },
     });
-    return { user: existing, profile };
+    return ensureProfileFor(user);
+  } catch (err) {
+    // P2002 = unique constraint: otra request concurrente acaba de crear la
+    // fila (la doble llamada a requireUser de AppLayout + GoalAutoSync de la
+    // Etapa 3b-ii). Releemos por email y seguimos. Mismo patrón que
+    // getOrCreateMonthlyRecord en lib/monthly.ts.
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: { profile: true },
+      });
+      if (user) return ensureProfileFor(user);
+    }
+    throw err;
   }
+}
 
-  const created = await prisma.user.create({
-    data: {
-      id: authId,
-      email,
-      profile: { create: {} },
-    },
-    include: { profile: true },
+/**
+ * Garantiza que la fila tenga su Profile. Cubre filas viejas creadas sin
+ * profile. El upsert por `userId` (único) es resistente a carreras: si dos
+ * requests concurrentes lo crean a la vez, una gana y la otra lo recupera.
+ */
+async function ensureProfileFor(
+  user: User & { profile: Profile | null },
+): Promise<{ user: User; profile: Profile }> {
+  if (user.profile) return { user, profile: user.profile };
+  const profile = await prisma.profile.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: { userId: user.id },
   });
-
-  return { user: created, profile: created.profile! };
+  return { user, profile };
 }

@@ -4,10 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
-import {
-  setActivePeriod,
-  consolidatePeriodFromLiveEntities,
-} from "@/lib/monthly";
+import { setActivePeriod } from "@/lib/monthly";
+import { syncGoalsAndReconsolidate } from "@/lib/goal-sync";
 
 const periodSchema = z.object({
   year: z
@@ -52,7 +50,8 @@ export async function setActivePeriodAction(formData: FormData): Promise<void> {
   const period = { year: parsed.data.year, month: parsed.data.month };
 
   await setActivePeriod(user.id, period);
-  await consolidatePeriodFromLiveEntities(user.id, period);
+  // Orden canónico: sync de gastos de metas del nuevo período → consolidar.
+  await syncGoalsAndReconsolidate(user.id, period);
 
   // Refrescar toda la app (todas las páginas leen del período activo)
   revalidatePath("/", "layout");

@@ -6,17 +6,30 @@ import { Prisma } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BASKETS, type Basket } from "@/lib/expenses";
+import { syncGoalsAndReconsolidateActivePeriod } from "@/lib/goal-sync";
 
 /**
- * Server Actions del módulo Metas (capa A).
+ * Server Actions del módulo Metas.
  *
- * Metas es estado actual e INDEPENDIENTE: no toca la consolidación mensual ni
- * el flujo del mes. Cada meta lleva su canasta (basket); la columna legacy
- * `category` se deriva del basket para satisfacer su NOT NULL heredado
- * (limpieza futura, ver CONTEXT.md).
+ * Cada meta lleva su canasta (basket); la columna legacy `category` se deriva
+ * del basket para satisfacer su NOT NULL heredado (limpieza futura, CONTEXT.md).
+ *
+ * Rediseño Metas (Etapa 3b-ii): tras crear/editar una meta se dispara el sync
+ * de gastos automáticos del período activo y luego se reconsolida (orden
+ * canónico: sync → consolidar, en lib/goal-sync). Así, al crear una meta
+ * automática, su gasto del mes aparece de inmediato en su canasta. La
+ * generación es idempotente y forward-only (lib/goal-expenses, 3b-i).
  */
 
 export type GoalActionResult = { error?: string; ok?: boolean };
+
+/** Una meta puede haber generado/actualizado un gasto: refrescar esas vistas. */
+function revalidateGoalViews() {
+  revalidatePath("/goals");
+  revalidatePath("/expenses");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
+}
 
 /** Deriva la columna legacy category (need|want|patrimony) desde el basket. */
 function categoryFromBasket(basket: Basket): string {
@@ -104,7 +117,9 @@ export async function createGoalAction(
     };
   }
 
-  revalidatePath("/goals");
+  // sync → consolidar (genera el gasto del mes de la meta automática recién creada)
+  await syncGoalsAndReconsolidateActivePeriod(user.id);
+  revalidateGoalViews();
   return { ok: true };
 }
 
@@ -135,7 +150,9 @@ export async function updateGoalAction(
     };
   }
 
-  revalidatePath("/goals");
+  // sync → consolidar: si cambió la cuota, reconcilia el gasto del período activo.
+  await syncGoalsAndReconsolidateActivePeriod(user.id);
+  revalidateGoalViews();
   return { ok: true };
 }
 
