@@ -16,6 +16,7 @@ import {
 import { PortfolioDonut, type DonutSlice } from "../investments/PortfolioDonut";
 import { ExpenseForm } from "./ExpenseForm";
 import { SubscriptionForm } from "./SubscriptionForm";
+import { StatementScanner } from "./StatementScanner";
 import { deleteExpenseAction } from "./actions";
 
 export const metadata = { title: "Egresos · The Money Command" };
@@ -123,6 +124,12 @@ export default async function ExpensesPage({
           </p>
         )}
       </header>
+
+      {/* Escáner de resumen de tarjeta (Etapa 3: revisión + creación real) */}
+      <StatementScanner
+        existingExpenses={rows.map((r) => ({ name: r.name, amount: r.amount }))}
+        activeMonthLabel={`${MONTH_LABELS_ES[period.month - 1]} ${period.year}`}
+      />
 
       {/* KPIs */}
       <section

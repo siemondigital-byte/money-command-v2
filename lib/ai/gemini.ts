@@ -9,10 +9,11 @@
  * Modelo: gemini-2.5-flash (multimodal: texto + imagen).
  */
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, type GenerateContentConfig } from "@google/genai";
 import {
   AIError,
   type AIProvider,
+  type GenerateFromDocumentParams,
   type GenerateFromImageParams,
   type GenerateTextParams,
 } from "./types";
@@ -50,14 +51,89 @@ function toContents(messages: GenerateTextParams["messages"]) {
   }));
 }
 
+/** Tipos MIME aceptados para análisis por visión (imagen o PDF). */
+function assertSupportedMime(mimeType: string): void {
+  const ok = mimeType.startsWith("image/") || mimeType === "application/pdf";
+  if (!ok) {
+    throw new AIError("Tipo de archivo no soportado para análisis.");
+  }
+}
+
+/** Arma el `config` de generateContent a partir de system + opciones de salida. */
+function buildConfig(opts: {
+  system?: string;
+  maxOutputTokens?: number;
+  jsonOutput?: boolean;
+  minimalReasoning?: boolean;
+}): GenerateContentConfig | undefined {
+  const config: GenerateContentConfig = {};
+  if (opts.system) config.systemInstruction = opts.system;
+  if (opts.maxOutputTokens != null) config.maxOutputTokens = opts.maxOutputTokens;
+  if (opts.jsonOutput) config.responseMimeType = "application/json";
+  if (opts.minimalReasoning) {
+    // Apaga el "thinking" (que en 2.5-flash consume del presupuesto de salida).
+    config.thinkingConfig = { thinkingBudget: 0 };
+  }
+  return Object.keys(config).length > 0 ? config : undefined;
+}
+
+/**
+ * Llamada de visión compartida (imagen o PDF): manda prompt + inlineData a
+ * gemini-2.5-flash. Reusada por generateFromDocument y generateFromImage.
+ */
+async function runVision(input: {
+  system?: string;
+  prompt: string;
+  base64: string;
+  mimeType: string;
+  maxOutputTokens?: number;
+  jsonOutput?: boolean;
+  minimalReasoning?: boolean;
+}): Promise<string> {
+  try {
+    assertSupportedMime(input.mimeType);
+    const ai = getClient();
+    const response = await ai.models.generateContent({
+      model: MODEL_VISION,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: input.prompt },
+            { inlineData: { mimeType: input.mimeType, data: input.base64 } },
+          ],
+        },
+      ],
+      config: buildConfig(input),
+    });
+    const text = response.text;
+    if (!text) throw new AIError("El modelo no devolvió texto.");
+    return text;
+  } catch (err) {
+    if (err instanceof AIError) throw err;
+    throw new AIError("No se pudo analizar el documento con IA.", err);
+  }
+}
+
 export const geminiProvider: AIProvider = {
-  async generateText({ system, messages }: GenerateTextParams): Promise<string> {
+  async generateText({
+    system,
+    messages,
+    maxOutputTokens,
+    jsonOutput,
+    minimalReasoning,
+  }: GenerateTextParams): Promise<string> {
     try {
       const ai = getClient();
       const response = await ai.models.generateContent({
         model: MODEL_TEXT,
         contents: toContents(messages),
-        config: system ? { systemInstruction: system } : undefined,
+        config: buildConfig({
+          system,
+          maxOutputTokens,
+          jsonOutput,
+          minimalReasoning,
+        }),
       });
       const text = response.text;
       if (!text) throw new AIError("El modelo no devolvió texto.");
@@ -69,33 +145,34 @@ export const geminiProvider: AIProvider = {
     }
   },
 
-  async generateFromImage({
+  // Documento: imagen o PDF. Método general para visión.
+  generateFromDocument({
+    system,
+    prompt,
+    fileBase64,
+    mimeType,
+    maxOutputTokens,
+    jsonOutput,
+    minimalReasoning,
+  }: GenerateFromDocumentParams): Promise<string> {
+    return runVision({
+      system,
+      prompt,
+      base64: fileBase64,
+      mimeType,
+      maxOutputTokens,
+      jsonOutput,
+      minimalReasoning,
+    });
+  },
+
+  // Alias retrocompatible para imágenes (delega en la llamada general).
+  generateFromImage({
     system,
     prompt,
     imageBase64,
     mimeType,
   }: GenerateFromImageParams): Promise<string> {
-    try {
-      const ai = getClient();
-      const response = await ai.models.generateContent({
-        model: MODEL_VISION,
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType, data: imageBase64 } },
-            ],
-          },
-        ],
-        config: system ? { systemInstruction: system } : undefined,
-      });
-      const text = response.text;
-      if (!text) throw new AIError("El modelo no devolvió texto.");
-      return text;
-    } catch (err) {
-      if (err instanceof AIError) throw err;
-      throw new AIError("No se pudo analizar la imagen con IA.", err);
-    }
+    return runVision({ system, prompt, base64: imageBase64, mimeType });
   },
 };

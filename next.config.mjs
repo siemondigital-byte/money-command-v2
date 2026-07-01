@@ -3,7 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: "2mb",
+      // 8mb para cubrir PDFs de resumen de tarjeta escaneados / fotos de
+      // factura (base64 infla ~33%). El escáner de imágenes/PDF sube por acá.
+      bodySizeLimit: "8mb",
     },
   },
 };

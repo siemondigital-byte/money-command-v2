@@ -22,7 +22,11 @@ const provider: AIProvider = geminiProvider;
 export const generateText: AIProvider["generateText"] = (params) =>
   provider.generateText(params);
 
-/** Genera texto a partir de una imagen (visión / Escáner). */
+/** Genera texto a partir de un documento (imagen o PDF): visión / Escáner. */
+export const generateFromDocument: AIProvider["generateFromDocument"] = (params) =>
+  provider.generateFromDocument(params);
+
+/** Alias retrocompatible para imágenes. */
 export const generateFromImage: AIProvider["generateFromImage"] = (params) =>
   provider.generateFromImage(params);
 
@@ -32,4 +36,5 @@ export type {
   ChatMessage,
   GenerateTextParams,
   GenerateFromImageParams,
+  GenerateFromDocumentParams,
 } from "./types";

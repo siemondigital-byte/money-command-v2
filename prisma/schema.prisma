@@ -221,6 +221,11 @@ model Expense {
   year  Int
   month Int // 1-12
 
+  // Fecha real de la compra (lector de extractos de tarjeta). Opcional: los
+  // gastos manuales y los existentes quedan null. Permite dedup preciso
+  // (comercio + monto + fecha) al importar un resumen.
+  purchaseDate DateTime?
+
   // Suscripción recurrente (flag dedicado, NO se infiere de isAntExpense+style:
   // un gasto hormiga fijo en Estilo —ej. café diario— no es suscripción).
   // Alimenta el resumen mensual/anual y la futura GASTOS_HORMIGA_MES del Coach.
