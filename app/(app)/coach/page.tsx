@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { getServerDict } from "@/lib/i18n/server";
 import { buildScorecard } from "@/lib/coach";
 import { gatherCoachData } from "@/lib/coach-data";
 import {
@@ -12,7 +13,9 @@ import { Scorecard } from "./Scorecard";
 import { ConceptOfTheDay } from "./ConceptOfTheDay";
 import { CoachChat } from "./CoachChat";
 
-export const metadata = { title: "Coach · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.coach };
+}
 
 export default async function CoachPage() {
   const { user, profile } = await requireUser();

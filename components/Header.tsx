@@ -3,6 +3,7 @@ import type { SerializedProfile } from "@/lib/serialize";
 import { PeriodSelector } from "./PeriodSelector";
 import { HeaderNav } from "./HeaderNav";
 import { activePeriod } from "@/lib/monthly";
+import { getDict } from "@/lib/i18n";
 
 export function Header({ profile }: { profile: SerializedProfile }) {
   const period = activePeriod({
@@ -71,6 +72,7 @@ export function Header({ profile }: { profile: SerializedProfile }) {
 }
 
 function CompassWhisper({ profile }: { profile: SerializedProfile }) {
+  const c = getDict(profile.locale).compass;
   const what = profile.compassWhat?.trim();
   const year = profile.compassYear;
   const contribution = profile.compassContribution?.trim();
@@ -82,15 +84,15 @@ function CompassWhisper({ profile }: { profile: SerializedProfile }) {
         className="compass-whisper"
         style={{ textDecoration: "none" }}
       >
-        Definí tu brújula
+        {c.define}
       </Link>
     );
   }
 
   const parts: string[] = [];
-  if (what) parts.push(`Estoy construyendo este patrimonio para poder ${what}`);
-  if (year) parts.push(`para el año ${year}`);
-  if (contribution) parts.push(`porque quiero contribuir ${contribution}`);
+  if (what) parts.push(`${c.buildingTo} ${what}`);
+  if (year) parts.push(`${c.forYear} ${year}`);
+  if (contribution) parts.push(`${c.becauseContribute} ${contribution}`);
 
   return (
     <p

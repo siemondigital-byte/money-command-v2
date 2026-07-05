@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { serializeGoal, type SerializedGoal } from "@/lib/serialize";
 import { BASKETS, BASKET_COLORS, type Basket } from "@/lib/expenses";
 import { getDict } from "@/lib/i18n";
+import { getServerDict } from "@/lib/i18n/server";
 import {
   progress,
   monthsToGoal,
@@ -16,7 +17,9 @@ import { GoalForm } from "./GoalForm";
 import { GoalsProgressChart, type GoalBar } from "./GoalsProgressChart";
 import { deleteGoalAction } from "./actions";
 
-export const metadata = { title: "Metas · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.goals };
+}
 
 export default async function GoalsPage({
   searchParams,

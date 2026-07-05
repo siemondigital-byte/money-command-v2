@@ -17,11 +17,14 @@ import {
   type PayoffResult,
 } from "@/lib/debts";
 import { getDict } from "@/lib/i18n";
+import { getServerDict } from "@/lib/i18n/server";
 import { DebtForm } from "./DebtForm";
 import { DebtProjectionChart } from "./DebtProjectionChart";
 import { deleteDebtAction, confirmDebtPaymentsAction } from "./actions";
 
-export const metadata = { title: "Deudas · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.debts };
+}
 
 export default async function DebtsPage({
   searchParams,

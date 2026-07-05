@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { getServerDict } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { serializeMonthlyRecord } from "@/lib/serialize";
 import { HistoryEditForm } from "./HistoryEditForm";
 import { DeleteRecordButton } from "./DeleteRecordButton";
 import { GoToPeriodButton } from "./GoToPeriodButton";
 
-export const metadata = { title: "Historial · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.history };
+}
 
 const SHORT_MONTHS = [
   "Ene",

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { getServerDict } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { activePeriod } from "@/lib/monthly";
 import { effectivePlanB } from "@/lib/income";
@@ -20,7 +21,9 @@ import { Thermostat } from "./Thermostat";
 import { FreedomBlock } from "./FreedomBlock";
 import { PatrimonyBlock } from "./PatrimonyBlock";
 
-export const metadata = { title: "Dashboard · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.dashboard };
+}
 
 /** Horizonte del gráfico de patrimonio (años, barra por año). */
 const PATRIMONY_YEARS = 30;

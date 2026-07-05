@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { getServerDict } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { serializeInvestment } from "@/lib/serialize";
 import {
@@ -22,7 +23,9 @@ import { GrowthChart } from "./GrowthChart";
 import { InvestmentForm } from "./InvestmentForm";
 import { deleteInvestmentAction } from "./actions";
 
-export const metadata = { title: "Inversiones · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.investments };
+}
 
 const CATEGORY_LABELS_ES: Record<InvestmentCategory, string> = {
   fixed_income: "Renta fija",

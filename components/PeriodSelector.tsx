@@ -63,7 +63,7 @@ export function PeriodSelector({
           color: "var(--muted)",
         }}
       >
-        Período
+        {t.header.period}
       </span>
       <select
         name="month"

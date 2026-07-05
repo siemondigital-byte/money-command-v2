@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import type { SerializedProfile } from "@/lib/serialize";
+import { useTranslations } from "@/lib/i18n/provider";
 import {
   updateSettingsAction,
   type SettingsActionResult,
@@ -15,6 +16,7 @@ function numToStr(v: number | null | undefined): string {
 }
 
 export function SettingsForm({ profile }: { profile: SerializedProfile }) {
+  const s = useTranslations().settings;
   const [state, formAction, pending] = useActionState<
     SettingsActionResult,
     FormData
@@ -22,11 +24,11 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
-      <Section title="Perfil" anchor="profile">
+      <Section title={s.sectionProfile} anchor="profile">
         <Row>
-          <Field label="Nombre" name="name" defaultValue={profile.name ?? ""} />
+          <Field label={s.name} name="name" defaultValue={profile.name ?? ""} />
           <Field
-            label="País (ISO, ej. AR, US)"
+            label={s.country}
             name="country"
             defaultValue={profile.country ?? ""}
             maxLength={2}
@@ -34,13 +36,13 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
         </Row>
         <Row>
           <Field
-            label="Edad actual"
+            label={s.ageCurrent}
             name="ageCurrent"
             type="number"
             defaultValue={profile.ageCurrent?.toString() ?? ""}
           />
           <Field
-            label="Edad objetivo libertad"
+            label={s.ageFreedomTarget}
             name="ageFreedomTarget"
             type="number"
             defaultValue={profile.ageFreedomTarget?.toString() ?? ""}
@@ -48,26 +50,25 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
         </Row>
       </Section>
 
-      <Section title="Brújula" anchor="compass">
+      <Section title={s.sectionCompass} anchor="compass">
         <p className="compass-whisper" style={{ marginBottom: "8px" }}>
-          Estoy construyendo este patrimonio para poder ___ / para el año ___ /
-          porque quiero contribuir ___
+          {s.compassHint}
         </p>
         <Field
-          label="Para poder (máx 80 caracteres)"
+          label={s.compassWhat}
           name="compassWhat"
           defaultValue={profile.compassWhat ?? ""}
           maxLength={80}
         />
         <Row>
           <Field
-            label="Para el año"
+            label={s.compassYear}
             name="compassYear"
             type="number"
             defaultValue={profile.compassYear?.toString() ?? ""}
           />
           <Field
-            label="Contribuir (máx 80)"
+            label={s.compassContribution}
             name="compassContribution"
             defaultValue={profile.compassContribution ?? ""}
             maxLength={80}
@@ -75,9 +76,9 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
         </Row>
       </Section>
 
-      <Section title="Termostato" anchor="thermostat">
+      <Section title={s.sectionThermostat} anchor="thermostat">
         <Field
-          label="Meta de ingreso a 2 años (mensual)"
+          label={s.thermostatTarget}
           name="thermostatTarget"
           type="number"
           step="0.01"
@@ -85,17 +86,17 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
         />
       </Section>
 
-      <Section title="Supuestos" anchor="assumptions">
+      <Section title={s.sectionAssumptions} anchor="assumptions">
         <Row>
           <Field
-            label="Inflación anual %"
+            label={s.inflationRate}
             name="inflationRate"
             type="number"
             step="0.01"
             defaultValue={numToStr(profile.inflationRate)}
           />
           <Field
-            label="Aumento salarial anual %"
+            label={s.salaryGrowthRate}
             name="salaryGrowthRate"
             type="number"
             step="0.01"
@@ -103,7 +104,7 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
           />
         </Row>
         <Field
-          label="Egreso mensual deseado en libertad (opcional)"
+          label={s.freedomMonthlySpend}
           name="freedomMonthlySpend"
           type="number"
           step="0.01"
@@ -111,33 +112,32 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
         />
       </Section>
 
-      <Section title="Método preferido" anchor="method">
+      <Section title={s.sectionMethod} anchor="method">
         <Select
-          label="Distribución Necesidades / Deseos / Inversiones"
+          label={s.preferredMethod}
           name="preferredMethod"
           options={METHODS}
           defaultValue={profile.preferredMethod}
         />
       </Section>
 
-      <Section title="Moneda e idioma" anchor="locale">
+      <Section title={s.sectionLocale} anchor="locale">
         <Row>
           <Select
-            label="Moneda"
+            label={s.currency}
             name="currency"
             options={CURRENCIES}
             defaultValue={profile.currency}
           />
           <Select
-            label="Idioma"
+            label={s.language}
             name="locale"
             options={["es", "en"]}
             defaultValue={profile.locale}
           />
         </Row>
         <p style={{ fontSize: "11px", color: "var(--hint)", marginTop: "8px" }}>
-          Ajusta el símbolo y los decimales en toda la app. No convierte montos
-          entre monedas.
+          {s.localeHelp}
         </p>
       </Section>
 
@@ -158,7 +158,7 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
           )}
           {state.ok && (
             <span style={{ color: "var(--accent)", fontSize: "12px" }}>
-              Guardado.
+              {s.saved}
             </span>
           )}
         </div>
@@ -168,7 +168,7 @@ export function SettingsForm({ profile }: { profile: SerializedProfile }) {
           disabled={pending}
           style={{ opacity: pending ? 0.6 : 1 }}
         >
-          {pending ? "Guardando…" : "Guardar cambios"}
+          {pending ? s.saving : s.save}
         </button>
       </div>
     </form>

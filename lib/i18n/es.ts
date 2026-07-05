@@ -97,6 +97,9 @@ export const es = {
     history: "Historial · The Money Command",
     settings: "Settings · The Money Command",
   },
+  header: {
+    period: "Período",
+  },
   // La brújula se arma concatenando estos fragmentos con los datos del perfil.
   compass: {
     define: "Definí tu brújula",

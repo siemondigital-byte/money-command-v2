@@ -12,6 +12,7 @@ import {
   type Basket,
 } from "@/lib/expenses";
 import { getDict, type Dict } from "@/lib/i18n";
+import { getServerDict } from "@/lib/i18n/server";
 import { PortfolioDonut, type DonutSlice } from "../investments/PortfolioDonut";
 import { ExpenseForm } from "./ExpenseForm";
 import { SubscriptionForm } from "./SubscriptionForm";
@@ -23,7 +24,9 @@ import {
 import { normalizeCategoryKey, categoryLabel } from "./category-grouping";
 import { deleteExpenseAction } from "./actions";
 
-export const metadata = { title: "Egresos · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.expenses };
+}
 
 type Tab = "fixed" | "variable" | "basket";
 

@@ -9,11 +9,14 @@ import {
   periodToString,
 } from "@/lib/monthly";
 import { getDict } from "@/lib/i18n";
+import { getServerDict } from "@/lib/i18n/server";
 import { IncomeRowForm } from "./IncomeRowForm";
 import { PlanBOverrideForm } from "./PlanBOverrideForm";
 import { deleteIncomeAction } from "./actions";
 
-export const metadata = { title: "Ingresos · The Money Command" };
+export async function generateMetadata() {
+  return { title: (await getServerDict()).metadata.income };
+}
 
 
 const PLAN_LABELS = {

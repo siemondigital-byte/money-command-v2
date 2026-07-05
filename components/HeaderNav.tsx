@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/(auth)/actions";
+import { useTranslations } from "@/lib/i18n/provider";
+import type { Dict } from "@/lib/i18n";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/income", label: "Ingresos" },
-  { href: "/expenses", label: "Egresos" },
-  { href: "/investments", label: "Inversiones" },
-  { href: "/debts", label: "Deudas" },
-  { href: "/goals", label: "Metas" },
-  { href: "/coach", label: "Coach" },
-  { href: "/history", label: "Historial" },
-  { href: "/settings", label: "Settings" },
+// href + clave en dict.nav. La etiqueta se resuelve por locale en el render.
+const NAV_ITEMS: { href: string; key: keyof Dict["nav"] }[] = [
+  { href: "/dashboard", key: "dashboard" },
+  { href: "/income", key: "income" },
+  { href: "/expenses", key: "expenses" },
+  { href: "/investments", key: "investments" },
+  { href: "/debts", key: "debts" },
+  { href: "/goals", key: "goals" },
+  { href: "/coach", key: "coach" },
+  { href: "/history", key: "history" },
+  { href: "/settings", key: "settings" },
 ];
 
 /**
@@ -26,6 +29,7 @@ const NAV_ITEMS = [
  */
 export function HeaderNav() {
   const pathname = usePathname() ?? "";
+  const t = useTranslations();
 
   return (
     <nav className="ah-nav">
@@ -38,13 +42,13 @@ export function HeaderNav() {
             href={item.href}
             className={active ? "active" : undefined}
           >
-            {item.label}
+            {t.nav[item.key]}
           </Link>
         );
       })}
       <form action={logoutAction}>
         <button type="submit" className="ah-logout">
-          Salir
+          {t.nav.logout}
         </button>
       </form>
     </nav>

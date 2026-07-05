@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -8,13 +9,17 @@ import { Prisma, type Profile, type User } from "@prisma/client";
  * espejo en Postgres (User + Profile vacío). Si no hay sesión, redirige a /login.
  *
  * Llamar al inicio de cualquier Server Component o Server Action protegido.
+ *
+ * Envuelto en React `cache()`: dedupe por request. Varias llamadas dentro del
+ * mismo render (p. ej. generateMetadata + el propio page, o AppLayout +
+ * GoalAutoSync) comparten UNA sola resolución en vez de re-consultar auth/DB.
  */
-export async function requireUser(): Promise<{
+export const requireUser = cache(async (): Promise<{
   authId: string;
   email: string;
   user: User;
   profile: Profile;
-}> {
+}> => {
   const supabase = await createClient();
   const {
     data: { user: authUser },
@@ -26,7 +31,7 @@ export async function requireUser(): Promise<{
 
   const { user, profile } = await ensureUserRow(authUser.id, authUser.email);
   return { authId: authUser.id, email: authUser.email, user, profile };
-}
+});
 
 /**
  * Versión que no redirige: devuelve null si no hay sesión.
