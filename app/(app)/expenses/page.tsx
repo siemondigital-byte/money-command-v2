@@ -21,6 +21,7 @@ import {
   VariablesByCategory,
   type CategoryExpenseRow,
 } from "./VariablesByCategory";
+import { normalizeCategoryKey, categoryLabel } from "./category-grouping";
 import { deleteExpenseAction } from "./actions";
 
 export const metadata = { title: "Egresos · The Money Command" };
@@ -561,7 +562,44 @@ function BasketSection({
 }) {
   const total = realByBasket.total;
   return (
-    <section className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4 items-stretch">
+    <section className="flex flex-col gap-4">
+      {/* Gráfico arriba (parte superior) */}
+      <div
+        className="card"
+        style={{
+          padding: "12px",
+          maxWidth: "100%",
+          overflow: "hidden",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        {donutSlices.length > 0 ? (
+          <div style={{ width: "100%", maxWidth: "260px" }}>
+            <PortfolioDonut
+              slices={donutSlices}
+              formattedTotal={money.format(realByBasket.total)}
+            />
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: 180,
+              fontSize: "11px",
+              color: "var(--hint)",
+              textAlign: "center",
+            }}
+          >
+            Sin egresos para graficar
+          </div>
+        )}
+      </div>
+
+      {/* Reparto por canasta: dentro de cada canasta, Fijos y Variables, y de
+          cada tipo sus 3 categorías con más impacto (sin desplegable). */}
       <div className="card flex flex-col gap-5">
         <div className="label">Reparto del egreso real por canasta</div>
         {BASKETS.map((b) => {
@@ -572,24 +610,40 @@ function BasketSection({
           // NIVEL 1 — % de la canasta sobre el total real del mes.
           // Las tres suman 100%. Si el total es 0, 0% sin dividir por cero.
           const pct = total > 0 ? (real / total) * 100 : 0;
-          // NIVEL 2 — la canasta partida en FIJOS y VARIABLES (activos). Se
-          // reagrupan las MISMAS filas activas por tipo: la suma de los dos
-          // grupos == `real` de la canasta (todo gasto es fijo o variable), así
-          // los totales y % no se mueven. Solo presentación.
-          const groups = (["fixed", "variable"] as const)
+          // NIVEL 2 — la canasta partida en FIJOS y VARIABLES; dentro de cada
+          // tipo, las categorías (activas) de mayor a menor. Se reagrupan las
+          // MISMAS filas activas: los totales por tipo/categoría no alteran el
+          // total de la canasta (realByBasket). Solo presentación.
+          const typeGroups = (["variable", "fixed"] as const)
             .map((t) => {
-              let sum = 0;
+              const catMap = new Map<
+                string,
+                { key: string; label: string; total: number }
+              >();
+              let typeTotal = 0;
               for (const r of rows) {
-                if (r.isActive && r.basket === b && r.type === t) sum += r.amount;
+                if (!r.isActive || r.basket !== b || r.type !== t) continue;
+                typeTotal += r.amount;
+                const key = normalizeCategoryKey(r.category);
+                let g = catMap.get(key);
+                if (!g) {
+                  g = { key, label: categoryLabel(key, r.category), total: 0 };
+                  catMap.set(key, g);
+                }
+                g.total += r.amount;
               }
+              const cats = [...catMap.values()]
+                .map((c) => ({ ...c, total: Math.round(c.total * 100) / 100 }))
+                .sort((a, c) => c.total - a.total);
               return {
-                key: t,
+                type: t,
                 label: t === "fixed" ? "Fijos" : "Variables",
-                total: Math.round(sum * 100) / 100,
+                typeTotal: Math.round(typeTotal * 100) / 100,
+                cats,
               };
             })
-            .filter((g) => g.total > 0)
-            .sort((a, c) => c.total - a.total);
+            .filter((g) => g.typeTotal > 0)
+            .sort((a, c) => c.typeTotal - a.typeTotal);
           return (
             <div key={b} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <div
@@ -625,104 +679,105 @@ function BasketSection({
                 />
               </div>
 
-              {/* NIVEL 2 — Fijos y Variables de la canasta (sin desplegable) */}
-              {groups.length > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                    paddingLeft: "12px",
-                    marginTop: "4px",
-                  }}
-                >
-                  {groups.map((c) => {
-                    // Dos porcentajes: dentro de la canasta y sobre el total
-                    // del mes. Guards para no dividir por cero.
-                    const pctOfBasket = real > 0 ? (c.total / real) * 100 : 0;
-                    const pctOfTotal = total > 0 ? (c.total / total) * 100 : 0;
-                    // La barra representa el peso sobre el TOTAL del mes, así
-                    // todas las barras (canasta y grupos) quedan en la misma
-                    // escala y se compara el peso real de un vistazo.
-                    return (
-                      <div
-                        key={c.key}
-                        style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-                      >
+              {/* NIVEL 2 — por tipo (Fijos/Variables), top 3 categorías */}
+              {typeGroups.map((tg) => {
+                const topCats = tg.cats.slice(0, 3);
+                const extra = tg.cats.length - topCats.length;
+                return (
+                  <div
+                    key={tg.type}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                      paddingLeft: "12px",
+                      marginTop: "6px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "12px",
+                      }}
+                    >
+                      <span style={{ color: "var(--text)", fontWeight: 600 }}>
+                        {tg.label}
+                      </span>
+                      <span style={{ color: "var(--muted)" }}>
+                        {money.format(tg.typeTotal)}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "10px", color: "var(--hint)" }}>
+                      {tg.cats.length >= 3
+                        ? "Las 3 categorías con más impacto"
+                        : "Categorías con más impacto"}
+                    </div>
+                    {topCats.map((c) => {
+                      // Dos porcentajes: dentro de la canasta y sobre el total
+                      // del mes. Guards para no dividir por cero. La barra usa
+                      // el peso sobre el total, misma escala que todo el resto.
+                      const pctOfBasket = real > 0 ? (c.total / real) * 100 : 0;
+                      const pctOfTotal = total > 0 ? (c.total / total) * 100 : 0;
+                      return (
                         <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            fontSize: "12px",
-                          }}
-                        >
-                          <span style={{ color: "var(--text)" }}>{c.label}</span>
-                          <span style={{ color: "var(--muted)" }}>
-                            {money.format(c.total)}
-                          </span>
-                        </div>
-                        <div
-                          style={{
-                            height: 4,
-                            background: "var(--surface)",
-                            borderRadius: 4,
-                            overflow: "hidden",
-                          }}
+                          key={c.key}
+                          style={{ display: "flex", flexDirection: "column", gap: "4px" }}
                         >
                           <div
                             style={{
-                              width: `${pctOfTotal}%`,
-                              height: "100%",
-                              background: "var(--muted)",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              fontSize: "12px",
                             }}
-                          />
+                          >
+                            <span style={{ color: "var(--text)" }}>{c.label}</span>
+                            <span style={{ color: "var(--muted)" }}>
+                              {money.format(c.total)}
+                            </span>
+                          </div>
+                          <div
+                            style={{
+                              height: 4,
+                              background: "var(--surface)",
+                              borderRadius: 4,
+                              overflow: "hidden",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: `${pctOfTotal}%`,
+                                height: "100%",
+                                background: "var(--muted)",
+                              }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "8px",
+                              fontSize: "11px",
+                              color: "var(--hint)",
+                            }}
+                          >
+                            <span>{Math.round(pctOfBasket)}% de la canasta</span>
+                            <span>·</span>
+                            <span>{Math.round(pctOfTotal)}% del total</span>
+                          </div>
                         </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            fontSize: "11px",
-                            color: "var(--hint)",
-                          }}
-                        >
-                          <span>{Math.round(pctOfBasket)}% de la canasta</span>
-                          <span>·</span>
-                          <span>{Math.round(pctOfTotal)}% del total</span>
-                        </div>
+                      );
+                    })}
+                    {extra > 0 && (
+                      <div style={{ fontSize: "11px", color: "var(--hint)" }}>
+                        +{extra} categoría{extra > 1 ? "s" : ""} más
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    )}
+                  </div>
+                );
+              })}
             </div>
           );
         })}
-      </div>
-
-      <div
-        className="card"
-        style={{ padding: "12px", maxWidth: "100%", overflow: "hidden" }}
-      >
-        {donutSlices.length > 0 ? (
-          <PortfolioDonut
-            slices={donutSlices}
-            formattedTotal={money.format(realByBasket.total)}
-          />
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: 180,
-              fontSize: "11px",
-              color: "var(--hint)",
-              textAlign: "center",
-            }}
-          >
-            Sin egresos para graficar
-          </div>
-        )}
       </div>
     </section>
   );
