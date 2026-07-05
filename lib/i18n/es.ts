@@ -142,5 +142,7 @@ export const es = {
     debtTypes,
     debtPurposes,
     months,
+    // Categoría con gastos en más de una canasta (vista Variables agrupada).
+    mixed: "Mixta",
   },
 };

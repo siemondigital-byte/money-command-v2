@@ -4,11 +4,11 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   BASKETS,
-  BASKET_LABELS_ES,
   BASKET_COLORS,
   type Basket,
 } from "@/lib/expenses";
 import { normalizeCategoryKey, categoryLabel } from "./category-grouping";
+import { useTranslations } from "@/lib/i18n/provider";
 import { deleteExpenseAction } from "./actions";
 
 /**
@@ -69,6 +69,8 @@ export function VariablesByCategory({
   /** Pestaña activa, para el href de Editar (vuelve a esta vista). */
   tab: string;
 }) {
+  const t = useTranslations();
+  const categories = t.labels.categories;
   const money = useMemo(
     () =>
       new Intl.NumberFormat(locale, {
@@ -96,7 +98,12 @@ export function VariablesByCategory({
       const key = normalizeCategoryKey(r.category);
       let g = map.get(key);
       if (!g) {
-        g = { key, label: categoryLabel(key, r.category), rows: [], subtotal: 0 };
+        g = {
+          key,
+          label: categoryLabel(key, r.category, categories),
+          rows: [],
+          subtotal: 0,
+        };
         map.set(key, g);
       }
       g.rows.push(r);
@@ -107,7 +114,7 @@ export function VariablesByCategory({
     // La que más pesa, arriba.
     arr.sort((a, b) => b.subtotal - a.subtotal);
     return arr;
-  }, [rows]);
+  }, [rows, categories]);
 
   if (groups.length === 0) return null;
 
@@ -259,6 +266,7 @@ function Caret({ open }: { open: boolean }) {
 }
 
 function BasketTag({ basket, mixed }: { basket: Basket; mixed: boolean }) {
+  const t = useTranslations();
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
       <span
@@ -271,7 +279,7 @@ function BasketTag({ basket, mixed }: { basket: Basket; mixed: boolean }) {
         }}
       />
       <span style={{ fontSize: "11px", color: "var(--muted)" }}>
-        {mixed ? "Mixta" : BASKET_LABELS_ES[basket]}
+        {mixed ? t.labels.mixed : t.labels.baskets[basket]}
       </span>
     </span>
   );

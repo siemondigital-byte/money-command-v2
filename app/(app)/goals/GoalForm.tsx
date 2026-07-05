@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SerializedGoal } from "@/lib/serialize";
-import { BASKETS, BASKET_LABELS_ES } from "@/lib/expenses";
+import { BASKETS } from "@/lib/expenses";
+import { useTranslations } from "@/lib/i18n/provider";
 import { createGoalAction, updateGoalAction, type GoalActionResult } from "./actions";
 
 /**
@@ -19,6 +20,7 @@ import { createGoalAction, updateGoalAction, type GoalActionResult } from "./act
  */
 export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
   const router = useRouter();
+  const t = useTranslations();
   const isEditing = editing != null;
   const action = isEditing ? updateGoalAction : createGoalAction;
   const [state, formAction, pending] = useActionState<GoalActionResult, FormData>(
@@ -78,7 +80,7 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
             <select name="basket" defaultValue={editing?.basket ?? "essentials"}>
               {BASKETS.map((b) => (
                 <option key={b} value={b}>
-                  {BASKET_LABELS_ES[b]}
+                  {t.labels.baskets[b]}
                 </option>
               ))}
             </select>

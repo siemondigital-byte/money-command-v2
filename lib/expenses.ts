@@ -14,11 +14,8 @@ export type ExpenseType = "fixed" | "variable";
 
 export const BASKETS: Basket[] = ["essentials", "style", "freedom"];
 
-export const BASKET_LABELS_ES: Record<Basket, string> = {
-  essentials: "Esenciales",
-  style: "Estilo",
-  freedom: "Libertad",
-};
+// Las etiquetas de canasta (es/en) viven en la capa i18n: lib/i18n/es.ts →
+// dict.labels.baskets. Se leen del locale activo (getDict / useTranslations).
 
 /** Colores del tema dark de la app (NO la paleta light del prototipo). */
 export const BASKET_COLORS: Record<Basket, string> = {
@@ -46,21 +43,8 @@ export const EXPENSE_CATEGORIES = [
 
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 
-export const CATEGORY_LABELS_ES: Record<string, string> = {
-  vivienda: "Vivienda",
-  comida: "Comida",
-  servicios: "Servicios",
-  transporte: "Transporte",
-  salud: "Salud",
-  seguros: "Seguros",
-  entretenimiento: "Entretenimiento",
-  restaurantes: "Restaurantes",
-  viajes: "Viajes",
-  ropa: "Ropa",
-  educacion: "Educación",
-  suscripciones: "Suscripciones",
-  otros: "Otros",
-};
+// Las etiquetas de categoría (es/en) viven en la capa i18n: lib/i18n/es.ts →
+// dict.labels.categories. Se leen del locale activo.
 
 /**
  * Deriva la columna legacy `classification` (need|want|investment) a partir

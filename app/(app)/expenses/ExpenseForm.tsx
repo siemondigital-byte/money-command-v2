@@ -3,12 +3,8 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SerializedExpense } from "@/lib/serialize";
-import {
-  BASKETS,
-  BASKET_LABELS_ES,
-  EXPENSE_CATEGORIES,
-  CATEGORY_LABELS_ES,
-} from "@/lib/expenses";
+import { BASKETS, EXPENSE_CATEGORIES } from "@/lib/expenses";
+import { useTranslations } from "@/lib/i18n/provider";
 import {
   createExpenseAction,
   updateExpenseAction,
@@ -34,6 +30,7 @@ export function ExpenseForm({
   onDoneHref: string;
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const isEditing = editing != null;
   const action = isEditing ? updateExpenseAction : createExpenseAction;
   const [state, formAction, pending] = useActionState<
@@ -85,7 +82,7 @@ export function ExpenseForm({
           >
             {EXPENSE_CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {CATEGORY_LABELS_ES[c] ?? c}
+                {t.labels.categories[c] ?? c}
               </option>
             ))}
           </select>
@@ -95,7 +92,7 @@ export function ExpenseForm({
           <select name="basket" defaultValue={editing?.basket ?? "essentials"}>
             {BASKETS.map((b) => (
               <option key={b} value={b}>
-                {BASKET_LABELS_ES[b]}
+                {t.labels.baskets[b]}
               </option>
             ))}
           </select>

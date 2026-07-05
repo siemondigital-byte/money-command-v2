@@ -8,26 +8,13 @@ import {
   getMonthlyRecord,
   periodToString,
 } from "@/lib/monthly";
+import { getDict } from "@/lib/i18n";
 import { IncomeRowForm } from "./IncomeRowForm";
 import { PlanBOverrideForm } from "./PlanBOverrideForm";
 import { deleteIncomeAction } from "./actions";
 
 export const metadata = { title: "Ingresos · The Money Command" };
 
-const MONTH_LABELS_ES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
 
 const PLAN_LABELS = {
   A: { name: "Plan A · Salario / Activos", helper: "Tu ingreso principal recurrente." },
@@ -49,6 +36,7 @@ export default async function IncomePage({
 }) {
   const { user, profile } = await requireUser();
   const params = await searchParams;
+  const dict = getDict(profile.locale);
 
   const period = activePeriod({
     activeYear: profile.activeYear,
@@ -115,7 +103,7 @@ export default async function IncomePage({
     <div className="fade-up flex flex-col gap-6">
       <header>
         <div className="label mb-1">
-          Ingresos · {MONTH_LABELS_ES[period.month - 1]} {period.year}
+          Ingresos · {dict.labels.months[period.month - 1]} {period.year}
         </div>
         <h1>Plan A · B · C</h1>
         <p

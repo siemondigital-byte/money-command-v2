@@ -2,21 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePeriodChange } from "./usePeriodChange";
-
-const MONTH_LABELS_ES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
+import { useTranslations } from "@/lib/i18n/provider";
 
 /**
  * Selector de período global del header.
@@ -38,6 +24,7 @@ export function PeriodSelector({
   activeYear: number;
   activeMonth: number;
 }) {
+  const t = useTranslations();
   const { changePeriod, pending } = usePeriodChange();
 
   // Estado local controlado, sembrado del servidor…
@@ -89,7 +76,7 @@ export function PeriodSelector({
         }}
         disabled={pending}
       >
-        {MONTH_LABELS_ES.map((label, idx) => (
+        {t.labels.months.map((label, idx) => (
           <option key={idx + 1} value={idx + 1}>
             {label}
           </option>

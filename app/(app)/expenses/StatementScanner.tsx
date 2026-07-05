@@ -2,7 +2,8 @@
 
 import { useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import { BASKETS, BASKET_LABELS_ES, type Basket } from "@/lib/expenses";
+import { BASKETS, type Basket } from "@/lib/expenses";
+import { useTranslations } from "@/lib/i18n/provider";
 import {
   scanStatementAction,
   createExpensesBatchAction,
@@ -67,6 +68,7 @@ export function StatementScanner({
   activeMonthLabel: string;
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -455,7 +457,7 @@ export function StatementScanner({
                   <Field label="Canasta">
                     <select value={r.canasta} onChange={(e) => updateRow(r.key, { canasta: e.target.value as Basket })}>
                       {BASKETS.map((b) => (
-                        <option key={b} value={b}>{BASKET_LABELS_ES[b]}</option>
+                        <option key={b} value={b}>{t.labels.baskets[b]}</option>
                       ))}
                     </select>
                   </Field>

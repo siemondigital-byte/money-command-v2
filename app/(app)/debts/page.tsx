@@ -4,8 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { serializeDebt, type SerializedDebt } from "@/lib/serialize";
 import { activePeriod, getMonthlyRecord, periodToString } from "@/lib/monthly";
 import {
-  DEBT_TYPE_LABELS_ES,
-  PURPOSE_LABELS_ES,
   sumBalances,
   sumMonthlyPayments,
   weightedApr,
@@ -18,26 +16,12 @@ import {
   type DebtPurpose,
   type PayoffResult,
 } from "@/lib/debts";
+import { getDict } from "@/lib/i18n";
 import { DebtForm } from "./DebtForm";
 import { DebtProjectionChart } from "./DebtProjectionChart";
 import { deleteDebtAction, confirmDebtPaymentsAction } from "./actions";
 
 export const metadata = { title: "Deudas · The Money Command" };
-
-const MONTH_LABELS_ES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
 
 export default async function DebtsPage({
   searchParams,
@@ -45,6 +29,7 @@ export default async function DebtsPage({
   searchParams: Promise<{ edit?: string }>;
 }) {
   const { user, profile } = await requireUser();
+  const dict = getDict(profile.locale);
   const params = await searchParams;
 
   const period = activePeriod({
@@ -142,7 +127,7 @@ export default async function DebtsPage({
         >
           <div>
             <div style={{ fontSize: "14px", color: "var(--text)" }}>
-              ¿Confirmás tus pagos de deuda de {MONTH_LABELS_ES[period.month - 1]}?
+              ¿Confirmás tus pagos de deuda de {dict.labels.months[period.month - 1]}?
             </div>
             <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
               Si pagaste lo registrado, actualizamos el saldo. Si pagaste
@@ -268,8 +253,8 @@ export default async function DebtsPage({
                 {debts.map((d) => (
                   <tr key={d.id} style={{ borderTop: "1px solid var(--border)" }}>
                     <Td>{d.name}</Td>
-                    <Td>{DEBT_TYPE_LABELS_ES[d.type as DebtType] ?? d.type}</Td>
-                    <Td>{PURPOSE_LABELS_ES[d.purpose as DebtPurpose] ?? d.purpose}</Td>
+                    <Td>{dict.labels.debtTypes[d.type as DebtType] ?? d.type}</Td>
+                    <Td>{dict.labels.debtPurposes[d.purpose as DebtPurpose] ?? d.purpose}</Td>
                     <Td align="right" accent>
                       {money.format(d.balance)}
                     </Td>

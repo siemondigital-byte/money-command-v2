@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeGoal, type SerializedGoal } from "@/lib/serialize";
-import { BASKETS, BASKET_LABELS_ES, BASKET_COLORS, type Basket } from "@/lib/expenses";
+import { BASKETS, BASKET_COLORS, type Basket } from "@/lib/expenses";
+import { getDict } from "@/lib/i18n";
 import {
   progress,
   monthsToGoal,
@@ -23,6 +24,7 @@ export default async function GoalsPage({
   searchParams: Promise<{ edit?: string }>;
 }) {
   const { user, profile } = await requireUser();
+  const dict = getDict(profile.locale);
   const params = await searchParams;
 
   const goalsRaw = await prisma.goal.findMany({
@@ -138,6 +140,7 @@ export default async function GoalsPage({
             <BasketSection
               key={basket}
               basket={basket}
+              basketLabel={dict.labels.baskets[basket]}
               goals={inBasket}
               money={money}
               pct={pct}
@@ -220,6 +223,7 @@ export default async function GoalsPage({
 
 function BasketSection({
   basket,
+  basketLabel,
   goals,
   money,
   pct,
@@ -228,6 +232,7 @@ function BasketSection({
   editingId,
 }: {
   basket: Basket;
+  basketLabel: string;
   goals: SerializedGoal[];
   money: Intl.NumberFormat;
   pct: Intl.NumberFormat;
@@ -248,7 +253,7 @@ function BasketSection({
           }}
         />
         <div className="label" style={{ color: "var(--text)" }}>
-          {BASKET_LABELS_ES[basket]}
+          {basketLabel}
         </div>
         <span style={{ fontSize: "11px", color: "var(--muted)" }}>
           {goals.length} meta{goals.length === 1 ? "" : "s"}

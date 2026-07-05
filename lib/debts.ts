@@ -28,23 +28,14 @@ export const DEBT_TYPES: DebtType[] = [
   "other",
 ];
 
-export const DEBT_TYPE_LABELS_ES: Record<DebtType, string> = {
-  card: "Tarjeta de crédito",
-  auto_loan: "Préstamo auto",
-  student_loan: "Deuda estudiantil",
-  personal_loan: "Préstamo personal",
-  mortgage: "Hipoteca",
-  other: "Otro",
-};
+// Las etiquetas de tipo de deuda (es/en) viven en la capa i18n: lib/i18n/es.ts
+// → dict.labels.debtTypes. Se leen del locale activo.
 
 export type DebtPurpose = "consumption" | "investment";
 
 export const DEBT_PURPOSES: DebtPurpose[] = ["consumption", "investment"];
 
-export const PURPOSE_LABELS_ES: Record<DebtPurpose, string> = {
-  consumption: "Consumo",
-  investment: "Inversión",
-};
+// Etiquetas de propósito (es/en) en i18n: dict.labels.debtPurposes.
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;

@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation";
 import type { SerializedDebt } from "@/lib/serialize";
 import {
   DEBT_TYPES,
-  DEBT_TYPE_LABELS_ES,
   DEBT_PURPOSES,
-  PURPOSE_LABELS_ES,
   type DebtType,
   type DebtPurpose,
 } from "@/lib/debts";
+import { useTranslations } from "@/lib/i18n/provider";
 import {
   createDebtAction,
   updateDebtAction,
@@ -31,6 +30,7 @@ export function DebtForm({
   editing: SerializedDebt | null;
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const isEditing = editing != null;
   const action = isEditing ? updateDebtAction : createDebtAction;
   const [state, formAction, pending] = useActionState<
@@ -86,9 +86,9 @@ export function DebtForm({
               name="type"
               defaultValue={(editing?.type as DebtType) ?? "card"}
             >
-              {DEBT_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {DEBT_TYPE_LABELS_ES[t]}
+              {DEBT_TYPES.map((dt) => (
+                <option key={dt} value={dt}>
+                  {t.labels.debtTypes[dt]}
                 </option>
               ))}
             </select>
@@ -101,7 +101,7 @@ export function DebtForm({
             >
               {DEBT_PURPOSES.map((p) => (
                 <option key={p} value={p}>
-                  {PURPOSE_LABELS_ES[p]}
+                  {t.labels.debtPurposes[p]}
                 </option>
               ))}
             </select>

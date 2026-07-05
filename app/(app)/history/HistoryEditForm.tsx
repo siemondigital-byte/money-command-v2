@@ -3,25 +3,11 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { SerializedMonthlyRecord } from "@/lib/serialize";
+import { useTranslations } from "@/lib/i18n/provider";
 import {
   updateMonthlyRecordAction,
   type HistoryActionResult,
 } from "./actions";
-
-const MONTH_LABELS_ES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
 
 export function HistoryEditForm({
   record,
@@ -30,6 +16,7 @@ export function HistoryEditForm({
   record: SerializedMonthlyRecord;
   onDoneHref: string;
 }) {
+  const t = useTranslations();
   const [state, formAction, pending] = useActionState<
     HistoryActionResult,
     FormData
@@ -57,7 +44,7 @@ export function HistoryEditForm({
         <label className="flex flex-col gap-1">
           <span className="label">Mes</span>
           <select name="month" defaultValue={record.month}>
-            {MONTH_LABELS_ES.map((m, i) => (
+            {t.labels.months.map((m, i) => (
               <option key={i + 1} value={i + 1}>
                 {m}
               </option>

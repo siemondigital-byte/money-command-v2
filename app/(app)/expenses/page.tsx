@@ -5,14 +5,13 @@ import { serializeExpense, type SerializedExpense } from "@/lib/serialize";
 import { activePeriod, getMonthlyRecord, periodToString } from "@/lib/monthly";
 import {
   BASKETS,
-  BASKET_LABELS_ES,
   BASKET_COLORS,
-  CATEGORY_LABELS_ES,
   sumRealByBasket,
   totalsByType,
   subscriptionSummary,
   type Basket,
 } from "@/lib/expenses";
+import { getDict, type Dict } from "@/lib/i18n";
 import { PortfolioDonut, type DonutSlice } from "../investments/PortfolioDonut";
 import { ExpenseForm } from "./ExpenseForm";
 import { SubscriptionForm } from "./SubscriptionForm";
@@ -26,21 +25,6 @@ import { deleteExpenseAction } from "./actions";
 
 export const metadata = { title: "Egresos · The Money Command" };
 
-const MONTH_LABELS_ES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
-
 type Tab = "fixed" | "variable" | "basket";
 
 export default async function ExpensesPage({
@@ -50,6 +34,7 @@ export default async function ExpensesPage({
 }) {
   const { user, profile } = await requireUser();
   const params = await searchParams;
+  const dict = getDict(profile.locale);
 
   const period = activePeriod({
     activeYear: profile.activeYear,
@@ -105,7 +90,7 @@ export default async function ExpensesPage({
     (b) => realByBasket[b] > 0,
   ).map((b) => ({
     category: b,
-    label: BASKET_LABELS_ES[b],
+    label: dict.labels.baskets[b],
     capital: realByBasket[b],
     color: BASKET_COLORS[b],
   }));
@@ -114,7 +99,7 @@ export default async function ExpensesPage({
     <div className="fade-up flex flex-col gap-6">
       <header>
         <div className="label mb-1">
-          Egresos · {MONTH_LABELS_ES[period.month - 1]} {period.year}
+          Egresos · {dict.labels.months[period.month - 1]} {period.year}
         </div>
         <h1>Dirigí tu dinero</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
@@ -133,7 +118,7 @@ export default async function ExpensesPage({
       {/* Escáner de resumen de tarjeta (Etapa 3: revisión + creación real) */}
       <StatementScanner
         existingExpenses={rows.map((r) => ({ name: r.name, amount: r.amount }))}
-        activeMonthLabel={`${MONTH_LABELS_ES[period.month - 1]} ${period.year}`}
+        activeMonthLabel={`${dict.labels.months[period.month - 1]} ${period.year}`}
       />
 
       {/* KPIs */}
@@ -172,6 +157,7 @@ export default async function ExpensesPage({
           type="fixed"
           rows={fixedRows}
           money={money}
+          dict={dict}
           editing={editing?.type === "fixed" ? editing : null}
           tab="fixed"
         />
@@ -181,6 +167,7 @@ export default async function ExpensesPage({
           type="variable"
           rows={variableRows}
           money={money}
+          dict={dict}
           editing={editing?.type === "variable" ? editing : null}
           tab="variable"
           grouped
@@ -194,6 +181,7 @@ export default async function ExpensesPage({
           realByBasket={realByBasket}
           donutSlices={donutSlices}
           money={money}
+          dict={dict}
         />
       )}
 
@@ -319,6 +307,7 @@ function ExpenseTypeSection({
   type,
   rows,
   money,
+  dict,
   editing,
   tab,
   grouped = false,
@@ -328,6 +317,7 @@ function ExpenseTypeSection({
   type: "fixed" | "variable";
   rows: SerializedExpense[];
   money: Intl.NumberFormat;
+  dict: Dict;
   editing: SerializedExpense | null;
   tab: Tab;
   /** Agrupar por categoría con desplegables (solo Variables). */
@@ -421,9 +411,9 @@ function ExpenseTypeSection({
             {rows.map((r) => (
               <tr key={r.id} style={{ borderTop: "1px solid var(--border)" }}>
                 <Td>{r.name}</Td>
-                <Td>{CATEGORY_LABELS_ES[r.category] ?? r.category}</Td>
+                <Td>{dict.labels.categories[r.category] ?? r.category}</Td>
                 <Td>
-                  <BasketTag basket={r.basket as Basket} />
+                  <BasketTag basket={r.basket as Basket} dict={dict} />
                 </Td>
                 <Td align="right">
                   {r.budget > 0 ? money.format(r.budget) : "—"}
@@ -488,10 +478,10 @@ function ExpenseTypeSection({
                       marginTop: "2px",
                     }}
                   >
-                    {CATEGORY_LABELS_ES[r.category] ?? r.category}
+                    {dict.labels.categories[r.category] ?? r.category}
                   </div>
                 </div>
-                <BasketTag basket={r.basket as Basket} />
+                <BasketTag basket={r.basket as Basket} dict={dict} />
               </div>
 
               <div
@@ -554,11 +544,13 @@ function BasketSection({
   realByBasket,
   donutSlices,
   money,
+  dict,
 }: {
   rows: SerializedExpense[];
   realByBasket: ReturnType<typeof sumRealByBasket>;
   donutSlices: DonutSlice[];
   money: Intl.NumberFormat;
+  dict: Dict;
 }) {
   const total = realByBasket.total;
   return (
@@ -627,7 +619,11 @@ function BasketSection({
                 const key = normalizeCategoryKey(r.category);
                 let g = catMap.get(key);
                 if (!g) {
-                  g = { key, label: categoryLabel(key, r.category), total: 0 };
+                  g = {
+                    key,
+                    label: categoryLabel(key, r.category, dict.labels.categories),
+                    total: 0,
+                  };
                   catMap.set(key, g);
                 }
                 g.total += r.amount;
@@ -653,7 +649,7 @@ function BasketSection({
                   fontSize: "13px",
                 }}
               >
-                <span style={{ color: "var(--text)" }}>{BASKET_LABELS_ES[b]}</span>
+                <span style={{ color: "var(--text)" }}>{dict.labels.baskets[b]}</span>
                 <span style={{ color: "var(--muted)" }}>
                   {money.format(real)}
                   <span style={{ color: "var(--text)" }}>
@@ -843,7 +839,7 @@ function TabLink({
   );
 }
 
-function BasketTag({ basket }: { basket: Basket }) {
+function BasketTag({ basket, dict }: { basket: Basket; dict: Dict }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
       <span
@@ -855,7 +851,7 @@ function BasketTag({ basket }: { basket: Basket }) {
           background: BASKET_COLORS[basket],
         }}
       />
-      <span style={{ fontSize: "12px" }}>{BASKET_LABELS_ES[basket]}</span>
+      <span style={{ fontSize: "12px" }}>{dict.labels.baskets[basket]}</span>
     </span>
   );
 }

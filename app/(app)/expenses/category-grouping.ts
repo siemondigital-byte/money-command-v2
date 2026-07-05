@@ -10,19 +10,23 @@
  * "transporte"), normalizamos una CLAVE de display; el valor guardado no cambia.
  */
 
-import { CATEGORY_LABELS_ES } from "@/lib/expenses";
-
 /** Clave de agrupamiento normalizada (solo para agrupar/mostrar). */
 export function normalizeCategoryKey(category: string): string {
   return category.trim().toLowerCase();
 }
 
 /**
- * Título prolijo del grupo: la etiqueta oficial si la categoría es una de las
- * predefinidas; si no (categoría libre del escáner), capitaliza la cruda.
+ * Título prolijo del grupo: la etiqueta oficial (del locale activo) si la
+ * categoría es una de las predefinidas; si no (categoría libre del escáner),
+ * capitaliza la cruda. `categories` es el mapa del diccionario resuelto por
+ * locale (dict.labels.categories), que el llamador provee.
  */
-export function categoryLabel(key: string, raw?: string): string {
-  const known = CATEGORY_LABELS_ES[key];
+export function categoryLabel(
+  key: string,
+  raw: string | undefined,
+  categories: Record<string, string>,
+): string {
+  const known = categories[key];
   if (known) return known;
   const base = (raw ?? key).trim();
   if (base.length === 0) return "Sin categoría";
