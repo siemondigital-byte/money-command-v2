@@ -13,8 +13,7 @@ export default async function LoginPage({
 
   return (
     <div>
-      <div className="label mb-1">Iniciar sesión</div>
-      <h2 className="mb-4">Bienvenido de vuelta</h2>
+      <div className="label mb-4">Iniciar sesión</div>
 
       <AuthForm action={loginAction} submitLabel="Entrar">
         <Field

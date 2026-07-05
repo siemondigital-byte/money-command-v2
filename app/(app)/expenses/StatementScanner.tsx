@@ -283,7 +283,9 @@ export function StatementScanner({
 
       {/* Subida */}
       {(phase === "idle" || phase === "error") && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {/* Input nativo oculto: el botón estilizado lo dispara (mismo look que
+              el resto de la app, sin el "Choose File" gris del navegador). */}
           <input
             ref={fileInputRef}
             type="file"
@@ -293,11 +295,20 @@ export function StatementScanner({
               const f = e.target.files?.[0];
               if (f) void handleFile(f);
             }}
+            style={{ display: "none" }}
           />
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => fileInputRef.current?.click()}
+            style={{ alignSelf: "flex-start" }}
+          >
+            Subir PDF o foto
+          </button>
           <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0 }}>
             Subí un PDF o una foto del resumen. El texto del PDF se lee en tu
-            navegador y las imágenes se comprimen ahí mismo. En esta versión, la
-            creación de gastos todavía no está activa: solo revisás la lista.
+            navegador y las imágenes se comprimen ahí mismo. Vas a poder revisar y
+            ajustar la lista antes de crear los gastos.
           </p>
           {phase === "error" && errorMsg && (
             <p style={{ color: "var(--danger)", fontSize: "12px", margin: 0 }}>{errorMsg}</p>

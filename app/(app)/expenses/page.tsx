@@ -17,6 +17,10 @@ import { PortfolioDonut, type DonutSlice } from "../investments/PortfolioDonut";
 import { ExpenseForm } from "./ExpenseForm";
 import { SubscriptionForm } from "./SubscriptionForm";
 import { StatementScanner } from "./StatementScanner";
+import {
+  VariablesByCategory,
+  type CategoryExpenseRow,
+} from "./VariablesByCategory";
 import { deleteExpenseAction } from "./actions";
 
 export const metadata = { title: "Egresos · The Money Command" };
@@ -178,6 +182,9 @@ export default async function ExpensesPage({
           money={money}
           editing={editing?.type === "variable" ? editing : null}
           tab="variable"
+          grouped
+          locale={locale}
+          currency={profile.currency}
         />
       )}
       {tab === "basket" && (
@@ -313,17 +320,40 @@ function ExpenseTypeSection({
   money,
   editing,
   tab,
+  grouped = false,
+  locale,
+  currency,
 }: {
   type: "fixed" | "variable";
   rows: SerializedExpense[];
   money: Intl.NumberFormat;
   editing: SerializedExpense | null;
   tab: Tab;
+  /** Agrupar por categoría con desplegables (solo Variables). */
+  grouped?: boolean;
+  locale?: string;
+  currency?: string;
 }) {
   const subtotal = rows
     .filter((r) => r.isActive)
     .reduce((s, r) => s + r.amount, 0);
   const label = type === "fixed" ? "Egresos fijos" : "Egresos variables";
+
+  // Vista agrupada: mismas filas, reagrupadas por categoría (solo presentación).
+  // El subtotal de arriba sigue siendo Σ activos (igual que totalsByType).
+  const groupedRows: CategoryExpenseRow[] = grouped
+    ? rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        amount: r.amount,
+        category: r.category,
+        basket: r.basket as Basket,
+        isActive: r.isActive,
+        purchaseDate: r.purchaseDate
+          ? new Date(r.purchaseDate).toISOString().slice(0, 10)
+          : null,
+      }))
+    : [];
 
   return (
     <section className="card flex flex-col gap-3">
@@ -354,7 +384,17 @@ function ExpenseTypeSection({
         </div>
       </div>
 
-      {rows.length > 0 && (
+      {/* Vista agrupada por categoría (Variables): desplegables por categoría. */}
+      {grouped && rows.length > 0 && (
+        <VariablesByCategory
+          rows={groupedRows}
+          locale={locale ?? "en-US"}
+          currency={currency ?? "USD"}
+          tab={tab}
+        />
+      )}
+
+      {!grouped && rows.length > 0 && (
         <>
         {/* Desktop (>= md): tabla original, sin cambios. Oculta en móvil. */}
         <div className="hidden md:block">
@@ -532,12 +572,24 @@ function BasketSection({
           // NIVEL 1 — % de la canasta sobre el total real del mes.
           // Las tres suman 100%. Si el total es 0, 0% sin dividir por cero.
           const pct = total > 0 ? (real / total) * 100 : 0;
-          // NIVEL 2 — gastos de la canasta (activos), de mayor a menor; cada
-          // % es sobre el TOTAL del mes (no sobre la canasta), para que se vea
-          // el peso real de cada gasto en el panorama completo.
-          const items = rows
-            .filter((r) => r.isActive && r.basket === b)
-            .sort((a, c) => c.amount - a.amount);
+          // NIVEL 2 — la canasta partida en FIJOS y VARIABLES (activos). Se
+          // reagrupan las MISMAS filas activas por tipo: la suma de los dos
+          // grupos == `real` de la canasta (todo gasto es fijo o variable), así
+          // los totales y % no se mueven. Solo presentación.
+          const groups = (["fixed", "variable"] as const)
+            .map((t) => {
+              let sum = 0;
+              for (const r of rows) {
+                if (r.isActive && r.basket === b && r.type === t) sum += r.amount;
+              }
+              return {
+                key: t,
+                label: t === "fixed" ? "Fijos" : "Variables",
+                total: Math.round(sum * 100) / 100,
+              };
+            })
+            .filter((g) => g.total > 0)
+            .sort((a, c) => c.total - a.total);
           return (
             <div key={b} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <div
@@ -573,8 +625,8 @@ function BasketSection({
                 />
               </div>
 
-              {/* NIVEL 2 — desglose de gastos individuales */}
-              {items.length > 0 && (
+              {/* NIVEL 2 — Fijos y Variables de la canasta (sin desplegable) */}
+              {groups.length > 0 && (
                 <div
                   style={{
                     display: "flex",
@@ -584,17 +636,17 @@ function BasketSection({
                     marginTop: "4px",
                   }}
                 >
-                  {items.map((r) => {
+                  {groups.map((c) => {
                     // Dos porcentajes: dentro de la canasta y sobre el total
                     // del mes. Guards para no dividir por cero.
-                    const pctOfBasket = real > 0 ? (r.amount / real) * 100 : 0;
-                    const pctOfTotal = total > 0 ? (r.amount / total) * 100 : 0;
+                    const pctOfBasket = real > 0 ? (c.total / real) * 100 : 0;
+                    const pctOfTotal = total > 0 ? (c.total / total) * 100 : 0;
                     // La barra representa el peso sobre el TOTAL del mes, así
-                    // todas las barras (canasta y gastos) quedan en la misma
+                    // todas las barras (canasta y grupos) quedan en la misma
                     // escala y se compara el peso real de un vistazo.
                     return (
                       <div
-                        key={r.id}
+                        key={c.key}
                         style={{ display: "flex", flexDirection: "column", gap: "4px" }}
                       >
                         <div
@@ -604,9 +656,9 @@ function BasketSection({
                             fontSize: "12px",
                           }}
                         >
-                          <span style={{ color: "var(--text)" }}>{r.name}</span>
+                          <span style={{ color: "var(--text)" }}>{c.label}</span>
                           <span style={{ color: "var(--muted)" }}>
-                            {money.format(r.amount)}
+                            {money.format(c.total)}
                           </span>
                         </div>
                         <div

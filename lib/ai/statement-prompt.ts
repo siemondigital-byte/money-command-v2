@@ -37,7 +37,7 @@ CÓMO LLENAR CADA CAMPO:
 - "comercio": el texto de la columna DETALLE DEL MOVIMIENTO (nombre del comercio). Si no se lee, "".
 - "monto": el número que corresponde a lo que se paga ESTE mes por esa compra. Si la compra está en cuotas, usá "CUOTA A PAGAR ESTE MES" (la cuota del período), NO el "VALOR DEL MOVIMIENTO" total. Si es pago único (una sola cuota), usá el valor del movimiento. Sin símbolo de moneda ni separador de miles; usá punto decimal.
 - "fecha": la fecha del movimiento en formato YYYY-MM-DD. Si no se ve, "".
-- "categoria_sugerida": una etiqueta corta en español (ej. "comida", "transporte", "servicios", "restaurantes", "ropa", "salud", "entretenimiento").
+- "categoria_sugerida": elegí PREFERENTEMENTE una de estas categorías predefinidas de la app cuando la compra encaje en alguna (usá EXACTAMENTE ese texto, en minúscula): vivienda, comida, servicios, transporte, salud, seguros, entretenimiento, restaurantes, viajes, ropa, educacion, suscripciones, otros. Solo si ninguna aplica bien, sugerí una etiqueta corta propia en español (minúscula).
 - "canasta_sugerida": sugerencia según el tipo de gasto. essentials = necesidades (comida, servicios, transporte, salud). style = gustos y ocio (restaurantes, viajes, ropa, entretenimiento). freedom = deuda, ahorro, educación, inversión. Es solo una sugerencia; la persona decide.
 - "confianza": "alta" si la fila se lee clara; "media" si dudás de algún campo; "baja" si no estás seguro de que sea una compra.
 
