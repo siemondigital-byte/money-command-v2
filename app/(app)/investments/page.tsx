@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { getDict } from "@/lib/i18n";
 import { getServerDict } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { serializeInvestment } from "@/lib/serialize";
@@ -27,14 +28,6 @@ export async function generateMetadata() {
   return { title: (await getServerDict()).metadata.investments };
 }
 
-const CATEGORY_LABELS_ES: Record<InvestmentCategory, string> = {
-  fixed_income: "Renta fija",
-  equity: "Renta variable",
-  real_estate: "Bienes raíces",
-  speculative: "Cripto / Especulativo",
-  other: "Otros",
-};
-
 /** Paleta por POSICIÓN (no por categoría): cada activo un color distinto, el
  * mismo en la tabla, el gráfico y el donut. Se cicla si hay más posiciones. */
 const POSITION_COLORS = [
@@ -58,6 +51,8 @@ export default async function InvestmentsPage({
 }) {
   const { user, profile } = await requireUser();
   const params = await searchParams;
+  const dict = getDict(profile.locale).investments;
+  const catLabels = getDict(profile.locale).labels.investmentCategories;
 
   const positions = await prisma.investment.findMany({
     where: { userId: user.id, isActive: true },
@@ -116,7 +111,7 @@ export default async function InvestmentsPage({
     return {
       ...p,
       color,
-      name: p.label ?? CATEGORY_LABELS_ES[p.category as InvestmentCategory],
+      name: p.label ?? catLabels[p.category as InvestmentCategory],
       share: shares[i]!.share,
       v5: projectedValue([proj], 5),
       v10: projectedValue([proj], 10),
@@ -141,7 +136,7 @@ export default async function InvestmentsPage({
   // Categorías para el form con yields sugeridos
   const categoryOptions = INVESTMENT_CATEGORIES.map((cat) => ({
     value: cat,
-    label: CATEGORY_LABELS_ES[cat],
+    label: catLabels[cat],
     suggestedYield: DEFAULT_PASSIVE_YIELDS_BY_CATEGORY[cat],
   }));
 
@@ -150,8 +145,8 @@ export default async function InvestmentsPage({
   return (
     <div className="fade-up flex flex-col gap-6">
       <header>
-        <div className="label mb-1">Inversiones</div>
-        <h1>Tu portafolio</h1>
+        <div className="label mb-1">{dict.headerLabel}</div>
+        <h1>{dict.title}</h1>
         <p
           style={{
             color: "var(--muted)",
@@ -159,9 +154,7 @@ export default async function InvestmentsPage({
             marginTop: "8px",
           }}
         >
-          Cada activo con su tasa y su aporte mensual. Proyectamos su
-          crecimiento por interés compuesto, y tu renta pasiva de hoy es el
-          Plan B (suma de capital por su yield, dividido 12).
+          {dict.intro}
         </p>
       </header>
 
@@ -175,30 +168,30 @@ export default async function InvestmentsPage({
         }}
       >
         <Kpi
-          label="Portafolio Total"
+          label={dict.kpiPortfolioTotal}
           value={money.format(totalCapital)}
-          sub={`${serialized.length} posición${serialized.length === 1 ? "" : "es"}`}
+          sub={`${serialized.length} ${serialized.length === 1 ? dict.positionSingular : dict.positionPlural}`}
         />
         <Kpi
-          label="Rendimiento Ponderado"
+          label={dict.kpiWeightedReturn}
           value={pct.format(wYield)}
-          sub="prom. ponderado por capital"
+          sub={dict.weightedReturnSub}
         />
         <Kpi
-          label="Renta Pasiva Hoy"
+          label={dict.kpiPassiveToday}
           value={money.format(planBMonthly)}
-          sub="Plan B mensual (yields)"
+          sub={dict.passiveTodaySub}
           valueColor="var(--accent)"
         />
         <Kpi
-          label="Proyección 10A"
+          label={dict.kpiProjection10}
           value={money.format(proj10)}
-          sub="valor estimado"
+          sub={dict.projection10Sub}
         />
         <Kpi
-          label="Renta 10A"
+          label={dict.kpiRent10}
           value={money.format(renta10)}
-          sub="renta pasiva/mes a 10 años"
+          sub={dict.rent10Sub}
         />
       </section>
 
@@ -207,11 +200,10 @@ export default async function InvestmentsPage({
           entre completa. Desktop (>= md): 1fr 220px, dona al costado. */}
       <section className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4 items-stretch">
         <div className="card flex flex-col gap-3">
-          <div className="label">Proyección por horizonte</div>
+          <div className="label">{dict.projectionByHorizon}</div>
           {!hasAssets ? (
             <p style={{ fontSize: "13px", color: "var(--hint)" }}>
-              Cuando cargues posiciones, acá vas a ver tu valor y tu renta
-              proyectados a 5, 10 y 20 años.
+              {dict.projectionEmpty}
             </p>
           ) : (
             <>
@@ -227,15 +219,15 @@ export default async function InvestmentsPage({
             >
               <thead>
                 <tr>
-                  <Th>Horizonte</Th>
-                  <Th align="right">Valor proyectado</Th>
-                  <Th align="right">Renta/mes</Th>
+                  <Th>{dict.colHorizon}</Th>
+                  <Th align="right">{dict.colProjectedValue}</Th>
+                  <Th align="right">{dict.colRentPerMonth}</Th>
                 </tr>
               </thead>
               <tbody>
                 {projTable.map((r) => (
                   <tr key={r.years} style={{ borderTop: "1px solid var(--border)" }}>
-                    <Td>{r.years} años</Td>
+                    <Td>{r.years} {dict.yearsSuffix}</Td>
                     <Td align="right">{money.format(r.value)}</Td>
                     <Td align="right" accent>
                       {money.format(r.monthlyIncome)}
@@ -261,7 +253,7 @@ export default async function InvestmentsPage({
                       fontSize: "1rem",
                     }}
                   >
-                    {r.years} años
+                    {r.years} {dict.yearsSuffix}
                   </div>
                   <div
                     style={{
@@ -271,11 +263,11 @@ export default async function InvestmentsPage({
                     }}
                   >
                     <Field
-                      label="Valor proyectado"
+                      label={dict.colProjectedValue}
                       value={money.format(r.value)}
                     />
                     <Field
-                      label="Renta/mes"
+                      label={dict.colRentPerMonth}
                       value={money.format(r.monthlyIncome)}
                       color="var(--accent)"
                     />
@@ -305,7 +297,7 @@ export default async function InvestmentsPage({
                 textAlign: "center",
               }}
             >
-              Sin datos para graficar
+              {dict.noDataToChart}
             </div>
           )}
         </div>
@@ -348,10 +340,10 @@ export default async function InvestmentsPage({
 
       {/* Pieza 2 — Crecimiento por interés compuesto, 30 años (apilado) */}
       <section className="card flex flex-col gap-3">
-        <div className="label">Crecimiento por interés compuesto — 30 años</div>
+        <div className="label">{dict.growthTitle}</div>
         {!hasAssets ? (
           <p style={{ fontSize: "13px", color: "var(--hint)" }}>
-            Acá vas a ver cómo crece cada activo, apilado, año a año hasta los 30.
+            {dict.growthEmpty}
           </p>
         ) : (
           <>
@@ -391,6 +383,8 @@ export default async function InvestmentsPage({
               colors={assets.map((a) => a.color)}
               locale={profile.locale}
               currency={profile.currency}
+              todayLabel={dict.chartToday}
+              assetFallback={dict.chartAssetFallback}
             />
           </>
         )}
@@ -399,11 +393,11 @@ export default async function InvestmentsPage({
       {/* Pieza 1 — Tabla fila por activo */}
       <section className="card" style={{ padding: 0, overflow: "hidden" }}>
         <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)" }}>
-          <div className="label">Tus activos</div>
+          <div className="label">{dict.assetsTitle}</div>
         </div>
         {!hasAssets ? (
           <p style={{ fontSize: "13px", color: "var(--muted)", padding: "16px" }}>
-            Sin posiciones todavía. Agregá la primera más abajo.
+            {dict.assetsEmpty}
           </p>
         ) : (
           <div style={{ overflowX: "auto" }}>
@@ -416,16 +410,16 @@ export default async function InvestmentsPage({
             >
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                  <Th>Activo</Th>
-                  <Th>Tipo</Th>
-                  <Th align="right">Valor</Th>
-                  <Th align="right">Aporte/mes</Th>
-                  <Th align="right">Rendimiento</Th>
-                  <Th align="right">5A</Th>
-                  <Th align="right">10A</Th>
-                  <Th align="right">Renta 10A</Th>
-                  <Th align="right">20A</Th>
-                  <Th align="right">Acción</Th>
+                  <Th>{dict.colAsset}</Th>
+                  <Th>{dict.colType}</Th>
+                  <Th align="right">{dict.colValue}</Th>
+                  <Th align="right">{dict.colContributionPerMonth}</Th>
+                  <Th align="right">{dict.colReturn}</Th>
+                  <Th align="right">{dict.col5y}</Th>
+                  <Th align="right">{dict.col10y}</Th>
+                  <Th align="right">{dict.colRent10y}</Th>
+                  <Th align="right">{dict.col20y}</Th>
+                  <Th align="right">{dict.colAction}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -455,7 +449,7 @@ export default async function InvestmentsPage({
                           {a.name}
                         </span>
                       </Td>
-                      <Td>{CATEGORY_LABELS_ES[a.category as InvestmentCategory]}</Td>
+                      <Td>{catLabels[a.category as InvestmentCategory]}</Td>
                       <Td align="right">{money.format(a.capital)}</Td>
                       <Td align="right">
                         {a.monthlyContribution > 0
@@ -481,7 +475,7 @@ export default async function InvestmentsPage({
                             href={`/investments?edit=${a.id}#form`}
                             style={{ color: "var(--accent-2)", fontSize: "12px" }}
                           >
-                            Editar
+                            {dict.edit}
                           </Link>
                           <form action={deleteInvestmentAction}>
                             <input type="hidden" name="id" value={a.id} />
@@ -497,7 +491,7 @@ export default async function InvestmentsPage({
                                 padding: 0,
                               }}
                             >
-                              Eliminar
+                              {dict.delete}
                             </button>
                           </form>
                         </div>

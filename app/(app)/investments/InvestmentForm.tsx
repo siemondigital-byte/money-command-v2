@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "@/lib/i18n/provider";
 import type { SerializedInvestment } from "@/lib/serialize";
 import {
   createInvestmentAction,
@@ -28,6 +29,7 @@ export function InvestmentForm({
   editing: SerializedInvestment | null;
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const isEditing = editing != null;
   const action = isEditing ? updateInvestmentAction : createInvestmentAction;
   const [state, formAction, pending] = useActionState<
@@ -51,7 +53,7 @@ export function InvestmentForm({
         className="btn-secondary"
         onClick={() => setOpen(true)}
       >
-        Agregar posición
+        {t.investments.addPosition}
       </button>
     );
   }
@@ -61,7 +63,7 @@ export function InvestmentForm({
 
   return (
     <section className="card flex flex-col gap-3" id="form">
-      {isEditing && <div className="label">Editar posición</div>}
+      {isEditing && <div className="label">{t.investments.editPosition}</div>}
 
       {state.error && (
         <p style={{ color: "var(--danger)", fontSize: "12px" }}>{state.error}</p>
@@ -72,31 +74,31 @@ export function InvestmentForm({
 
         <div className="form-grid">
           <label className="flex flex-col gap-1">
-            <span className="label">Categoría</span>
+            <span className="label">{t.investments.fieldCategory}</span>
             <select name="category" defaultValue={defaultCategory}>
               {categories.map((c) => (
                 <option key={c.value} value={c.value}>
-                  {c.label}
+                  {t.labels.investmentCategories[c.value] ?? c.value}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="label">Etiqueta (opcional)</span>
+            <span className="label">{t.investments.fieldLabel}</span>
             <input
               name="label"
               type="text"
               maxLength={80}
               defaultValue={editing?.label ?? ""}
-              placeholder="ej. S&P 500 ETF"
+              placeholder={t.investments.placeholderLabel}
             />
           </label>
         </div>
 
         <div className="form-grid">
           <label className="flex flex-col gap-1">
-            <span className="label">Capital actual</span>
+            <span className="label">{t.investments.fieldCapital}</span>
             <input
               name="capital"
               type="number"
@@ -108,9 +110,7 @@ export function InvestmentForm({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="label">
-              Yield / Rendimiento anual (%)
-            </span>
+            <span className="label">{t.investments.fieldYield}</span>
             <input
               name="passiveYieldPct"
               type="number"
@@ -119,20 +119,20 @@ export function InvestmentForm({
               max="100"
               required
               defaultValue={defaultYieldPct}
-              placeholder="ej. 4 para 4%"
+              placeholder={t.investments.placeholderYield}
             />
           </label>
         </div>
 
         <label className="flex flex-col gap-1" style={{ maxWidth: "260px" }}>
-          <span className="label">Aporte mensual</span>
+          <span className="label">{t.investments.fieldMonthlyContribution}</span>
           <input
             name="monthlyContribution"
             type="number"
             step="0.01"
             min="0"
             defaultValue={editing ? Number(editing.monthlyContribution) : ""}
-            placeholder="0.00"
+            placeholder={t.investments.placeholderMonthlyContribution}
           />
         </label>
 
@@ -143,8 +143,7 @@ export function InvestmentForm({
             lineHeight: 1.5,
           }}
         >
-          La tasa anual de la posición. Se usa para tu renta pasiva y para
-          proyectar su crecimiento.
+          {t.investments.yieldHelp}
         </p>
 
         <div
@@ -162,7 +161,7 @@ export function InvestmentForm({
               isEditing ? router.replace("/investments") : setOpen(false)
             }
           >
-            Cancelar
+            {t.investments.cancel}
           </button>
           <button
             type="submit"
@@ -171,10 +170,10 @@ export function InvestmentForm({
             style={{ opacity: pending ? 0.6 : 1 }}
           >
             {pending
-              ? "Guardando…"
+              ? t.investments.saving
               : isEditing
-                ? "Guardar cambios"
-                : "Agregar posición"}
+                ? t.investments.saveChanges
+                : t.investments.addPosition}
           </button>
         </div>
       </form>

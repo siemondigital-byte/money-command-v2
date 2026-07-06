@@ -56,6 +56,7 @@ export default async function DashboardPage() {
   const locale = profile.locale;
   const currency = profile.currency;
   const t = getDict(locale).dashboard;
+  const invCats = getDict(locale).labels.investmentCategories;
 
   // Datos consolidados / históricos (LECTURA, nunca escritura).
   const [record, records, investments] = await Promise.all([
@@ -101,7 +102,7 @@ export default async function DashboardPage() {
       category: p.id,
       label:
         p.label ??
-        t.investmentCategories[p.category] ??
+        invCats[p.category] ??
         t.capitalInvested.otherFallback,
       capital: Number(p.capital),
       color: POSITION_COLORS[i % POSITION_COLORS.length]!,

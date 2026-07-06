@@ -40,6 +40,8 @@ export function GrowthChart({
   colors,
   locale,
   currency,
+  todayLabel,
+  assetFallback,
 }: {
   years: number[];
   perAsset: number[][];
@@ -47,6 +49,8 @@ export function GrowthChart({
   colors: string[];
   locale: string;
   currency: string;
+  todayLabel: string;
+  assetFallback: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -54,14 +58,14 @@ export function GrowthChart({
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const xLabels = years.map((y) => (y === 0 ? "Hoy" : `${y}a`));
+    const xLabels = years.map((y) => (y === 0 ? todayLabel : `${y}a`));
 
     const cfg: ChartConfiguration<"line", number[], string> = {
       type: "line",
       data: {
         labels: xLabels,
         datasets: perAsset.map((band, i) => ({
-          label: labels[i] ?? `Activo ${i + 1}`,
+          label: labels[i] ?? `${assetFallback} ${i + 1}`,
           data: band,
           borderColor: colors[i] ?? "#7fffb2",
           backgroundColor: (colors[i] ?? "#7fffb2") + "55", // ~33% alpha
@@ -126,7 +130,7 @@ export function GrowthChart({
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [years, perAsset, labels, colors, locale, currency]);
+  }, [years, perAsset, labels, colors, locale, currency, todayLabel, assetFallback]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: 280 }}>

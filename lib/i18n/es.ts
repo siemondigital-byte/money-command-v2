@@ -61,8 +61,9 @@ const debtPurposes: Record<DebtPurpose, string> = {
   investment: "Inversión",
 };
 
-// Categorías de inversión (Dashboard). Record<string,string> a propósito: se
-// indexa por category libre. Duplica el mapa local del módulo Inversiones.
+// Categorías de inversión. Record<string,string> a propósito: se indexa por
+// category libre. Fuente única: lo consumen Dashboard e Inversiones vía
+// labels.investmentCategories.
 const investmentCategories: Record<string, string> = {
   fixed_income: "Renta fija",
   equity: "Renta variable",
@@ -181,9 +182,6 @@ export const es = {
     noDataExpensesLink: "egresos",
     noDataSuf: "para verlo completo.",
     affirmationLabel: "Afirmación del día",
-    // Etiquetas de categoría de inversión (duplican las del módulo Inversiones;
-    // consolidar cuando se migre Inversiones a i18n).
-    investmentCategories,
     capitalInvested: {
       label: "Capital invertido",
       weightedReturnPre: "rentabilidad ponderada · genera",
@@ -383,6 +381,75 @@ export const es = {
     placeholderNameA: "Salario principal",
     placeholderNameC: "Freelance / proyecto",
   },
+  investments: {
+    // Header
+    headerLabel: "Inversiones",
+    title: "Tu portafolio",
+    intro:
+      "Cada activo con su tasa y su aporte mensual. Proyectamos su crecimiento por interés compuesto, y tu renta pasiva de hoy es el Plan B (suma de capital por su yield, dividido 12).",
+    // KPIs (capa A)
+    kpiPortfolioTotal: "Portafolio Total",
+    // Contador de posiciones: "{n} posición" / "{n} posiciones"
+    positionSingular: "posición",
+    positionPlural: "posiciones",
+    kpiWeightedReturn: "Rendimiento Ponderado",
+    weightedReturnSub: "prom. ponderado por capital",
+    kpiPassiveToday: "Renta Pasiva Hoy",
+    passiveTodaySub: "Plan B mensual (yields)",
+    kpiProjection10: "Proyección 10A",
+    projection10Sub: "valor estimado",
+    kpiRent10: "Renta 10A",
+    rent10Sub: "renta pasiva/mes a 10 años",
+    // Proyección por horizonte
+    projectionByHorizon: "Proyección por horizonte",
+    projectionEmpty:
+      "Cuando cargues posiciones, acá vas a ver tu valor y tu renta proyectados a 5, 10 y 20 años.",
+    colHorizon: "Horizonte",
+    colProjectedValue: "Valor proyectado",
+    colRentPerMonth: "Renta/mes",
+    // "{n} años"
+    yearsSuffix: "años",
+    // Donut
+    noDataToChart: "Sin datos para graficar",
+    // Crecimiento por interés compuesto
+    growthTitle: "Crecimiento por interés compuesto — 30 años",
+    growthEmpty:
+      "Acá vas a ver cómo crece cada activo, apilado, año a año hasta los 30.",
+    // Labels del GrowthChart (eje X y fallback de serie)
+    chartToday: "Hoy",
+    chartAssetFallback: "Activo",
+    // Tabla de activos
+    assetsTitle: "Tus activos",
+    assetsEmpty: "Sin posiciones todavía. Agregá la primera más abajo.",
+    colAsset: "Activo",
+    colType: "Tipo",
+    colValue: "Valor",
+    colContributionPerMonth: "Aporte/mes",
+    colReturn: "Rendimiento",
+    col5y: "5A",
+    col10y: "10A",
+    colRent10y: "Renta 10A",
+    col20y: "20A",
+    colAction: "Acción",
+    edit: "Editar",
+    delete: "Eliminar",
+    // Form crear / editar
+    addPosition: "Agregar posición",
+    editPosition: "Editar posición",
+    fieldCategory: "Categoría",
+    fieldLabel: "Etiqueta (opcional)",
+    placeholderLabel: "ej. S&P 500 ETF",
+    fieldCapital: "Capital actual",
+    fieldYield: "Yield / Rendimiento anual (%)",
+    placeholderYield: "ej. 4 para 4%",
+    fieldMonthlyContribution: "Aporte mensual",
+    placeholderMonthlyContribution: "0.00",
+    yieldHelp:
+      "La tasa anual de la posición. Se usa para tu renta pasiva y para proyectar su crecimiento.",
+    cancel: "Cancelar",
+    saving: "Guardando…",
+    saveChanges: "Guardar cambios",
+  },
   expenses: {
     // Panel de fugas (suscripciones + gastos hormiga), alimentado por isLeak.
     leaks: {
@@ -404,6 +471,7 @@ export const es = {
     categories,
     debtTypes,
     debtPurposes,
+    investmentCategories,
     months,
     monthsShort,
     // Categoría con gastos en más de una canasta (vista Variables agrupada).
