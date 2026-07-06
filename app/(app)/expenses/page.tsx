@@ -36,6 +36,7 @@ type Tab = "fixed" | "variable" | "basket";
 const LEAK_CATEGORIES = new Set([
   "suscripciones",
   "entretenimiento",
+  "delivery",
   "otros",
   "mixtos",
   "mixto",
@@ -246,42 +247,51 @@ export default async function ExpensesPage({
           {dict.expenses.leaks.freedomCapitalNote}
         </p>
 
-        {/* Qué está contando el panel (según su categoría). Para incluir o
-            excluir un gasto, se le cambia la categoría en la lista de arriba. */}
+        {/* Qué está contando el panel (según su categoría). Mismo formato que la
+            lista principal, con Editar/Eliminar; para incluir o excluir un gasto,
+            se le cambia la categoría (acá o arriba). */}
         {leakRows.length > 0 && (
-          <div
-            style={{
-              borderTop: "1px solid var(--border)",
-              paddingTop: "12px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", paddingTop: "4px" }}>
             {leakRows.map((r) => (
               <div
                 key={r.id}
                 style={{
                   display: "flex",
+                  alignItems: "center",
                   justifyContent: "space-between",
-                  alignItems: "baseline",
                   gap: "12px",
-                  fontSize: "13px",
+                  padding: "10px 0",
+                  borderTop: "1px solid var(--border)",
+                  flexWrap: "wrap",
                 }}
               >
-                <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>
-                  {r.name}
-                  <span style={{ color: "var(--muted)", fontSize: "11px", marginLeft: "8px" }}>
+                <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <span style={{ fontSize: "13px", overflowWrap: "anywhere" }}>{r.name}</span>
+                  <span style={{ fontSize: "11px", color: "var(--muted)" }}>
                     {categoryLabel(
                       normalizeCategoryKey(r.category),
                       r.category,
                       dict.labels.categories,
                     )}
                   </span>
-                </span>
-                <span style={{ color: "var(--muted)", whiteSpace: "nowrap" }}>
-                  {money.format(r.amount)}
-                </span>
+                  {r.purchaseDate && (
+                    <span style={{ fontSize: "11px", color: "var(--hint)" }}>
+                      {new Date(r.purchaseDate).toISOString().slice(0, 10)}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "16px" }}>
+                  <span style={{ fontSize: "13px", color: "var(--accent)", whiteSpace: "nowrap" }}>
+                    {money.format(r.amount)}
+                  </span>
+                  <Link
+                    href={`/expenses?tab=${r.type === "fixed" ? "fixed" : "variable"}&edit=${r.id}#form`}
+                    style={{ color: "var(--accent-2)", fontSize: "12px" }}
+                  >
+                    Editar
+                  </Link>
+                  <DeleteButton id={r.id} />
+                </div>
               </div>
             ))}
           </div>

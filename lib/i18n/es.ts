@@ -34,6 +34,7 @@ const categories: Record<string, string> = {
   seguros: "Seguros",
   entretenimiento: "Entretenimiento",
   restaurantes: "Restaurantes",
+  delivery: "Delivery",
   viajes: "Viajes",
   ropa: "Ropa",
   educacion: "Educación",
@@ -319,7 +320,7 @@ export const es = {
     leaks: {
       title: "Suscripciones y egresos hormiga",
       intro:
-        "Reúne tus gastos de suscripciones, entretenimiento y otros del período. Mirá lo que pesan al mes, al año y a futuro. Para incluir o quitar un gasto, cambiá su categoría en la lista.",
+        "Reúne tus gastos de suscripciones, entretenimiento, delivery y otros del período. Mirá lo que pesan al mes, al año y a futuro. Para incluir o quitar un gasto, cambiá su categoría.",
       perMonth: "Por mes",
       perYear: "Por año",
       inFiveYears: "En 5 años",

@@ -34,6 +34,7 @@ export const EXPENSE_CATEGORIES = [
   "seguros",
   "entretenimiento",
   "restaurantes",
+  "delivery",
   "viajes",
   "ropa",
   "educacion",
