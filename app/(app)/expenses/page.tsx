@@ -699,6 +699,12 @@ function BasketSection({
                       // el peso sobre el total, misma escala que todo el resto.
                       const pctOfBasket = real > 0 ? (c.total / real) * 100 : 0;
                       const pctOfTotal = total > 0 ? (c.total / total) * 100 : 0;
+                      // >0 pero redondea a 0 → "<1" (no mostrar "0%" en
+                      // categorías con monto pero peso menor al 0,5%).
+                      const pctText = (raw: number) =>
+                        raw > 0 && Math.round(raw) === 0
+                          ? "<1"
+                          : String(Math.round(raw));
                       return (
                         <div
                           key={c.key}
@@ -740,9 +746,9 @@ function BasketSection({
                               color: "var(--hint)",
                             }}
                           >
-                            <span>{Math.round(pctOfBasket)}{L.pctOfBasket}</span>
+                            <span>{pctText(pctOfBasket)}{L.pctOfBasket}</span>
                             <span>·</span>
-                            <span>{Math.round(pctOfTotal)}{L.pctOfTotal}</span>
+                            <span>{pctText(pctOfTotal)}{L.pctOfTotal}</span>
                           </div>
                         </div>
                       );
