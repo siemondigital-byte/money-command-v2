@@ -29,6 +29,18 @@ export async function generateMetadata() {
 
 type Tab = "fixed" | "variable" | "basket";
 
+// Categorías que alimentan el panel de fugas (suscripciones y gastos hormiga).
+// Enfoque por CATEGORÍA (no por marca): cualquier gasto de estas categorías
+// cuenta. Para incluir/excluir un gasto, se le cambia la categoría en la lista.
+// Comparación normalizada (case-insensitive) para no fragmentar "Otros"/"otros".
+const LEAK_CATEGORIES = new Set([
+  "suscripciones",
+  "entretenimiento",
+  "otros",
+  "mixtos",
+  "mixto",
+]);
+
 export default async function ExpensesPage({
   searchParams,
 }: {
@@ -73,11 +85,14 @@ export default async function ExpensesPage({
   const totals = totalsByType(helperRows);
   const realByBasket = sumRealByBasket(helperRows);
 
-  // Panel de fugas (presentación pura): suma los gastos marcados isLeak del
-  // período. ORTOGONAL a la canasta — no toca totales ni consolidación.
+  // Panel de fugas (presentación pura): suma los gastos activos del período
+  // cuya CATEGORÍA está en LEAK_CATEGORIES (suscripciones, entretenimiento,
+  // otros, mixtos). No toca totales ni consolidación.
   // Capital de libertad = mensual × 150 (= mensual × 12 ÷ 0.08, renta al 8%).
   const round2 = (n: number) => Math.round(n * 100) / 100;
-  const leakRows = rows.filter((r) => r.isLeak && r.isActive);
+  const leakRows = rows.filter(
+    (r) => r.isActive && LEAK_CATEGORIES.has(normalizeCategoryKey(r.category)),
+  );
   const leakMonthly = round2(leakRows.reduce((s, r) => s + r.amount, 0));
   const leakAnnual = round2(leakMonthly * 12);
   const leakFiveYears = round2(leakMonthly * 60);
@@ -95,7 +110,6 @@ export default async function ExpensesPage({
   // Las suscripciones tienen su propia sección; no se listan en Fijos/Variables.
   const fixedRows = rows.filter((r) => r.type === "fixed" && !r.isSubscription);
   const variableRows = rows.filter((r) => r.type === "variable");
-  const subscriptionRows = rows.filter((r) => r.isSubscription);
 
   const donutSlices: DonutSlice[] = BASKETS.filter(
     (b) => realByBasket[b] > 0,
@@ -232,81 +246,45 @@ export default async function ExpensesPage({
           {dict.expenses.leaks.freedomCapitalNote}
         </p>
 
-        {subscriptionRows.length > 0 && (
-          <>
-          {/* Desktop (>= md): tabla. Oculta en móvil. */}
-          <div className="hidden md:block">
-          <table
+        {/* Qué está contando el panel (según su categoría). Para incluir o
+            excluir un gasto, se le cambia la categoría en la lista de arriba. */}
+        {leakRows.length > 0 && (
+          <div
             style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
               borderTop: "1px solid var(--border)",
+              paddingTop: "12px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
             }}
           >
-            <thead>
-              <tr>
-                <Th>Suscripción</Th>
-                <Th align="right">Costo/mes</Th>
-                <Th align="right">Acción</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {subscriptionRows.map((r) => (
-                <tr key={r.id} style={{ borderTop: "1px solid var(--border)" }}>
-                  <Td>{r.name}</Td>
-                  <Td align="right">{money.format(r.amount)}</Td>
-                  <Td align="right">
-                    <DeleteButton id={r.id} />
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-
-          {/* Móvil (< md): una tarjeta por suscripción. */}
-          <div
-            className="md:hidden flex flex-col gap-3"
-            style={{ borderTop: "1px solid var(--border)", paddingTop: "12px" }}
-          >
-            {subscriptionRows.map((r) => (
+            {leakRows.map((r) => (
               <div
                 key={r.id}
-                className="card card-elevated"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  alignItems: "baseline",
                   gap: "12px",
+                  fontSize: "13px",
                 }}
               >
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontFamily: "Syne, sans-serif",
-                      fontWeight: 700,
-                      fontSize: "0.95rem",
-                      overflowWrap: "anywhere",
-                    }}
-                  >
-                    {r.name}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--muted)",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {money.format(r.amount)} / mes
-                  </div>
-                </div>
-                <DeleteButton id={r.id} />
+                <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>
+                  {r.name}
+                  <span style={{ color: "var(--muted)", fontSize: "11px", marginLeft: "8px" }}>
+                    {categoryLabel(
+                      normalizeCategoryKey(r.category),
+                      r.category,
+                      dict.labels.categories,
+                    )}
+                  </span>
+                </span>
+                <span style={{ color: "var(--muted)", whiteSpace: "nowrap" }}>
+                  {money.format(r.amount)}
+                </span>
               </div>
             ))}
           </div>
-          </>
         )}
 
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: "12px" }}>

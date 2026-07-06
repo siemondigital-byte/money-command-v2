@@ -319,15 +319,13 @@ export const es = {
     leaks: {
       title: "Suscripciones y egresos hormiga",
       intro:
-        "Los gastos que marcás como fuga se suman acá. Mirá lo que pesan al mes, al año y a futuro.",
+        "Reúne tus gastos de suscripciones, entretenimiento y otros del período. Mirá lo que pesan al mes, al año y a futuro. Para incluir o quitar un gasto, cambiá su categoría en la lista.",
       perMonth: "Por mes",
       perYear: "Por año",
       inFiveYears: "En 5 años",
       freedomCapital: "Capital de libertad",
       freedomCapitalNote:
         "El capital que tendrías que tener invertido para cubrir esto con rendimientos al 8% (ejemplo ajustable).",
-      // Checkbox del ExpenseForm
-      formCheckbox: "Marcar como fuga (suscripción o gasto hormiga)",
     },
   },
   labels: {

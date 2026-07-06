@@ -55,8 +55,6 @@ const expenseSchema = z.object({
   basket: z.enum(["essentials", "style", "freedom"]),
   budget: numericString,
   amount: numericString,
-  // Checkbox "fuga": el FormData manda "on" si está tildado, o nada si no.
-  isLeak: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
 });
 
 const subscriptionSchema = z.object({
@@ -96,7 +94,6 @@ export async function createExpenseAction(
     basket: getStr(formData, "basket"),
     budget: getStr(formData, "budget"),
     amount: getStr(formData, "amount"),
-    isLeak: getStr(formData, "isLeak"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
@@ -113,7 +110,6 @@ export async function createExpenseAction(
         category: parsed.data.category,
         type: parsed.data.type,
         basket: parsed.data.basket,
-        isLeak: parsed.data.isLeak,
         // columna legacy NOT NULL: derivada del basket (ver CONTEXT.md)
         classification: classificationFromBasket(parsed.data.basket as Basket),
         periodicity: "monthly",
@@ -151,7 +147,6 @@ export async function updateExpenseAction(
     basket: getStr(formData, "basket"),
     budget: getStr(formData, "budget"),
     amount: getStr(formData, "amount"),
-    isLeak: getStr(formData, "isLeak"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
@@ -166,7 +161,6 @@ export async function updateExpenseAction(
         category: parsed.data.category,
         type: parsed.data.type,
         basket: parsed.data.basket,
-        isLeak: parsed.data.isLeak,
         classification: classificationFromBasket(parsed.data.basket as Basket),
         budget: dec(parsed.data.budget),
         amount: dec(parsed.data.amount),

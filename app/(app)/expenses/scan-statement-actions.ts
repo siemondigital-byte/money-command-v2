@@ -52,8 +52,6 @@ export interface StatementItem {
   categoria_sugerida: string;
   canasta_sugerida: "essentials" | "style" | "freedom";
   confianza: "alta" | "media" | "baja";
-  /** Sugerencia de la IA: ¿parece una fuga (suscripción / gasto hormiga)? */
-  es_fuga: boolean;
 }
 
 export type ScanStatementResult =
@@ -78,8 +76,6 @@ const itemSchema = z.object({
   categoria_sugerida: z.string().optional().default(""),
   canasta_sugerida: z.enum(["essentials", "style", "freedom"]).catch("essentials"),
   confianza: z.enum(["alta", "media", "baja"]).catch("media"),
-  // Booleano tolerante: true | "true" → true; cualquier otra cosa → false.
-  es_fuga: z.preprocess((v) => v === true || v === "true", z.boolean()),
 });
 
 const READ_ERROR =
@@ -212,8 +208,6 @@ const batchItemSchema = z.object({
   fecha: z.string().trim().optional().default(""),
   categoria: z.string().trim().max(60).optional().default(""),
   canasta: z.enum(["essentials", "style", "freedom"]),
-  // Marca de fuga confirmada por la persona en la revisión.
-  isLeak: z.boolean().optional().default(false),
 });
 
 // Lista de items. Llega como STRING JSON (un escalar) para no gatillar el límite
@@ -288,9 +282,6 @@ export async function createExpensesBatchAction(
       year: period.year,
       month: period.month,
       purchaseDate: parsePurchaseDate(it.fecha),
-      // Fuga marcada en la revisión (o sugerida por la IA). Ortogonal a la
-      // canasta: alimenta el panel de fugas, no toca la consolidación.
-      isLeak: it.isLeak,
     };
   });
 

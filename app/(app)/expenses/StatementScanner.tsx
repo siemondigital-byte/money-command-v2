@@ -51,8 +51,6 @@ interface Row {
   confianza: StatementItem["confianza"];
   include: boolean;
   isDuplicate: boolean;
-  /** Marca de fuga (suscripción / gasto hormiga). Sugerida por la IA, editable. */
-  isLeak: boolean;
 }
 
 function norm(s: string): string {
@@ -110,7 +108,6 @@ export function StatementScanner({
         confianza: it.confianza,
         include: true,
         isDuplicate: existingKeys.has(key),
-        isLeak: it.es_fuga,
       };
     });
   }
@@ -237,7 +234,6 @@ export function StatementScanner({
       fecha: r.fecha,
       categoria: r.categoria,
       canasta: r.canasta,
-      isLeak: r.isLeak,
     }));
     try {
       const res = await createExpensesBatchAction(JSON.stringify(payload));
@@ -264,7 +260,6 @@ export function StatementScanner({
   );
   const lowConf = rows.filter((r) => r.confianza === "baja").length;
   const dupCount = rows.filter((r) => r.isDuplicate).length;
-  const leakCount = rows.filter((r) => r.include && r.isLeak).length;
 
   if (!open) {
     return (
@@ -413,12 +408,6 @@ export function StatementScanner({
           <div style={{ fontSize: "13px", color: "var(--text)" }}>
             <strong>{selected.length}</strong> de {rows.length} compras seleccionadas ·
             total <strong style={{ color: "var(--accent)" }}>{selectedTotal.toFixed(2)}</strong>
-            {leakCount > 0 && (
-              <>
-                {" · "}
-                <strong style={{ color: "var(--gold)" }}>{leakCount}</strong> marcada(s) como fuga
-              </>
-            )}
           </div>
 
           {/* Filas editables */}
@@ -445,17 +434,6 @@ export function StatementScanner({
                       onChange={(e) => updateRow(r.key, { include: e.target.checked })}
                     />
                     Incluir
-                  </label>
-                  <label
-                    style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--gold)" }}
-                    title="Suscripción o gasto hormiga: se suma al panel de fugas"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={r.isLeak}
-                      onChange={(e) => updateRow(r.key, { isLeak: e.target.checked })}
-                    />
-                    Fuga
                   </label>
                   <Badge tone={r.confianza === "baja" ? "danger" : r.confianza === "media" ? "gold" : "accent"}>
                     confianza {r.confianza}
