@@ -715,7 +715,7 @@ textarea:focus {
 /* Layout: termostato + libertad lado a lado */
 .dash .d-mid {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 300px 1fr;
   gap: 16px;
   align-items: stretch;
 }
@@ -739,7 +739,7 @@ textarea:focus {
 }
 .dash .d-thermo .tube {
   position: relative;
-  width: 26px;
+  width: 34px;
   border-radius: 100px;
   background: var(--surface-2);
   border: 1px solid var(--border);

@@ -10,7 +10,7 @@ import { MoneyAmount } from "./MoneyAmount";
 const SCALE_NUM: CSSProperties = {
   fontFamily: "Syne, sans-serif",
   fontWeight: 800,
-  fontSize: "clamp(1rem, 16cqi, 1.5rem)",
+  fontSize: "clamp(0.95rem, 13cqi, 1.35rem)",
   letterSpacing: "-0.03em",
   lineHeight: 1.05,
   overflowWrap: "anywhere",
@@ -77,7 +77,7 @@ export function Thermostat({
               Height fija para conservar su forma de tubo en todas las vistas. */}
           <div
             className="tube"
-            style={{ height: "200px", flexShrink: 0, minWidth: "26px" }}
+            style={{ height: "200px", flexShrink: 0, minWidth: "34px" }}
           >
             <div
               className="level"
