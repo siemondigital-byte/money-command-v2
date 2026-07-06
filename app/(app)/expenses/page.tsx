@@ -536,7 +536,7 @@ function ExpenseTypeSection({
             Editar egreso
           </div>
         )}
-        <ExpenseForm type={type} editing={editing} onDoneHref={`/expenses?tab=${tab}`} />
+        <ExpenseForm key={editing?.id ?? "new"} type={type} editing={editing} onDoneHref={`/expenses?tab=${tab}`} />
       </div>
     </section>
   );
