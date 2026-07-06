@@ -39,6 +39,7 @@ export const EXPENSE_CATEGORIES = [
   "ropa",
   "educacion",
   "suscripciones",
+  "redes sociales",
   "mixtos",
   "otros",
 ] as const;

@@ -39,6 +39,7 @@ const categories: Record<string, string> = {
   ropa: "Ropa",
   educacion: "Educación",
   suscripciones: "Suscripciones",
+  "redes sociales": "Redes sociales",
   mixtos: "Mixtos",
   otros: "Otros",
 };

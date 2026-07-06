@@ -42,6 +42,7 @@ export const LEAK_CATEGORIES = new Set([
   "suscripciones",
   "entretenimiento",
   "delivery",
+  "redes sociales",
   "otros",
   "mixtos",
   "mixto",
