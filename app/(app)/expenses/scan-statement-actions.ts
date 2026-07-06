@@ -79,7 +79,7 @@ const itemSchema = z.object({
 });
 
 const READ_ERROR =
-  "No pude leer el resumen, intentá con otra foto o PDF más claro.";
+  "No pude leer el documento, intentá con otra foto o PDF más claro.";
 
 /** Quita cercos de markdown (```json ... ```), por si el modelo los agrega. */
 function stripFences(s: string): string {
@@ -144,7 +144,7 @@ export async function scanStatementAction(
       // como string liviano. Se procesa como generación de TEXTO (no visión):
       // sin base64 gigante, sin límite de serialización, sin costo de imagen.
       if (textField.length > MAX_TEXT_CHARS) {
-        return { error: "El resumen es demasiado grande." };
+        return { error: "El documento es demasiado grande." };
       }
       modelText = await generateText({
         system: STATEMENT_EXTRACTION_PROMPT,

@@ -69,7 +69,6 @@ export function StatementScanner({
 }) {
   const router = useRouter();
   const t = useTranslations();
-  const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [password, setPassword] = useState("");
@@ -265,27 +264,9 @@ export function StatementScanner({
   const lowConf = rows.filter((r) => r.confianza === "baja").length;
   const dupCount = rows.filter((r) => r.isDuplicate).length;
 
-  if (!open) {
-    return (
-      <button
-        type="button"
-        className="btn-secondary"
-        onClick={() => setOpen(true)}
-        style={{ alignSelf: "flex-start" }}
-      >
-        {t.expenses.scanner.openButton}
-      </button>
-    );
-  }
-
   return (
     <section className="card flex flex-col gap-4" style={{ borderTop: "2px solid var(--accent-2)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "10px" }}>
-        <div className="label">{t.expenses.scanner.title}</div>
-        <button type="button" onClick={() => { reset(); setOpen(false); }} style={linkBtn}>
-          {t.expenses.scanner.close}
-        </button>
-      </div>
+      <div className="label">{t.expenses.scanner.title}</div>
 
       {/* Subida */}
       {(phase === "idle" || phase === "error") && (
@@ -397,9 +378,6 @@ export function StatementScanner({
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <button type="button" className="btn-secondary" onClick={reset}>
               {t.expenses.scanner.scanAnother}
-            </button>
-            <button type="button" onClick={() => { reset(); setOpen(false); }} style={linkBtn}>
-              {t.expenses.scanner.close}
             </button>
           </div>
         </div>
