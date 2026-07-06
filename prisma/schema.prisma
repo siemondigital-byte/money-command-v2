@@ -231,6 +231,11 @@ model Expense {
   // Alimenta el resumen mensual/anual y la futura GASTOS_HORMIGA_MES del Coach.
   isSubscription Boolean @default(false)
 
+  // Marca "fuga" (suscripción o gasto hormiga). ORTOGONAL a la canasta: el gasto
+  // sigue contando en su canasta igual que hoy. Solo alimenta el panel de fugas
+  // (presentación); NO interviene en consolidación ni totales.
+  isLeak Boolean @default(false)
+
   // Para gastos hormiga (microgastos)
   isAntExpense    Boolean  @default(false)
   unitAmount      Decimal? @db.Decimal(12, 2) // ej. $5 por café

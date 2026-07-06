@@ -314,6 +314,22 @@ export const es = {
     savedPre: "Cambios guardados.",
     backToHistory: "Volver al historial",
   },
+  expenses: {
+    // Panel de fugas (suscripciones + gastos hormiga), alimentado por isLeak.
+    leaks: {
+      title: "Suscripciones y egresos hormiga",
+      intro:
+        "Los gastos que marcás como fuga se suman acá. Mirá lo que pesan al mes, al año y a futuro.",
+      perMonth: "Por mes",
+      perYear: "Por año",
+      inFiveYears: "En 5 años",
+      freedomCapital: "Capital de libertad",
+      freedomCapitalNote:
+        "El capital que tendrías que tener invertido para cubrir esto con rendimientos al 8% (ejemplo ajustable).",
+      // Checkbox del ExpenseForm
+      formCheckbox: "Marcar como fuga (suscripción o gasto hormiga)",
+    },
+  },
   labels: {
     baskets,
     categories,

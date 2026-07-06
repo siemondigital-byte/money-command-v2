@@ -8,7 +8,6 @@ import {
   BASKET_COLORS,
   sumRealByBasket,
   totalsByType,
-  subscriptionSummary,
   type Basket,
 } from "@/lib/expenses";
 import { getDict, type Dict } from "@/lib/i18n";
@@ -73,7 +72,16 @@ export default async function ExpensesPage({
   }));
   const totals = totalsByType(helperRows);
   const realByBasket = sumRealByBasket(helperRows);
-  const subs = subscriptionSummary(helperRows);
+
+  // Panel de fugas (presentación pura): suma los gastos marcados isLeak del
+  // período. ORTOGONAL a la canasta — no toca totales ni consolidación.
+  // Capital de libertad = mensual × 150 (= mensual × 12 ÷ 0.08, renta al 8%).
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+  const leakRows = rows.filter((r) => r.isLeak && r.isActive);
+  const leakMonthly = round2(leakRows.reduce((s, r) => s + r.amount, 0));
+  const leakAnnual = round2(leakMonthly * 12);
+  const leakFiveYears = round2(leakMonthly * 60);
+  const leakFreedomCapital = round2(leakMonthly * 150);
 
   // Formato moneda — decimales según moneda (default ISO 4217)
   const locale = profile.locale === "es" ? "es-AR" : "en-US";
@@ -192,10 +200,9 @@ export default async function ExpensesPage({
       {tab === "variable" && (
         <section className="card flex flex-col gap-4">
         <div>
-          <div className="label">Suscripciones y egresos hormiga</div>
+          <div className="label">{dict.expenses.leaks.title}</div>
           <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
-            Se suman dentro de Estilo. Mirá lo que pesan al mes, al año y a
-            futuro.
+            {dict.expenses.leaks.intro}
           </p>
         </div>
 
@@ -208,14 +215,22 @@ export default async function ExpensesPage({
             paddingTop: "12px",
           }}
         >
-          <Kpi label="Por mes" value={money.format(subs.monthly)} />
-          <Kpi label="Por año" value={money.format(subs.annual)} muted />
+          <Kpi label={dict.expenses.leaks.perMonth} value={money.format(leakMonthly)} />
+          <Kpi label={dict.expenses.leaks.perYear} value={money.format(leakAnnual)} muted />
           <Kpi
-            label={`En ${subs.projectionYears} años`}
-            value={money.format(subs.projectionTotal)}
+            label={dict.expenses.leaks.inFiveYears}
+            value={money.format(leakFiveYears)}
             muted
           />
+          <Kpi
+            label={dict.expenses.leaks.freedomCapital}
+            value={money.format(leakFreedomCapital)}
+            accent
+          />
         </div>
+        <p style={{ fontSize: "11px", color: "var(--hint)", margin: 0 }}>
+          {dict.expenses.leaks.freedomCapitalNote}
+        </p>
 
         {subscriptionRows.length > 0 && (
           <>
