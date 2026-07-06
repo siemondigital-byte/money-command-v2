@@ -13,7 +13,13 @@ function pctColor(pct: number): string {
   return "var(--danger)";
 }
 
-export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
+export function Scorecard({
+  scorecard,
+  labels,
+}: {
+  scorecard: ScorecardData;
+  labels: { healthLabel: string; metricsLabel: string };
+}) {
   const { metrics, total, rangeLabel, message } = scorecard;
   // El total ya es 0-100 (máximos suman 100): su % = el total.
   const totalColor = pctColor(total);
@@ -25,7 +31,7 @@ export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
         className="card"
         style={{ display: "flex", flexDirection: "column", gap: "14px" }}
       >
-        <div className="label">Salud financiera</div>
+        <div className="label">{labels.healthLabel}</div>
 
         <div
           style={{
@@ -90,7 +96,7 @@ export function Scorecard({ scorecard }: { scorecard: ScorecardData }) {
         className="card"
         style={{ display: "flex", flexDirection: "column", gap: "20px" }}
       >
-        <div className="label">Las 5 métricas</div>
+        <div className="label">{labels.metricsLabel}</div>
 
         {metrics.map((m) => {
           const pct = m.max > 0 ? (m.score / m.max) * 100 : 0;

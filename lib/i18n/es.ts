@@ -135,6 +135,39 @@ export const es = {
     poweredBy: "Powered by",
     rights: "Todos los derechos reservados",
   },
+  coach: {
+    pageLabel: "Coach",
+    title: "Tu Coach financiero",
+    intro:
+      "Pregúntale lo que quieras sobre tus finanzas y el método: responde con tus datos reales del mes activo. Abajo, cinco métricas leen tus módulos para darte una foto de tu salud financiera. Es solo lectura: no cambia ninguno de tus datos.",
+    reminderLabel: "Recordatorio del día",
+    challengeLabel: "Reto de la semana",
+    chat: {
+      askLabel: "Pregúntale al Coach",
+      disclaimer:
+        "Responde con tus datos reales del mes activo. No es asesoría financiera regulada.",
+      emptyState:
+        "Escribe una pregunta sobre tus finanzas y el método, o toca una sugerencia.",
+      suggestion1: "¿Cómo voy?",
+      suggestion2: "¿Cuánto me falta para mi libertad?",
+      suggestion3: "¿Qué priorizo?",
+      placeholder: "Escribe tu pregunta…",
+      inputAria: "Tu pregunta para el Coach",
+      send: "Enviar",
+      thinking: "El Coach está pensando",
+      error: "No pude responder ahora, intenta de nuevo.",
+    },
+    concept: {
+      label: "Concepto del día",
+      explainMore: "Explícamelo más",
+      hide: "Ocultar",
+      other: "Otro concepto",
+    },
+    scorecard: {
+      healthLabel: "Salud financiera",
+      metricsLabel: "Las 5 métricas",
+    },
+  },
   // La brújula se arma concatenando estos fragmentos con los datos del perfil.
   compass: {
     define: "Define tu brújula",

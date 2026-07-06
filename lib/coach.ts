@@ -81,12 +81,161 @@ const MAX: Record<CoachMetricKey, number> = {
   freedom: 15,
 };
 
-const LABELS: Record<CoachMetricKey, string> = {
-  savings: "Tasa de ahorro",
-  emergency: "Fondo de emergencia",
-  debt: "Ratio deuda/ingreso",
-  diversification: "Diversificación de portafolio",
-  freedom: "Progreso a libertad financiera",
+// ----------------------------------------------------------------------------
+// Textos por idioma. El cálculo (scores) NO depende del locale; solo el texto
+// que se muestra (labels, subtítulos, mensajes de rango). Default "es" para que
+// los tests (que llaman sin locale) sigan verdes; "en" es aditivo.
+// ----------------------------------------------------------------------------
+
+export type CoachLocale = "es" | "en";
+
+interface Range {
+  min: number;
+  label: string;
+  message: string;
+}
+
+interface CoachStrings {
+  labels: Record<CoachMetricKey, string>;
+  savings: (rate: number) => string;
+  emergencyNoGoal: string;
+  emergencyNoExpense: string;
+  emergencyMonths: (months: number) => string;
+  debtName: string;
+  debtNoDebts: string;
+  debtNoIncome: string;
+  debtRatio: (ratioPct: number) => string;
+  debtWorst: (name: string, apr: number) => string;
+  diversificationNoAssets: string;
+  diversification: (assets: number, types: number) => string;
+  freedomNoNlf: string;
+  freedomProgress: (pct: number) => string;
+  ranges: Range[];
+}
+
+const STRINGS: Record<CoachLocale, CoachStrings> = {
+  es: {
+    labels: {
+      savings: "Tasa de ahorro",
+      emergency: "Fondo de emergencia",
+      debt: "Ratio deuda/ingreso",
+      diversification: "Diversificación de portafolio",
+      freedom: "Progreso a libertad financiera",
+    },
+    savings: (rate) => `${rate.toFixed(0)}% actual · meta 30%`,
+    emergencyNoGoal: "define una meta de fondo de emergencia en Metas",
+    emergencyNoExpense: "carga tus egresos para medir los meses cubiertos",
+    emergencyMonths: (m) => `${m} de 6 meses completados`,
+    debtName: "Deuda",
+    debtNoDebts: "Sin deudas — ratio 0%",
+    debtNoIncome: "carga tus ingresos para medir el ratio deuda/ingreso",
+    debtRatio: (r) => `Ratio deuda/ingreso: ${r}%`,
+    debtWorst: (name, apr) => ` · ${name} al ${apr}% — acelerar`,
+    diversificationNoAssets: "sin activos en portafolio",
+    diversification: (a, t) =>
+      `${a} activo${a === 1 ? "" : "s"} · ${t} tipo${t === 1 ? "" : "s"}`,
+    freedomNoNlf: "carga tus egresos para calcular tu Número de Libertad",
+    freedomProgress: (pct) => `${pct}% del camino a tu Número de Libertad`,
+    ranges: [
+      {
+        min: 90,
+        label: "Excepcional",
+        message:
+          "Tu salud financiera es excepcional. Estás en el 1% que aplica el sistema con consistencia. Mantén el ritmo y acelera las palancas que ya dominas.",
+      },
+      {
+        min: 75,
+        label: "Vas en serio",
+        message:
+          "Salud financiera excelente. Tienes los cimientos firmes. Tu próximo nivel está en optimizar la palanca con menor puntaje individual.",
+      },
+      {
+        min: 60,
+        label: "Bien, pero te falta",
+        message:
+          "Salud financiera buena. Estás avanzando, pero hay áreas claras de mejora. Identifica la palanca más débil y enfócate ahí este mes.",
+      },
+      {
+        min: 40,
+        label: "Te estás quedando corto",
+        message:
+          "Tu salud financiera necesita atención. No es crisis, pero estás dejando años de libertad sobre la mesa. Prioridad: completar fondo de emergencia y subir tasa de ahorro al 20%.",
+      },
+      {
+        min: 20,
+        label: "Así no llegas",
+        message:
+          "Estás en zona de alerta. Esto se soluciona con sistema, no con suerte. Empieza por reducir deuda de consumo y construir fondo de emergencia. No mires el largo plazo todavía, enfócate en estabilizar.",
+      },
+      {
+        min: 0,
+        label: "Es ahora o nunca",
+        message:
+          "Estás en crisis financiera. Necesitas actuar esta semana. Pasos: 1) Lista todas tus deudas y sus APR. 2) Corta cualquier egreso no esencial. 3) Busca ingreso adicional inmediato. El sistema funciona, pero hay que empezar por la base.",
+      },
+    ],
+  },
+  en: {
+    labels: {
+      savings: "Savings rate",
+      emergency: "Emergency fund",
+      debt: "Debt-to-income ratio",
+      diversification: "Portfolio diversification",
+      freedom: "Progress to financial freedom",
+    },
+    savings: (rate) => `${rate.toFixed(0)}% current · target 30%`,
+    emergencyNoGoal: "set an emergency-fund goal in Goals",
+    emergencyNoExpense: "load your expenses to measure the months covered",
+    emergencyMonths: (m) => `${m} of 6 months completed`,
+    debtName: "Debt",
+    debtNoDebts: "No debt — 0% ratio",
+    debtNoIncome: "load your income to measure the debt-to-income ratio",
+    debtRatio: (r) => `Debt-to-income ratio: ${r}%`,
+    debtWorst: (name, apr) => ` · ${name} at ${apr}% — accelerate`,
+    diversificationNoAssets: "no assets in portfolio",
+    diversification: (a, t) =>
+      `${a} asset${a === 1 ? "" : "s"} · ${t} type${t === 1 ? "" : "s"}`,
+    freedomNoNlf: "load your expenses to calculate your Freedom Number",
+    freedomProgress: (pct) => `${pct}% of the way to your Freedom Number`,
+    ranges: [
+      {
+        min: 90,
+        label: "Exceptional",
+        message:
+          "Your financial health is exceptional. You're in the 1% who apply the system consistently. Keep the pace and accelerate the levers you already master.",
+      },
+      {
+        min: 75,
+        label: "You mean business",
+        message:
+          "Excellent financial health. Your foundations are solid. Your next level is optimizing the single lowest-scoring lever.",
+      },
+      {
+        min: 60,
+        label: "Good, but not there yet",
+        message:
+          "Good financial health. You're making progress, but there are clear areas to improve. Identify your weakest lever and focus there this month.",
+      },
+      {
+        min: 40,
+        label: "Falling short",
+        message:
+          "Your financial health needs attention. It's not a crisis, but you're leaving years of freedom on the table. Priority: complete your emergency fund and raise your savings rate to 20%.",
+      },
+      {
+        min: 20,
+        label: "This won't get you there",
+        message:
+          "You're in the warning zone. This is fixed with a system, not luck. Start by cutting consumer debt and building an emergency fund. Don't look at the long term yet — focus on stabilizing.",
+      },
+      {
+        min: 0,
+        label: "It's now or never",
+        message:
+          "You're in a financial crisis. You need to act this week. Steps: 1) List all your debts and their APRs. 2) Cut any non-essential expense. 3) Find immediate extra income. The system works, but you have to start from the base.",
+      },
+    ],
+  },
 };
 
 function clamp(n: number, lo: number, hi: number): number {
@@ -107,7 +256,11 @@ interface MetricResult {
 // 1. Tasa de ahorro — 30 pts (por tramos)
 // ============================================================================
 
-export function savingsMetric(income: number, expense: number): MetricResult {
+export function savingsMetric(
+  income: number,
+  expense: number,
+  locale: CoachLocale = "es",
+): MetricResult {
   const rate = income > 0 ? ((income - expense) / income) * 100 : 0;
   let score: number;
   if (rate >= 30) score = 30;
@@ -115,7 +268,7 @@ export function savingsMetric(income: number, expense: number): MetricResult {
   else if (rate >= 10) score = 20;
   else if (rate >= 5) score = 10;
   else score = 0;
-  return { score, subtitle: `${rate.toFixed(0)}% actual · meta 30%` };
+  return { score, subtitle: STRINGS[locale].savings(rate) };
 }
 
 // ============================================================================
@@ -125,28 +278,22 @@ export function savingsMetric(income: number, expense: number): MetricResult {
 export function emergencyMetric(
   goals: CoachGoal[],
   avgMonthlyExpense: number,
+  locale: CoachLocale = "es",
 ): MetricResult {
+  const S = STRINGS[locale];
   const goal = goals.find(
-    (g) => g.basket === "essentials" && /fondo|emergencia/i.test(g.name),
+    (g) =>
+      g.basket === "essentials" && /fondo|emergencia|emergency/i.test(g.name),
   );
   if (!goal) {
-    return {
-      score: 0,
-      subtitle: "define una meta de fondo de emergencia en Metas",
-    };
+    return { score: 0, subtitle: S.emergencyNoGoal };
   }
   if (avgMonthlyExpense <= 0) {
-    return {
-      score: 0,
-      subtitle: "carga tus egresos para medir los meses cubiertos",
-    };
+    return { score: 0, subtitle: S.emergencyNoExpense };
   }
   const months = goal.currentAmount / avgMonthlyExpense;
   const score = Math.round(clamp((months / 6) * 20, 0, 20));
-  return {
-    score,
-    subtitle: `${Math.round(months)} de 6 meses completados`,
-  };
+  return { score, subtitle: S.emergencyMonths(Math.round(months)) };
 }
 
 // ============================================================================
@@ -156,17 +303,16 @@ export function emergencyMetric(
 export function debtMetric(
   debts: CoachDebt[],
   incomeMonth: number,
+  locale: CoachLocale = "es",
 ): MetricResult {
+  const S = STRINGS[locale];
   const payments = debts.reduce((s, d) => s + d.currentPayment, 0);
 
   if (incomeMonth <= 0) {
     if (payments <= 0) {
-      return { score: 20, subtitle: "Sin deudas — ratio 0%" };
+      return { score: 20, subtitle: S.debtNoDebts };
     }
-    return {
-      score: 0,
-      subtitle: "carga tus ingresos para medir el ratio deuda/ingreso",
-    };
+    return { score: 0, subtitle: S.debtNoIncome };
   }
 
   const ratio = (payments / incomeMonth) * 100;
@@ -177,13 +323,13 @@ export function debtMetric(
   else score = 20;
 
   if (debts.length === 0) {
-    return { score, subtitle: "Sin deudas — ratio 0%" };
+    return { score, subtitle: S.debtNoDebts };
   }
 
-  let subtitle = `Ratio deuda/ingreso: ${Math.round(ratio)}%`;
+  let subtitle = S.debtRatio(Math.round(ratio));
   const worst = debts.reduce((m, d) => (d.apr > m.apr ? d : m), debts[0]!);
   if (worst.apr > 0) {
-    subtitle += ` · ${worst.name || "Deuda"} al ${fmtApr(worst.apr)}% — acelerar`;
+    subtitle += S.debtWorst(worst.name || S.debtName, fmtApr(worst.apr));
   }
   return { score, subtitle };
 }
@@ -194,11 +340,13 @@ export function debtMetric(
 
 export function diversificationMetric(
   investments: CoachInvestment[],
+  locale: CoachLocale = "es",
 ): MetricResult {
+  const S = STRINGS[locale];
   const withCapital = investments.filter((p) => p.capital > 0);
   const portfolio = withCapital.reduce((s, p) => s + p.capital, 0);
   if (portfolio <= 0) {
-    return { score: 0, subtitle: "sin activos en portafolio" };
+    return { score: 0, subtitle: S.diversificationNoAssets };
   }
 
   const byType = new Map<string, number>();
@@ -215,9 +363,7 @@ export function diversificationMetric(
   else if (significantTypes === 1) score = 3;
   else score = 0;
 
-  const subtitle = `${withCapital.length} activo${
-    withCapital.length === 1 ? "" : "s"
-  } · ${significantTypes} tipo${significantTypes === 1 ? "" : "s"}`;
+  const subtitle = S.diversification(withCapital.length, significantTypes);
   return { score, subtitle };
 }
 
@@ -225,79 +371,43 @@ export function diversificationMetric(
 // 5. Progreso a libertad financiera — 15 pts (patrimonio neto / NLF)
 // ============================================================================
 
-export function freedomMetric(netWorth: number, nlf: number): MetricResult {
+export function freedomMetric(
+  netWorth: number,
+  nlf: number,
+  locale: CoachLocale = "es",
+): MetricResult {
+  const S = STRINGS[locale];
   if (nlf <= 0) {
-    return {
-      score: 0,
-      subtitle: "carga tus egresos para calcular tu Número de Libertad",
-    };
+    return { score: 0, subtitle: S.freedomNoNlf };
   }
   const score = Math.round(clamp((netWorth / nlf) * 15, 0, 15));
   const pct = clamp(Math.round((netWorth / nlf) * 100), 0, 100);
-  return { score, subtitle: `${pct}% del camino a tu Número de Libertad` };
+  return { score, subtitle: S.freedomProgress(pct) };
 }
 
 // ============================================================================
 // Rango (etiqueta + mensaje exacto) y armado del scorecard
 // ============================================================================
 
-interface Range {
-  min: number;
-  label: string;
-  message: string;
-}
-
-const RANGES: Range[] = [
-  {
-    min: 90,
-    label: "Excepcional",
-    message:
-      "Tu salud financiera es excepcional. Estás en el 1% que aplica el sistema con consistencia. Mantén el ritmo y acelera las palancas que ya dominas.",
-  },
-  {
-    min: 75,
-    label: "Vas en serio",
-    message:
-      "Salud financiera excelente. Tienes los cimientos firmes. Tu próximo nivel está en optimizar la palanca con menor puntaje individual.",
-  },
-  {
-    min: 60,
-    label: "Bien, pero te falta",
-    message:
-      "Salud financiera buena. Estás avanzando, pero hay áreas claras de mejora. Identifica la palanca más débil y enfócate ahí este mes.",
-  },
-  {
-    min: 40,
-    label: "Te estás quedando corto",
-    message:
-      "Tu salud financiera necesita atención. No es crisis, pero estás dejando años de libertad sobre la mesa. Prioridad: completar fondo de emergencia y subir tasa de ahorro al 20%.",
-  },
-  {
-    min: 20,
-    label: "Así no llegas",
-    message:
-      "Estás en zona de alerta. Esto se soluciona con sistema, no con suerte. Empieza por reducir deuda de consumo y construir fondo de emergencia. No mires el largo plazo todavía, enfócate en estabilizar.",
-  },
-  {
-    min: 0,
-    label: "Es ahora o nunca",
-    message:
-      "Estás en crisis financiera. Necesitas actuar esta semana. Pasos: 1) Lista todas tus deudas y sus APR. 2) Corta cualquier egreso no esencial. 3) Busca ingreso adicional inmediato. El sistema funciona, pero hay que empezar por la base.",
-  },
-];
-
-export function scorecardRange(total: number): { label: string; message: string } {
-  const r = RANGES.find((x) => total >= x.min) ?? RANGES[RANGES.length - 1]!;
+export function scorecardRange(
+  total: number,
+  locale: CoachLocale = "es",
+): { label: string; message: string } {
+  const ranges = STRINGS[locale].ranges;
+  const r = ranges.find((x) => total >= x.min) ?? ranges[ranges.length - 1]!;
   return { label: r.label, message: r.message };
 }
 
-export function buildScorecard(input: CoachInputs): Scorecard {
+export function buildScorecard(
+  input: CoachInputs,
+  locale: CoachLocale = "es",
+): Scorecard {
   const results: Record<CoachMetricKey, MetricResult> = {
-    savings: savingsMetric(input.incomeMonth, input.expenseMonth),
-    emergency: emergencyMetric(input.goals, input.avgMonthlyExpense),
-    debt: debtMetric(input.debts, input.incomeMonth),
-    diversification: diversificationMetric(input.investments),
-    freedom: freedomMetric(input.netWorth, input.nlf),
+    savings: savingsMetric(input.incomeMonth, input.expenseMonth, locale),
+    emergency: emergencyMetric(input.goals, input.avgMonthlyExpense, locale),
+    debt: debtMetric(input.debts, input.incomeMonth, locale),
+    diversification: diversificationMetric(input.investments, locale),
+    freedom: freedomMetric(input.netWorth, input.nlf, locale),
   };
 
   const order: CoachMetricKey[] = [
@@ -310,7 +420,7 @@ export function buildScorecard(input: CoachInputs): Scorecard {
 
   const metrics: CoachMetric[] = order.map((key) => ({
     key,
-    label: LABELS[key],
+    label: STRINGS[locale].labels[key],
     score: results[key].score,
     max: MAX[key],
     subtitle: results[key].subtitle,
@@ -322,6 +432,6 @@ export function buildScorecard(input: CoachInputs): Scorecard {
     100,
   );
 
-  const range = scorecardRange(total);
+  const range = scorecardRange(total, locale);
   return { metrics, total, rangeLabel: range.label, message: range.message };
 }

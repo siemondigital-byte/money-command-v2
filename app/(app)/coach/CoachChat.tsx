@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Markdown from "react-markdown";
+import { useTranslations } from "@/lib/i18n/provider";
 import { askCoachAction } from "./actions";
 
 /**
@@ -12,13 +13,6 @@ import { askCoachAction } from "./actions";
  */
 
 type Msg = { role: "user" | "coach"; content: string };
-
-// Preguntas sugeridas (los ejemplos del Coach). Al tocarlas, se envían.
-const SUGGESTIONS = [
-  "¿Cómo voy?",
-  "¿Cuánto me falta para mi libertad?",
-  "¿Qué priorizo?",
-];
 
 const MAX_LEN = 1000;
 
@@ -54,6 +48,9 @@ const listStyle: CSSProperties = {
 };
 
 export function CoachChat() {
+  const t = useTranslations();
+  const chat = t.coach.chat;
+  const suggestions = [chat.suggestion1, chat.suggestion2, chat.suggestion3];
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -78,7 +75,7 @@ export function CoachChat() {
       if ("ok" in res && res.ok) {
         setMessages((m) => [...m, { role: "coach", content: res.answer }]);
       } else {
-        setError("No pude responder ahora, intentá de nuevo.");
+        setError(chat.error);
       }
     } catch {
       setError("No pude responder ahora, intentá de nuevo.");
@@ -105,9 +102,9 @@ export function CoachChat() {
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        <div className="label">Preguntale al Coach</div>
+        <div className="label">{chat.askLabel}</div>
         <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0 }}>
-          Responde con tus datos reales del mes activo. No es asesoría financiera regulada.
+          {chat.disclaimer}
         </p>
       </div>
 
@@ -132,7 +129,7 @@ export function CoachChat() {
               padding: "8px 2px",
             }}
           >
-            Escribe una pregunta sobre tus finanzas y el método, o toca una sugerencia.
+            {chat.emptyState}
           </div>
         )}
 
@@ -153,7 +150,7 @@ export function CoachChat() {
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start" }}>
             <div style={{ ...coachBubble, color: "var(--muted)" }}>
-              <span className="coach-thinking">El Coach está pensando</span>
+              <span className="coach-thinking">{chat.thinking}</span>
             </div>
           </div>
         )}
@@ -165,7 +162,7 @@ export function CoachChat() {
 
       {/* Sugerencias */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-        {SUGGESTIONS.map((s) => (
+        {suggestions.map((s) => (
           <button
             key={s}
             type="button"
@@ -186,8 +183,8 @@ export function CoachChat() {
           onChange={(e) => setInput(e.target.value)}
           maxLength={MAX_LEN}
           disabled={loading}
-          placeholder="Escribe tu pregunta…"
-          aria-label="Tu pregunta para el Coach"
+          placeholder={chat.placeholder}
+          aria-label={chat.inputAria}
           style={{ flex: 1, minWidth: 0 }}
         />
         <button
@@ -196,7 +193,7 @@ export function CoachChat() {
           disabled={loading || input.trim().length === 0}
           style={{ opacity: loading || input.trim().length === 0 ? 0.6 : 1 }}
         >
-          {loading ? "…" : "Enviar"}
+          {loading ? "…" : chat.send}
         </button>
       </form>
 

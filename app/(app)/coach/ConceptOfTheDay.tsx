@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "@/lib/i18n/provider";
 import type { CoachConcept } from "@/lib/coach-content";
 
 /**
@@ -19,6 +20,8 @@ export function ConceptOfTheDay({
   initialIndex: number;
   concepts: CoachConcept[];
 }) {
+  const t = useTranslations();
+  const cc = t.coach.concept;
   const total = concepts.length;
   const safeInitial = ((initialIndex % total) + total) % total;
   const [index, setIndex] = useState(safeInitial);
@@ -53,7 +56,7 @@ export function ConceptOfTheDay({
         borderTop: "2px solid var(--accent)",
       }}
     >
-      <div className="label">Concepto del día</div>
+      <div className="label">{cc.label}</div>
 
       <h2
         style={{
@@ -92,7 +95,7 @@ export function ConceptOfTheDay({
             className="label"
             style={{ color: "var(--accent-2)", marginBottom: "8px" }}
           >
-            Explícamelo más
+            {cc.explainMore}
           </div>
           <p
             style={{
@@ -119,10 +122,10 @@ export function ConceptOfTheDay({
             borderColor: "rgba(127, 255, 178, 0.35)",
           }}
         >
-          {showExplanation ? "Ocultar" : "Explícamelo más"}
+          {showExplanation ? cc.hide : cc.explainMore}
         </button>
         <button type="button" onClick={otherConcept} style={ghostBtn}>
-          Otro concepto
+          {cc.other}
         </button>
       </div>
     </section>

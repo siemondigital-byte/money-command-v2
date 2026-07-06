@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { getDict } from "@/lib/i18n";
 import { getServerDict } from "@/lib/i18n/server";
 import { buildScorecard } from "@/lib/coach";
 import { gatherCoachData } from "@/lib/coach-data";
@@ -26,7 +27,11 @@ export default async function CoachPage() {
     activeYear: profile.activeYear,
     activeMonth: profile.activeMonth,
   });
-  const scorecard = buildScorecard(data.inputs);
+  const scorecard = buildScorecard(data.inputs, profile.locale as "es" | "en");
+
+  // Chrome del módulo por idioma del perfil.
+  const dict = getDict(profile.locale);
+  const c = dict.coach;
 
   // Contenido rotativo por fecha (determinístico, se calcula en el server).
   // El texto sale del idioma del perfil; los índices por fecha son compartidos.
@@ -39,13 +44,10 @@ export default async function CoachPage() {
   return (
     <div className="fade-up flex flex-col gap-6">
       <header>
-        <div className="label mb-1">Coach</div>
-        <h1>Tu Coach financiero</h1>
+        <div className="label mb-1">{c.pageLabel}</div>
+        <h1>{c.title}</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
-          Preguntale lo que quieras sobre tus finanzas y el método: responde con
-          tus datos reales del mes activo. Abajo, cinco métricas leen tus módulos
-          para darte una foto de tu salud financiera. Es solo lectura: no cambia
-          ninguno de tus datos.
+          {c.intro}
         </p>
       </header>
 
@@ -63,7 +65,7 @@ export default async function CoachPage() {
           borderLeft: "3px solid var(--accent-2)",
         }}
       >
-        <div className="label">Recordatorio del día</div>
+        <div className="label">{c.reminderLabel}</div>
         <p
           style={{
             fontFamily: "Syne, sans-serif",
@@ -89,7 +91,7 @@ export default async function CoachPage() {
           borderTop: "2px solid var(--gold)",
         }}
       >
-        <div className="label">Reto de la semana</div>
+        <div className="label">{c.challengeLabel}</div>
         <h2
           style={{
             fontFamily: "Syne, sans-serif",
@@ -115,7 +117,7 @@ export default async function CoachPage() {
         </p>
       </section>
 
-      <Scorecard scorecard={scorecard} />
+      <Scorecard scorecard={scorecard} labels={c.scorecard} />
     </div>
   );
 }

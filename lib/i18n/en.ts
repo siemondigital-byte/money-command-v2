@@ -122,6 +122,39 @@ export const en = {
     poweredBy: "Powered by",
     rights: "All rights reserved",
   },
+  coach: {
+    pageLabel: "Coach",
+    title: "Your financial Coach",
+    intro:
+      "Ask anything about your finances and the method: it answers with your real data from the active month. Below, five metrics read your modules to give you a snapshot of your financial health. It's read-only: it changes none of your data.",
+    reminderLabel: "Reminder of the day",
+    challengeLabel: "Challenge of the week",
+    chat: {
+      askLabel: "Ask the Coach",
+      disclaimer:
+        "Answers with your real data from the active month. This is not regulated financial advice.",
+      emptyState:
+        "Type a question about your finances and the method, or tap a suggestion.",
+      suggestion1: "How am I doing?",
+      suggestion2: "How far am I from my freedom?",
+      suggestion3: "What should I prioritize?",
+      placeholder: "Type your question…",
+      inputAria: "Your question for the Coach",
+      send: "Send",
+      thinking: "The Coach is thinking",
+      error: "I couldn't answer right now, try again.",
+    },
+    concept: {
+      label: "Concept of the day",
+      explainMore: "Explain it further",
+      hide: "Hide",
+      other: "Another concept",
+    },
+    scorecard: {
+      healthLabel: "Financial health",
+      metricsLabel: "The 5 metrics",
+    },
+  },
   compass: {
     define: "Define your compass",
     buildingTo: "I am building this wealth to be able to",
