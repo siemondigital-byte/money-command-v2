@@ -32,3 +32,33 @@ export function categoryLabel(
   if (base.length === 0) return "Sin categoría";
   return base.charAt(0).toUpperCase() + base.slice(1);
 }
+
+/**
+ * Categorías que, por defecto, cuentan como "gasto hormiga" (panel de fugas).
+ * El default es POR CATEGORÍA; cada gasto puede overridear con su checkbox
+ * (ver `hormigaOverridden` en el modelo).
+ */
+export const LEAK_CATEGORIES = new Set([
+  "suscripciones",
+  "entretenimiento",
+  "delivery",
+  "otros",
+  "mixtos",
+  "mixto",
+]);
+
+/** ¿La categoría (normalizada) es de gasto hormiga por defecto? */
+export function isLeakCategory(category: string): boolean {
+  return LEAK_CATEGORIES.has(normalizeCategoryKey(category));
+}
+
+/**
+ * Membresía EFECTIVA en el panel de fugas: por defecto sigue la categoría; el
+ * override (`hormigaOverridden`) la invierte (permite incluir gastos de otras
+ * categorías o excluir uno de categoría de fuga). Fuente única, usada por el
+ * panel (server) y el form (client).
+ */
+export function isHormiga(category: string, hormigaOverridden: boolean): boolean {
+  const byCategory = isLeakCategory(category);
+  return hormigaOverridden ? !byCategory : byCategory;
+}

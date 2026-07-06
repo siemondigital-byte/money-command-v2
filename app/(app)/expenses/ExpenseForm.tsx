@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { SerializedExpense } from "@/lib/serialize";
 import { BASKETS, EXPENSE_CATEGORIES } from "@/lib/expenses";
 import { useTranslations } from "@/lib/i18n/provider";
+import { isLeakCategory, isHormiga } from "./category-grouping";
 import {
   createExpenseAction,
   updateExpenseAction,
@@ -38,6 +39,16 @@ export function ExpenseForm({
     FormData
   >(action, {});
   const [open, setOpen] = useState(false);
+
+  // Categoría controlada + checkbox "Es gasto hormiga" (membresía efectiva).
+  // El checkbox sigue el default por categoría hasta que la persona lo toca; a
+  // partir de ahí manda su elección. El key del form (editing.id) reinicia esto.
+  const initialCategory = editing?.category ?? "vivienda";
+  const [category, setCategory] = useState(initialCategory);
+  const [userToggledHormiga, setUserToggledHormiga] = useState(false);
+  const [hormiga, setHormiga] = useState(() =>
+    isHormiga(initialCategory, editing?.hormigaOverridden ?? false),
+  );
 
   useEffect(() => {
     if (!state.ok) return;
@@ -78,7 +89,14 @@ export function ExpenseForm({
           <span className="label">Categoría</span>
           <select
             name="category"
-            defaultValue={editing?.category ?? "vivienda"}
+            value={category}
+            onChange={(e) => {
+              const v = e.target.value;
+              setCategory(v);
+              // Hasta que la persona toque el checkbox, seguir el default por
+              // categoría (ej. elegir "suscripciones" lo marca como hormiga).
+              if (!userToggledHormiga) setHormiga(isLeakCategory(v));
+            }}
           >
             {EXPENSE_CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -145,10 +163,14 @@ export function ExpenseForm({
       >
         <input
           type="checkbox"
-          name="excludeFromLeaks"
-          defaultChecked={editing?.excludeFromLeaks ?? false}
+          name="isHormiga"
+          checked={hormiga}
+          onChange={(e) => {
+            setHormiga(e.target.checked);
+            setUserToggledHormiga(true);
+          }}
         />
-        {t.expenses.leaks.notLeakCheckbox}
+        {t.expenses.leaks.hormigaCheckbox}
       </label>
 
       <div>

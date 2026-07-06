@@ -11,6 +11,7 @@ import {
   type Period,
 } from "@/lib/monthly";
 import { classificationFromBasket, type Basket } from "@/lib/expenses";
+import { isLeakCategory } from "./category-grouping";
 
 /**
  * Server Actions del módulo Expenses.
@@ -55,13 +56,23 @@ const expenseSchema = z.object({
   basket: z.enum(["essentials", "style", "freedom"]),
   budget: numericString,
   amount: numericString,
-  // Checkbox "No es gasto hormiga": excluye el gasto del panel de fugas aunque
-  // su categoría sea de fuga. FormData manda "on" si está tildado, o nada.
-  excludeFromLeaks: z.preprocess(
+  // Checkbox "Es gasto hormiga" (membresía EFECTIVA que eligió la persona).
+  // FormData manda "on" si está tildado, o nada. Se guarda como override
+  // relativo a la categoría (ver hormigaOverriddenFrom).
+  isHormiga: z.preprocess(
     (v) => v === "on" || v === "true" || v === true,
     z.boolean(),
   ),
 });
+
+/**
+ * Traduce la elección efectiva del checkbox ("es hormiga") al override que se
+ * persiste: true si difiere del default por categoría (invierte), false si
+ * coincide (sigue la categoría).
+ */
+function hormigaOverriddenFrom(category: string, isHormiga: boolean): boolean {
+  return isHormiga !== isLeakCategory(category);
+}
 
 const subscriptionSchema = z.object({
   name: z.string().trim().min(1, "Ingresá un nombre").max(80),
@@ -100,7 +111,7 @@ export async function createExpenseAction(
     basket: getStr(formData, "basket"),
     budget: getStr(formData, "budget"),
     amount: getStr(formData, "amount"),
-    excludeFromLeaks: getStr(formData, "excludeFromLeaks"),
+    isHormiga: getStr(formData, "isHormiga"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
@@ -117,7 +128,10 @@ export async function createExpenseAction(
         category: parsed.data.category,
         type: parsed.data.type,
         basket: parsed.data.basket,
-        excludeFromLeaks: parsed.data.excludeFromLeaks,
+        hormigaOverridden: hormigaOverriddenFrom(
+          parsed.data.category,
+          parsed.data.isHormiga,
+        ),
         // columna legacy NOT NULL: derivada del basket (ver CONTEXT.md)
         classification: classificationFromBasket(parsed.data.basket as Basket),
         periodicity: "monthly",
@@ -155,7 +169,7 @@ export async function updateExpenseAction(
     basket: getStr(formData, "basket"),
     budget: getStr(formData, "budget"),
     amount: getStr(formData, "amount"),
-    excludeFromLeaks: getStr(formData, "excludeFromLeaks"),
+    isHormiga: getStr(formData, "isHormiga"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
@@ -170,7 +184,10 @@ export async function updateExpenseAction(
         category: parsed.data.category,
         type: parsed.data.type,
         basket: parsed.data.basket,
-        excludeFromLeaks: parsed.data.excludeFromLeaks,
+        hormigaOverridden: hormigaOverriddenFrom(
+          parsed.data.category,
+          parsed.data.isHormiga,
+        ),
         classification: classificationFromBasket(parsed.data.basket as Basket),
         budget: dec(parsed.data.budget),
         amount: dec(parsed.data.amount),

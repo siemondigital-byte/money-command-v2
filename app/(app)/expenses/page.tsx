@@ -20,7 +20,11 @@ import {
   VariablesByCategory,
   type CategoryExpenseRow,
 } from "./VariablesByCategory";
-import { normalizeCategoryKey, categoryLabel } from "./category-grouping";
+import {
+  normalizeCategoryKey,
+  categoryLabel,
+  isHormiga,
+} from "./category-grouping";
 import { deleteExpenseAction } from "./actions";
 
 export async function generateMetadata() {
@@ -28,19 +32,6 @@ export async function generateMetadata() {
 }
 
 type Tab = "fixed" | "variable" | "basket";
-
-// Categorías que alimentan el panel de fugas (suscripciones y gastos hormiga).
-// Enfoque por CATEGORÍA (no por marca): cualquier gasto de estas categorías
-// cuenta. Para incluir/excluir un gasto, se le cambia la categoría en la lista.
-// Comparación normalizada (case-insensitive) para no fragmentar "Otros"/"otros".
-const LEAK_CATEGORIES = new Set([
-  "suscripciones",
-  "entretenimiento",
-  "delivery",
-  "otros",
-  "mixtos",
-  "mixto",
-]);
 
 /** SerializedExpense → fila liviana para <VariablesByCategory> (vista agrupada). */
 function toCategoryRow(r: SerializedExpense): CategoryExpenseRow {
@@ -108,10 +99,7 @@ export default async function ExpensesPage({
   // Capital de libertad = mensual × 150 (= mensual × 12 ÷ 0.08, renta al 8%).
   const round2 = (n: number) => Math.round(n * 100) / 100;
   const leakRows = rows.filter(
-    (r) =>
-      r.isActive &&
-      !r.excludeFromLeaks &&
-      LEAK_CATEGORIES.has(normalizeCategoryKey(r.category)),
+    (r) => r.isActive && isHormiga(r.category, r.hormigaOverridden),
   );
   // Mismas filas para la vista agrupada/desplegable (idéntica a la lista de arriba).
   const leakGroupedRows = leakRows.map(toCategoryRow);

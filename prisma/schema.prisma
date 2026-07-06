@@ -231,12 +231,13 @@ model Expense {
   // Alimenta el resumen mensual/anual y la futura GASTOS_HORMIGA_MES del Coach.
   isSubscription Boolean @default(false)
 
-  // Override manual del panel de fugas: un gasto cuya categoría es de fuga
-  // (suscripciones, entretenimiento, delivery, otros, mixtos) se EXCLUYE del
-  // panel si esto es true ("No es gasto hormiga"). ORTOGONAL a la canasta; no
-  // toca consolidación ni totales. Reusa la columna dormida `isLeak` vía @map
-  // (no requiere migración).
-  excludeFromLeaks Boolean @default(false) @map("isLeak")
+  // Override manual del panel de fugas: cuando es true, la membresía del gasto
+  // se INVIERTE respecto de su categoría (checkbox "Es gasto hormiga"). Así se
+  // puede marcar como hormiga un gasto de otra categoría, o sacar uno de una
+  // categoría de fuga. Default false = sigue la categoría. ORTOGONAL a la
+  // canasta; no toca consolidación ni totales. Reusa la columna dormida
+  // `isLeak` vía @map (no requiere migración).
+  hormigaOverridden Boolean @default(false) @map("isLeak")
 
   // Para gastos hormiga (microgastos)
   isAntExpense    Boolean  @default(false)
