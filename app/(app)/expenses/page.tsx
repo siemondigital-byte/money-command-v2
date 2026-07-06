@@ -93,9 +93,9 @@ export default async function ExpensesPage({
   const totals = totalsByType(helperRows);
   const realByBasket = sumRealByBasket(helperRows);
 
-  // Panel de fugas (presentación pura): suma los gastos activos del período
-  // cuya CATEGORÍA está en LEAK_CATEGORIES (suscripciones, entretenimiento,
-  // otros, mixtos). No toca totales ni consolidación.
+  // Panel de fugas (presentación pura): suma los gastos activos del período que
+  // son "hormiga" (por categoría de fuga, o por el override del checkbox). No
+  // toca totales ni consolidación.
   // Capital de libertad = mensual × 150 (= mensual × 12 ÷ 0.08, renta al 8%).
   const round2 = (n: number) => Math.round(n * 100) / 100;
   const leakRows = rows.filter(
@@ -117,9 +117,17 @@ export default async function ExpensesPage({
     minimumFractionDigits: 0,
   });
 
-  // Las suscripciones tienen su propia sección; no se listan en Fijos/Variables.
-  const fixedRows = rows.filter((r) => r.type === "fixed" && !r.isSubscription);
-  const variableRows = rows.filter((r) => r.type === "variable");
+  // Los gastos hormiga viven SOLO en el panel de fugas: se excluyen de las
+  // listas Fijos/Variables para no duplicarlos. (Los KPIs de arriba siguen
+  // sumando todo; el panel es una vista aparte.)
+  const isLeakRow = (r: SerializedExpense) =>
+    isHormiga(r.category, r.hormigaOverridden);
+  const fixedRows = rows.filter(
+    (r) => r.type === "fixed" && !r.isSubscription && !isLeakRow(r),
+  );
+  const variableRows = rows.filter(
+    (r) => r.type === "variable" && !isLeakRow(r),
+  );
 
   const donutSlices: DonutSlice[] = BASKETS.filter(
     (b) => realByBasket[b] > 0,
