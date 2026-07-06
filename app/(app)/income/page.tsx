@@ -465,7 +465,12 @@ function PlanSection({
             Editar fila {plan}
           </div>
         )}
-        <IncomeRowForm plan={plan} editing={editing} onDoneHref={editingHref} />
+        <IncomeRowForm
+          key={editing?.id ?? "new"}
+          plan={plan}
+          editing={editing}
+          onDoneHref={editingHref}
+        />
       </div>
     </section>
   );
