@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "@/lib/i18n/provider";
 import { deleteMonthlyRecordAction } from "./actions";
 
 /**
@@ -14,6 +15,7 @@ export function DeleteRecordButton({
   id: string;
   label: string;
 }) {
+  const t = useTranslations().history;
   const [confirming, setConfirming] = useState(false);
 
   const linkStyle = {
@@ -32,7 +34,7 @@ export function DeleteRecordButton({
         onClick={() => setConfirming(true)}
         style={{ ...linkStyle, color: "var(--danger)" }}
       >
-        Borrar
+        {t.delete}
       </button>
     );
   }
@@ -40,7 +42,7 @@ export function DeleteRecordButton({
   return (
     <span style={{ display: "inline-flex", gap: "8px", alignItems: "center" }}>
       <span style={{ fontSize: "11px", color: "var(--muted)" }}>
-        ¿Borrar {label}?
+        {t.confirmDeletePre} {label}?
       </span>
       <form action={deleteMonthlyRecordAction} style={{ display: "inline" }}>
         <input type="hidden" name="id" value={id} />
@@ -48,7 +50,7 @@ export function DeleteRecordButton({
           type="submit"
           style={{ ...linkStyle, color: "var(--danger)" }}
         >
-          Sí
+          {t.yes}
         </button>
       </form>
       <button
@@ -56,7 +58,7 @@ export function DeleteRecordButton({
         onClick={() => setConfirming(false)}
         style={{ ...linkStyle, color: "var(--muted)" }}
       >
-        No
+        {t.no}
       </button>
     </span>
   );

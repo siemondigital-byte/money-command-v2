@@ -42,7 +42,7 @@ export function HistoryEditForm({
         }}
       >
         <label className="flex flex-col gap-1">
-          <span className="label">Mes</span>
+          <span className="label">{t.history.colMonth}</span>
           <select name="month" defaultValue={record.month}>
             {t.labels.months.map((m, i) => (
               <option key={i + 1} value={i + 1}>
@@ -52,7 +52,7 @@ export function HistoryEditForm({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Año</span>
+          <span className="label">{t.history.fieldYear}</span>
           <input
             name="year"
             type="number"
@@ -64,7 +64,7 @@ export function HistoryEditForm({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Ingresos</span>
+          <span className="label">{t.history.colIncome}</span>
           <input
             name="incomeTotal"
             type="number"
@@ -75,7 +75,7 @@ export function HistoryEditForm({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Egresos</span>
+          <span className="label">{t.history.colExpenses}</span>
           <input
             name="expenseTotal"
             type="number"
@@ -86,7 +86,7 @@ export function HistoryEditForm({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Patrimonio</span>
+          <span className="label">{t.history.colNetWorth}</span>
           <input
             name="netWorth"
             type="number"
@@ -99,8 +99,7 @@ export function HistoryEditForm({
       </div>
 
       <p style={{ fontSize: "11px", color: "var(--hint)" }}>
-        La tasa de ahorro se recalcula sola a partir de Ingresos y Egresos. Si
-        cambiás el mes/año a uno que ya tiene registro, no se sobrescribe.
+        {t.history.formHelp}
       </p>
 
       <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
@@ -110,10 +109,10 @@ export function HistoryEditForm({
           disabled={pending}
           style={{ opacity: pending ? 0.6 : 1 }}
         >
-          {pending ? "…" : "Guardar"}
+          {pending ? "…" : t.history.save}
         </button>
         <a href={onDoneHref} style={{ color: "var(--muted)", fontSize: "12px" }}>
-          Cancelar
+          {t.history.cancel}
         </a>
       </div>
 
@@ -122,7 +121,7 @@ export function HistoryEditForm({
       )}
       {state.ok && (
         <p style={{ color: "var(--accent)", fontSize: "12px" }}>
-          Cambios guardados. <a href={onDoneHref}>Volver al historial</a>
+          {t.history.savedPre} <a href={onDoneHref}>{t.history.backToHistory}</a>
         </p>
       )}
     </form>

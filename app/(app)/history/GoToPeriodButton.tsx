@@ -1,6 +1,7 @@
 "use client";
 
 import { usePeriodChange } from "@/components/usePeriodChange";
+import { useTranslations } from "@/lib/i18n/provider";
 
 /**
  * Botón "Ir al mes" de History. Usa el helper único `usePeriodChange` (el
@@ -15,6 +16,7 @@ export function GoToPeriodButton({
   month: number;
 }) {
   const { changePeriod, pending } = usePeriodChange();
+  const t = useTranslations().history;
 
   return (
     <button
@@ -32,7 +34,7 @@ export function GoToPeriodButton({
         opacity: pending ? 0.5 : 1,
       }}
     >
-      Ir al mes
+      {t.goToMonth}
     </button>
   );
 }

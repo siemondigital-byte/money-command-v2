@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { getDict, type Dict } from "@/lib/i18n";
 import { getServerDict } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { serializeMonthlyRecord } from "@/lib/serialize";
@@ -11,21 +12,6 @@ export async function generateMetadata() {
   return { title: (await getServerDict()).metadata.history };
 }
 
-const SHORT_MONTHS = [
-  "Ene",
-  "Feb",
-  "Mar",
-  "Abr",
-  "May",
-  "Jun",
-  "Jul",
-  "Ago",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dic",
-];
-
 export default async function HistoryPage({
   searchParams,
 }: {
@@ -33,6 +19,9 @@ export default async function HistoryPage({
 }) {
   const { user, profile } = await requireUser();
   const params = await searchParams;
+  const dict = getDict(profile.locale);
+  const t = dict.history;
+  const SHORT_MONTHS = dict.labels.monthsShort;
 
   const records = await prisma.monthlyRecord.findMany({
     where: { userId: user.id },
@@ -60,8 +49,8 @@ export default async function HistoryPage({
   return (
     <div className="fade-up flex flex-col gap-6">
       <header>
-        <div className="label mb-1">Historial</div>
-        <h1>Tus meses registrados</h1>
+        <div className="label mb-1">{t.label}</div>
+        <h1>{t.title}</h1>
         <p
           style={{
             color: "var(--muted)",
@@ -70,17 +59,17 @@ export default async function HistoryPage({
           }}
         >
           {rows.length === 0
-            ? "Todavía no registraste ningún mes."
-            : `${rows.length} mes${rows.length === 1 ? "" : "es"} en tu historial.`}
+            ? t.empty
+            : `${rows.length} ${rows.length === 1 ? t.monthSingular : t.monthPlural} ${t.countSuffix}`}
         </p>
       </header>
 
-      <AddMonthHint />
+      <AddMonthHint t={t} />
 
       {rows.length === 0 ? (
         <div className="card">
           <p style={{ fontSize: "13px", color: "var(--muted)" }}>
-            Empezá registrando tu primer mes en{" "}
+            {t.firstMonthPre}{" "}
             <Link href="/income" style={{ color: "var(--accent)" }}>
               /income
             </Link>
@@ -104,12 +93,12 @@ export default async function HistoryPage({
             >
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                  <Th>Mes</Th>
-                  <Th align="right">Ingresos</Th>
-                  <Th align="right">Egresos</Th>
-                  <Th align="right">Tasa ahorro</Th>
-                  <Th align="right">Patrimonio</Th>
-                  <Th align="right">Acción</Th>
+                  <Th>{t.colMonth}</Th>
+                  <Th align="right">{t.colIncome}</Th>
+                  <Th align="right">{t.colExpenses}</Th>
+                  <Th align="right">{t.colSavingsRate}</Th>
+                  <Th align="right">{t.colNetWorth}</Th>
+                  <Th align="right">{t.colAction}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -143,7 +132,7 @@ export default async function HistoryPage({
                           href={`/history?edit=${r.id}#edit`}
                           style={{ color: "var(--accent-2)", fontSize: "12px" }}
                         >
-                          Editar
+                          {t.edit}
                         </Link>
                         <DeleteRecordButton
                           id={r.id}
@@ -197,18 +186,18 @@ export default async function HistoryPage({
                 }}
               >
                 <Field
-                  label="Ingresos"
+                  label={t.colIncome}
                   value={money.format(r.incomeTotal)}
                   color="var(--accent)"
                 />
-                <Field label="Egresos" value={money.format(r.expenseTotal)} />
+                <Field label={t.colExpenses} value={money.format(r.expenseTotal)} />
                 <Field
-                  label="Tasa ahorro"
+                  label={t.colSavingsRate}
                   value={pct.format(r.savingsRate / 100)}
                   color="var(--accent-2)"
                 />
                 <Field
-                  label="Patrimonio"
+                  label={t.colNetWorth}
                   value={money.format(r.netWorth)}
                   color="var(--gold)"
                 />
@@ -228,7 +217,7 @@ export default async function HistoryPage({
                   href={`/history?edit=${r.id}#edit`}
                   style={{ color: "var(--accent-2)", fontSize: "13px" }}
                 >
-                  Editar
+                  {t.edit}
                 </Link>
                 <DeleteRecordButton
                   id={r.id}
@@ -244,7 +233,7 @@ export default async function HistoryPage({
       {editing && (
         <section id="edit" className="card">
           <div className="label" style={{ marginBottom: "12px" }}>
-            Editar {SHORT_MONTHS[editing.month - 1]} {editing.year}
+            {t.edit} {SHORT_MONTHS[editing.month - 1]} {editing.year}
           </div>
           <HistoryEditForm record={editing} onDoneHref="/history" />
         </section>
@@ -259,7 +248,7 @@ export default async function HistoryPage({
  * nativo: es interactivo sin JS de cliente, así esta página sigue siendo un
  * Server Component. NO crea meses ni toca la consolidación; solo explica.
  */
-function AddMonthHint() {
+function AddMonthHint({ t }: { t: Dict["history"] }) {
   return (
     <details>
       <summary
@@ -280,7 +269,7 @@ function AddMonthHint() {
           letterSpacing: "0.02em",
         }}
       >
-        + Agregar mes
+        {t.addMonth}
       </summary>
       <div
         style={{
@@ -296,10 +285,8 @@ function AddMonthHint() {
           color: "var(--muted)",
         }}
       >
-        Para registrar un mes nuevo, elegilo arriba en{" "}
-        <strong style={{ color: "var(--text)" }}>PERÍODO</strong> (mes y año), en
-        la parte superior de la pantalla. El mes se crea solo al seleccionarlo, y
-        después podés cargar sus ingresos, egresos e inversiones.
+        {t.addMonthPre}{" "}
+        <strong style={{ color: "var(--text)" }}>{t.addMonthPeriod}</strong> {t.addMonthSuf}
       </div>
     </details>
   );

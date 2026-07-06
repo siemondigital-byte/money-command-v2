@@ -83,6 +83,22 @@ const months: string[] = [
   "Diciembre",
 ];
 
+// Meses abreviados (1-12). Antes: SHORT_MONTHS local en history/page.tsx.
+const monthsShort: string[] = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
+
 export const es = {
   nav: {
     dashboard: "Dashboard",
@@ -261,12 +277,50 @@ export const es = {
       ariaReturn: "retorno",
     },
   },
+  history: {
+    label: "Historial",
+    title: "Tus meses registrados",
+    empty: "Todavía no registraste ningún mes.",
+    // Contador: "{n} mes(es) en tu historial." Se arma en el JSX.
+    monthSingular: "mes",
+    monthPlural: "meses",
+    countSuffix: "en tu historial.",
+    firstMonthPre: "Empezá registrando tu primer mes en",
+    colMonth: "Mes",
+    colIncome: "Ingresos",
+    colExpenses: "Egresos",
+    colSavingsRate: "Tasa ahorro",
+    colNetWorth: "Patrimonio",
+    colAction: "Acción",
+    edit: "Editar",
+    addMonth: "+ Agregar mes",
+    addMonthPre: "Para registrar un mes nuevo, elegilo arriba en",
+    addMonthPeriod: "PERÍODO",
+    addMonthSuf:
+      "(mes y año), en la parte superior de la pantalla. El mes se crea solo al seleccionarlo, y después podés cargar sus ingresos, egresos e inversiones.",
+    // DeleteRecordButton
+    delete: "Borrar",
+    confirmDeletePre: "¿Borrar",
+    yes: "Sí",
+    no: "No",
+    // GoToPeriodButton
+    goToMonth: "Ir al mes",
+    // HistoryEditForm
+    fieldYear: "Año",
+    formHelp:
+      "La tasa de ahorro se recalcula sola a partir de Ingresos y Egresos. Si cambiás el mes/año a uno que ya tiene registro, no se sobrescribe.",
+    save: "Guardar",
+    cancel: "Cancelar",
+    savedPre: "Cambios guardados.",
+    backToHistory: "Volver al historial",
+  },
   labels: {
     baskets,
     categories,
     debtTypes,
     debtPurposes,
     months,
+    monthsShort,
     // Categoría con gastos en más de una canasta (vista Variables agrupada).
     mixed: "Mixta",
   },
