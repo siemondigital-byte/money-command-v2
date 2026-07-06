@@ -77,6 +77,9 @@ export function StatementScanner({
   const [createdCount, setCreatedCount] = useState(0);
   const pendingFile = useRef<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Input aparte para "Tomar foto": accept=image/* + capture=environment abre la
+  // cámara trasera en móvil; en escritorio (sin cámara) cae al selector normal.
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Set para dedup: "comercio normalizado|monto". Los gastos existentes hoy no
   // tienen fecha de compra (llega en la Etapa 3), así que el match es por
@@ -93,6 +96,7 @@ export function StatementScanner({
     setCreatedCount(0);
     pendingFile.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   }
 
   function buildRows(items: StatementItem[]): Row[] {
@@ -286,12 +290,24 @@ export function StatementScanner({
       {/* Subida */}
       {(phase === "idle" || phase === "error") && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {/* Input nativo oculto: el botón estilizado lo dispara (mismo look que
-              el resto de la app, sin el "Choose File" gris del navegador). */}
+          {/* Inputs nativos ocultos: los botones estilizados los disparan (mismo
+              look que el resto de la app, sin el "Choose File" gris del navegador).
+              - Subir: PDF o imagen, selector de archivo normal.
+              - Tomar foto: solo imagen + capture=environment → cámara en móvil. */}
           <input
             ref={fileInputRef}
             type="file"
             accept="application/pdf,image/*"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleFile(f);
+            }}
+            style={{ display: "none" }}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
             capture="environment"
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -299,14 +315,22 @@ export function StatementScanner({
             }}
             style={{ display: "none" }}
           />
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => fileInputRef.current?.click()}
-            style={{ alignSelf: "flex-start" }}
-          >
-            {t.expenses.scanner.uploadButton}
-          </button>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {t.expenses.scanner.uploadButton}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => cameraInputRef.current?.click()}
+            >
+              {t.expenses.scanner.takePhotoButton}
+            </button>
+          </div>
           <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0 }}>
             {t.expenses.scanner.uploadHelp}
           </p>

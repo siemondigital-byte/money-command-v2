@@ -700,6 +700,8 @@ export const es = {
       title: "Escanear resumen de tarjeta",
       close: "Cerrar",
       uploadButton: "Subir PDF o foto",
+      // Segunda vía de entrada: abre la cámara en móvil, selector de archivo en escritorio.
+      takePhotoButton: "Tomar foto",
       uploadHelp:
         "Subí un PDF o una foto del resumen. El texto del PDF se lee en tu navegador y las imágenes se comprimen ahí mismo. Vas a poder revisar y ajustar la lista antes de crear los gastos.",
       // Fase contraseña
