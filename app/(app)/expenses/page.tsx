@@ -142,18 +142,18 @@ export default async function ExpensesPage({
     <div className="fade-up flex flex-col gap-6">
       <header>
         <div className="label mb-1">
-          Egresos · {dict.labels.months[period.month - 1]} {period.year}
+          {dict.expenses.list.headerLabel} · {dict.labels.months[period.month - 1]}{" "}
+          {period.year}
         </div>
-        <h1>Dirigí tu dinero</h1>
+        <h1>{dict.expenses.list.title}</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
-          Registrá tus egresos del período y asigná cada uno a una canasta:
-          Esenciales, Estilo o Libertad. El total real y el desglose por canasta
-          se consolidan en el período activo.
+          {dict.expenses.list.intro}
         </p>
         {monthlyRecord && (
           <p style={{ fontSize: "11px", color: "var(--hint)", marginTop: "6px" }}>
-            Consolidado al MonthlyRecord {periodToString(period)} · expensesTotal
-            = {money.format(Number(monthlyRecord.expenseTotal))}
+            {dict.expenses.list.consolidatedPre} {periodToString(period)} ·{" "}
+            {dict.expenses.list.consolidatedTotal}{" "}
+            {money.format(Number(monthlyRecord.expenseTotal))}
           </p>
         )}
       </header>
@@ -173,15 +173,21 @@ export default async function ExpensesPage({
           gap: "20px",
         }}
       >
-        <Kpi label="Total Fijos" value={money.format(totals.fixedReal)} />
-        <Kpi label="Total Variables" value={money.format(totals.variableReal)} />
         <Kpi
-          label="Total Presupuesto"
+          label={dict.expenses.list.kpiTotalFixed}
+          value={money.format(totals.fixedReal)}
+        />
+        <Kpi
+          label={dict.expenses.list.kpiTotalVariable}
+          value={money.format(totals.variableReal)}
+        />
+        <Kpi
+          label={dict.expenses.list.kpiTotalBudget}
           value={money.format(totals.totalBudget)}
           muted
         />
         <Kpi
-          label="Total Real"
+          label={dict.expenses.list.kpiTotalReal}
           value={money.format(totals.totalReal)}
           accent
         />
@@ -189,9 +195,13 @@ export default async function ExpensesPage({
 
       {/* Tabs */}
       <nav style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        <TabLink current={tab} tab="fixed" label="Fijos" />
-        <TabLink current={tab} tab="variable" label="Variables" />
-        <TabLink current={tab} tab="basket" label="Por canasta" />
+        <TabLink current={tab} tab="fixed" label={dict.expenses.list.tabFixed} />
+        <TabLink
+          current={tab}
+          tab="variable"
+          label={dict.expenses.list.tabVariable}
+        />
+        <TabLink current={tab} tab="basket" label={dict.expenses.list.tabBasket} />
       </nav>
 
       {/* Contenido del tab */}
@@ -310,10 +320,11 @@ function ExpenseTypeSection({
   locale?: string;
   currency?: string;
 }) {
+  const L = dict.expenses.list;
   const subtotal = rows
     .filter((r) => r.isActive)
     .reduce((s, r) => s + r.amount, 0);
-  const label = type === "fixed" ? "Egresos fijos" : "Egresos variables";
+  const label = type === "fixed" ? L.fixedTitle : L.variableTitle;
 
   // Vista agrupada: mismas filas, reagrupadas por categoría (solo presentación).
   // El subtotal de arriba sigue siendo Σ activos (igual que totalsByType).
@@ -334,13 +345,11 @@ function ExpenseTypeSection({
         <div>
           <div className="label">{label}</div>
           <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
-            {type === "fixed"
-              ? "Recurrentes: renta, seguro, servicios."
-              : "Cambian mes a mes: súper, salidas, transporte."}
+            {type === "fixed" ? L.fixedHelper : L.variableHelper}
           </p>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div className="label">Subtotal real</div>
+          <div className="label">{L.subtotalReal}</div>
           <div
             className="kpi-medium"
             style={{ marginTop: "4px", color: "var(--accent)" }}
@@ -373,12 +382,12 @@ function ExpenseTypeSection({
         >
           <thead>
             <tr>
-              <Th>Nombre</Th>
-              <Th>Categoría</Th>
-              <Th>Canasta</Th>
-              <Th align="right">Presupuesto</Th>
-              <Th align="right">Real</Th>
-              <Th align="right">Acción</Th>
+              <Th>{L.colName}</Th>
+              <Th>{L.colCategory}</Th>
+              <Th>{L.colBasket}</Th>
+              <Th align="right">{L.colBudget}</Th>
+              <Th align="right">{L.colReal}</Th>
+              <Th align="right">{L.colAction}</Th>
             </tr>
           </thead>
           <tbody>
@@ -407,9 +416,9 @@ function ExpenseTypeSection({
                       href={`/expenses?tab=${tab}&edit=${r.id}#form`}
                       style={{ color: "var(--accent-2)", fontSize: "12px" }}
                     >
-                      Editar
+                      {L.edit}
                     </Link>
-                    <DeleteButton id={r.id} />
+                    <DeleteButton id={r.id} label={L.delete} />
                   </div>
                 </Td>
               </tr>
@@ -466,10 +475,10 @@ function ExpenseTypeSection({
                 }}
               >
                 <Field
-                  label="Presupuesto"
+                  label={L.colBudget}
                   value={r.budget > 0 ? money.format(r.budget) : "—"}
                 />
-                <Field label="Real" value={money.format(r.amount)} color="var(--accent)" />
+                <Field label={L.colReal} value={money.format(r.amount)} color="var(--accent)" />
               </div>
 
               <div
@@ -485,9 +494,9 @@ function ExpenseTypeSection({
                   href={`/expenses?tab=${tab}&edit=${r.id}#form`}
                   style={{ color: "var(--accent-2)", fontSize: "13px" }}
                 >
-                  Editar
+                  {L.edit}
                 </Link>
-                <DeleteButton id={r.id} />
+                <DeleteButton id={r.id} label={L.delete} />
               </div>
             </div>
           ))}
@@ -504,7 +513,7 @@ function ExpenseTypeSection({
             className="label"
             style={{ marginBottom: "8px", color: "var(--muted)" }}
           >
-            Editar egreso
+            {L.editExpense}
           </div>
         )}
         <ExpenseForm key={editing?.id ?? "new"} type={type} editing={editing} onDoneHref={`/expenses?tab=${tab}`} />
@@ -526,6 +535,7 @@ function BasketSection({
   money: Intl.NumberFormat;
   dict: Dict;
 }) {
+  const L = dict.expenses.list;
   const total = realByBasket.total;
   return (
     <section className="flex flex-col gap-4">
@@ -559,7 +569,7 @@ function BasketSection({
               textAlign: "center",
             }}
           >
-            Sin egresos para graficar
+            {L.noDataToChart}
           </div>
         )}
       </div>
@@ -567,7 +577,7 @@ function BasketSection({
       {/* Reparto por canasta: dentro de cada canasta, Fijos y Variables, y de
           cada tipo sus 3 categorías con más impacto (sin desplegable). */}
       <div className="card flex flex-col gap-5">
-        <div className="label">Reparto del egreso real por canasta</div>
+        <div className="label">{L.basketBreakdownTitle}</div>
         {BASKETS.map((b) => {
           const real = realByBasket[b];
           // Ocultar la fila completa de una canasta sin gastos en el período
@@ -607,7 +617,7 @@ function BasketSection({
                 .sort((a, c) => c.total - a.total);
               return {
                 type: t,
-                label: t === "fixed" ? "Fijos" : "Variables",
+                label: t === "fixed" ? L.fixedGroup : L.variableGroup,
                 typeTotal: Math.round(typeTotal * 100) / 100,
                 cats,
               };
@@ -680,8 +690,8 @@ function BasketSection({
                     </div>
                     <div style={{ fontSize: "10px", color: "var(--hint)" }}>
                       {tg.cats.length >= 3
-                        ? "Las 3 categorías con más impacto"
-                        : "Categorías con más impacto"}
+                        ? L.topThreeCategories
+                        : L.topCategories}
                     </div>
                     {topCats.map((c) => {
                       // Dos porcentajes: dentro de la canasta y sobre el total
@@ -730,16 +740,20 @@ function BasketSection({
                               color: "var(--hint)",
                             }}
                           >
-                            <span>{Math.round(pctOfBasket)}% de la canasta</span>
+                            <span>{Math.round(pctOfBasket)}{L.pctOfBasket}</span>
                             <span>·</span>
-                            <span>{Math.round(pctOfTotal)}% del total</span>
+                            <span>{Math.round(pctOfTotal)}{L.pctOfTotal}</span>
                           </div>
                         </div>
                       );
                     })}
                     {extra > 0 && (
                       <div style={{ fontSize: "11px", color: "var(--hint)" }}>
-                        +{extra} categoría{extra > 1 ? "s" : ""} más
+                        {L.moreCategoriesPre}
+                        {extra}{" "}
+                        {extra > 1
+                          ? L.moreCategoryPlural
+                          : L.moreCategorySingular}
                       </div>
                     )}
                   </div>
@@ -830,7 +844,7 @@ function BasketTag({ basket, dict }: { basket: Basket; dict: Dict }) {
   );
 }
 
-function DeleteButton({ id }: { id: string }) {
+function DeleteButton({ id, label }: { id: string; label: string }) {
   return (
     <form action={deleteExpenseAction} style={{ display: "inline" }}>
       <input type="hidden" name="id" value={id} />
@@ -846,7 +860,7 @@ function DeleteButton({ id }: { id: string }) {
           padding: 0,
         }}
       >
-        Eliminar
+        {label}
       </button>
     </form>
   );

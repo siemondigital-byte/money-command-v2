@@ -63,7 +63,7 @@ export function ExpenseForm({
         className="btn-secondary"
         onClick={() => setOpen(true)}
       >
-        Agregar
+        {t.expenses.form.add}
       </button>
     );
   }
@@ -75,18 +75,22 @@ export function ExpenseForm({
 
       <div className="form-grid">
         <label className="flex flex-col gap-1">
-          <span className="label">Nombre</span>
+          <span className="label">{t.expenses.form.fieldName}</span>
           <input
             name="name"
             type="text"
             maxLength={80}
             required
             defaultValue={editing?.name ?? ""}
-            placeholder={type === "fixed" ? "Renta, seguro…" : "Súper, salidas…"}
+            placeholder={
+              type === "fixed"
+                ? t.expenses.form.placeholderNameFixed
+                : t.expenses.form.placeholderNameVariable
+            }
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Categoría</span>
+          <span className="label">{t.expenses.form.fieldCategory}</span>
           <select
             name="category"
             value={category}
@@ -106,7 +110,7 @@ export function ExpenseForm({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Canasta</span>
+          <span className="label">{t.expenses.form.fieldBasket}</span>
           <select name="basket" defaultValue={editing?.basket ?? "essentials"}>
             {BASKETS.map((b) => (
               <option key={b} value={b}>
@@ -119,18 +123,18 @@ export function ExpenseForm({
 
       <div className="form-grid">
         <label className="flex flex-col gap-1">
-          <span className="label">Presupuesto</span>
+          <span className="label">{t.expenses.form.fieldBudget}</span>
           <input
             name="budget"
             type="number"
             step="0.01"
             min="0"
             defaultValue={editing ? editing.budget : ""}
-            placeholder="0.00"
+            placeholder={t.expenses.form.placeholderAmount}
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Real pagado</span>
+          <span className="label">{t.expenses.form.fieldRealPaid}</span>
           <input
             name="amount"
             type="number"
@@ -138,7 +142,7 @@ export function ExpenseForm({
             min="0"
             required
             defaultValue={editing ? editing.amount : ""}
-            placeholder="0.00"
+            placeholder={t.expenses.form.placeholderAmount}
           />
         </label>
         <button
@@ -147,7 +151,11 @@ export function ExpenseForm({
           disabled={pending}
           style={{ opacity: pending ? 0.6 : 1 }}
         >
-          {pending ? "…" : isEditing ? "Guardar" : "Agregar"}
+          {pending
+            ? "…"
+            : isEditing
+              ? t.expenses.form.save
+              : t.expenses.form.add}
         </button>
       </div>
 
@@ -189,7 +197,7 @@ export function ExpenseForm({
             padding: 0,
           }}
         >
-          Cancelar
+          {t.expenses.form.cancel}
         </button>
       </div>
 

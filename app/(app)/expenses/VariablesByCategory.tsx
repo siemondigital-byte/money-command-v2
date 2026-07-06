@@ -248,7 +248,7 @@ export function VariablesByCategory({
                         href={`/expenses?tab=${r.type === "fixed" ? "fixed" : "variable"}&edit=${r.id}#form`}
                         style={{ color: "var(--accent-2)", fontSize: "12px" }}
                       >
-                        Editar
+                        {t.expenses.list.edit}
                       </Link>
                       <DeleteButton id={r.id} />
                     </div>
@@ -302,6 +302,7 @@ function BasketTag({ basket, mixed }: { basket: Basket; mixed: boolean }) {
 }
 
 function DeleteButton({ id }: { id: string }) {
+  const t = useTranslations();
   return (
     <form action={deleteExpenseAction} style={{ display: "inline" }}>
       <input type="hidden" name="id" value={id} />
@@ -317,7 +318,7 @@ function DeleteButton({ id }: { id: string }) {
           padding: 0,
         }}
       >
-        Eliminar
+        {t.expenses.list.delete}
       </button>
     </form>
   );

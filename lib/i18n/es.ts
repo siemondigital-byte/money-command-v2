@@ -630,6 +630,128 @@ export const es = {
       // Checkbox del ExpenseForm: define si el gasto es hormiga (entra al panel).
       hormigaCheckbox: "Es gasto hormiga",
     },
+    // Página de lista (server): header, KPIs, tabs, tablas, vista Por Canasta.
+    list: {
+      // Header: "Egresos · {Mes} {Año}". El mes/año se arma en el JSX.
+      headerLabel: "Egresos",
+      title: "Dirigí tu dinero",
+      intro:
+        "Registrá tus egresos del período y asigná cada uno a una canasta: Esenciales, Estilo o Libertad. El total real y el desglose por canasta se consolidan en el período activo.",
+      // Nota de consolidación: "Consolidado al MonthlyRecord {periodo} · expensesTotal = {monto}"
+      consolidatedPre: "Consolidado al MonthlyRecord",
+      consolidatedTotal: "expensesTotal =",
+      // KPIs
+      kpiTotalFixed: "Total Fijos",
+      kpiTotalVariable: "Total Variables",
+      kpiTotalBudget: "Total Presupuesto",
+      kpiTotalReal: "Total Real",
+      // Tabs
+      tabFixed: "Fijos",
+      tabVariable: "Variables",
+      tabBasket: "Por canasta",
+      // ExpenseTypeSection: títulos + helpers por tipo
+      fixedTitle: "Egresos fijos",
+      fixedHelper: "Recurrentes: renta, seguro, servicios.",
+      variableTitle: "Egresos variables",
+      variableHelper: "Cambian mes a mes: súper, salidas, transporte.",
+      subtotalReal: "Subtotal real",
+      // Columnas de la tabla
+      colName: "Nombre",
+      colCategory: "Categoría",
+      colBasket: "Canasta",
+      colBudget: "Presupuesto",
+      colReal: "Real",
+      colAction: "Acción",
+      // Acciones
+      edit: "Editar",
+      delete: "Eliminar",
+      editExpense: "Editar egreso",
+      // Vista Por Canasta
+      noDataToChart: "Sin egresos para graficar",
+      basketBreakdownTitle: "Reparto del egreso real por canasta",
+      fixedGroup: "Fijos",
+      variableGroup: "Variables",
+      topThreeCategories: "Las 3 categorías con más impacto",
+      topCategories: "Categorías con más impacto",
+      pctOfBasket: "% de la canasta",
+      pctOfTotal: "% del total",
+      // "+{n} categoría(s) más"
+      moreCategoriesPre: "+",
+      moreCategorySingular: "categoría más",
+      moreCategoryPlural: "categorías más",
+    },
+    // ExpenseForm (client): campos, placeholders, botones.
+    form: {
+      fieldName: "Nombre",
+      fieldCategory: "Categoría",
+      fieldBasket: "Canasta",
+      fieldBudget: "Presupuesto",
+      fieldRealPaid: "Real pagado",
+      placeholderNameFixed: "Renta, seguro…",
+      placeholderNameVariable: "Súper, salidas…",
+      placeholderAmount: "0.00",
+      add: "Agregar",
+      save: "Guardar",
+      cancel: "Cancelar",
+    },
+    // StatementScanner (client): escáner de resumen de tarjeta.
+    scanner: {
+      openButton: "Escanear resumen de tarjeta",
+      title: "Escanear resumen de tarjeta",
+      close: "Cerrar",
+      uploadButton: "Subir PDF o foto",
+      uploadHelp:
+        "Subí un PDF o una foto del resumen. El texto del PDF se lee en tu navegador y las imágenes se comprimen ahí mismo. Vas a poder revisar y ajustar la lista antes de crear los gastos.",
+      // Fase contraseña
+      passwordIntro:
+        "El PDF está protegido con contraseña. Ingresala para desbloquearlo en tu navegador (la contraseña no se envía a ningún servidor), o subí una foto del resumen.",
+      passwordPlaceholder: "Contraseña del PDF",
+      passwordAriaLabel: "Contraseña del PDF",
+      unlockAndRead: "Desbloquear y leer",
+      uploadPhotoInstead: "Subir una foto en su lugar",
+      // Estados de carga
+      preparing: "Preparando el archivo…",
+      reading: "Leyendo resumen…",
+      creating: "Creando los gastos…",
+      // Listo: "Se crearon {n} gasto(s) en {mes}. Ya aparecen en tu lista de Egresos."
+      donePre: "Se crearon",
+      doneMid: "gasto(s) en",
+      doneSuf: ". Ya aparecen en tu lista de Egresos.",
+      scanAnother: "Escanear otro resumen",
+      // Advertencias
+      // "{n} renglón(es) con confianza baja: revisalos."
+      lowConfSuf: "renglón(es) con confianza baja: revisalos.",
+      // "{n} posible(s) duplicado(s) de gastos ya cargados este período."
+      dupSuf: "posible(s) duplicado(s) de gastos ya cargados este período.",
+      // Resumen: "{n} de {total} compras seleccionadas · total {monto}"
+      summaryMid: "de",
+      summarySuf: "compras seleccionadas · total",
+      // Fila de revisión
+      include: "Incluir",
+      // "confianza {alta/media/baja}"
+      confidencePre: "confianza",
+      possibleDuplicate: "posible duplicado",
+      fieldMerchant: "Comercio",
+      fieldAmount: "Monto",
+      fieldDate: "Fecha",
+      fieldCategory: "Categoría",
+      fieldBasket: "Canasta",
+      // Nota informativa: "Las compras se registran en el mes activo ({mes}), el mes en que pagás este resumen. Se guarda la fecha original de cada compra."
+      monthNotePre: "Las compras se registran en el mes activo (",
+      monthNoteSuf:
+        "), el mes en que pagás este resumen. Se guarda la fecha original de cada compra.",
+      // "Confirmar y crear {n} gasto(s)"
+      confirmCreatePre: "Confirmar y crear",
+      confirmCreateSuf: "gasto(s)",
+      // Errores
+      errRead: "No pude leer el resumen. Probá con otra foto o archivo.",
+      errUnsupported: "Formato no soportado. Subí un PDF o una imagen.",
+      errPrepare: "No pude preparar el archivo. Probá con otro.",
+      errWrongPassword: "Contraseña incorrecta. Probá de nuevo.",
+      errUnlock: "No pude desbloquear el PDF. Probá subir una foto.",
+      errNoValid: "No hay compras válidas para crear.",
+      errCreate: "No pude crear los gastos. Probá de nuevo.",
+    },
   },
   labels: {
     baskets,

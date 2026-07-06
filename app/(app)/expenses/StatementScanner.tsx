@@ -129,7 +129,7 @@ export function StatementScanner({
         setPhase("review");
       }
     } catch {
-      setErrorMsg("No pude leer el resumen. Probá con otra foto o archivo.");
+      setErrorMsg(t.expenses.scanner.errRead);
       setPhase("error");
     }
   }
@@ -179,10 +179,10 @@ export function StatementScanner({
         }
         return;
       }
-      setErrorMsg("Formato no soportado. Subí un PDF o una imagen.");
+      setErrorMsg(t.expenses.scanner.errUnsupported);
       setPhase("error");
     } catch {
-      setErrorMsg("No pude preparar el archivo. Probá con otro.");
+      setErrorMsg(t.expenses.scanner.errPrepare);
       setPhase("error");
     }
   }
@@ -204,9 +204,9 @@ export function StatementScanner({
       }
     } catch (err) {
       if (err instanceof WrongPasswordError) {
-        setErrorMsg("Contraseña incorrecta. Probá de nuevo.");
+        setErrorMsg(t.expenses.scanner.errWrongPassword);
       } else {
-        setErrorMsg("No pude desbloquear el PDF. Probá subir una foto.");
+        setErrorMsg(t.expenses.scanner.errUnlock);
       }
       setPhase("password");
     }
@@ -220,7 +220,7 @@ export function StatementScanner({
   async function doCreate() {
     const sel = rows.filter((r) => r.include && (Number(r.monto) || 0) > 0);
     if (sel.length === 0) {
-      setErrorMsg("No hay compras válidas para crear.");
+      setErrorMsg(t.expenses.scanner.errNoValid);
       setPhase("error");
       return;
     }
@@ -247,7 +247,7 @@ export function StatementScanner({
       // Refresca la vista de Egresos: los nuevos gastos aparecen en la lista.
       router.refresh();
     } catch {
-      setErrorMsg("No pude crear los gastos. Probá de nuevo.");
+      setErrorMsg(t.expenses.scanner.errCreate);
       setPhase("error");
     }
   }
@@ -269,7 +269,7 @@ export function StatementScanner({
         onClick={() => setOpen(true)}
         style={{ alignSelf: "flex-start" }}
       >
-        Escanear resumen de tarjeta
+        {t.expenses.scanner.openButton}
       </button>
     );
   }
@@ -277,9 +277,9 @@ export function StatementScanner({
   return (
     <section className="card flex flex-col gap-4" style={{ borderTop: "2px solid var(--accent-2)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "10px" }}>
-        <div className="label">Escanear resumen de tarjeta</div>
+        <div className="label">{t.expenses.scanner.title}</div>
         <button type="button" onClick={() => { reset(); setOpen(false); }} style={linkBtn}>
-          Cerrar
+          {t.expenses.scanner.close}
         </button>
       </div>
 
@@ -305,12 +305,10 @@ export function StatementScanner({
             onClick={() => fileInputRef.current?.click()}
             style={{ alignSelf: "flex-start" }}
           >
-            Subir PDF o foto
+            {t.expenses.scanner.uploadButton}
           </button>
           <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0 }}>
-            Subí un PDF o una foto del resumen. El texto del PDF se lee en tu
-            navegador y las imágenes se comprimen ahí mismo. Vas a poder revisar y
-            ajustar la lista antes de crear los gastos.
+            {t.expenses.scanner.uploadHelp}
           </p>
           {phase === "error" && errorMsg && (
             <p style={{ color: "var(--danger)", fontSize: "12px", margin: 0 }}>{errorMsg}</p>
@@ -322,17 +320,15 @@ export function StatementScanner({
       {phase === "password" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <p style={{ fontSize: "13px", color: "var(--text)", margin: 0 }}>
-            El PDF está protegido con contraseña. Ingresala para desbloquearlo en
-            tu navegador (la contraseña no se envía a ningún servidor), o subí una
-            foto del resumen.
+            {t.expenses.scanner.passwordIntro}
           </p>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Contraseña del PDF"
-              aria-label="Contraseña del PDF"
+              placeholder={t.expenses.scanner.passwordPlaceholder}
+              aria-label={t.expenses.scanner.passwordAriaLabel}
               autoComplete="off"
               style={{ flex: 1, minWidth: "180px" }}
             />
@@ -343,11 +339,11 @@ export function StatementScanner({
               disabled={password.trim().length === 0}
               style={{ opacity: password.trim().length === 0 ? 0.6 : 1 }}
             >
-              Desbloquear y leer
+              {t.expenses.scanner.unlockAndRead}
             </button>
           </div>
           <button type="button" onClick={reset} style={linkBtn}>
-            Subir una foto en su lugar
+            {t.expenses.scanner.uploadPhotoInstead}
           </button>
           {errorMsg && (
             <p style={{ color: "var(--danger)", fontSize: "12px", margin: 0 }}>{errorMsg}</p>
@@ -359,10 +355,10 @@ export function StatementScanner({
       {(phase === "preparing" || phase === "reading" || phase === "creating") && (
         <p style={{ fontSize: "13px", color: "var(--muted)", margin: 0 }}>
           {phase === "preparing"
-            ? "Preparando el archivo…"
+            ? t.expenses.scanner.preparing
             : phase === "reading"
-              ? "Leyendo resumen…"
-              : "Creando los gastos…"}
+              ? t.expenses.scanner.reading
+              : t.expenses.scanner.creating}
         </p>
       )}
 
@@ -370,15 +366,16 @@ export function StatementScanner({
       {phase === "done" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <p style={{ fontSize: "13px", color: "var(--accent)", margin: 0 }}>
-            Se crearon <strong>{createdCount}</strong> gasto(s) en {activeMonthLabel}.
-            Ya aparecen en tu lista de Egresos.
+            {t.expenses.scanner.donePre} <strong>{createdCount}</strong>{" "}
+            {t.expenses.scanner.doneMid} {activeMonthLabel}
+            {t.expenses.scanner.doneSuf}
           </p>
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <button type="button" className="btn-secondary" onClick={reset}>
-              Escanear otro resumen
+              {t.expenses.scanner.scanAnother}
             </button>
             <button type="button" onClick={() => { reset(); setOpen(false); }} style={linkBtn}>
-              Cerrar
+              {t.expenses.scanner.close}
             </button>
           </div>
         </div>
@@ -399,15 +396,16 @@ export function StatementScanner({
                 padding: "8px 10px",
               }}
             >
-              {lowConf > 0 && <div>{lowConf} renglón(es) con confianza baja: revisalos.</div>}
-              {dupCount > 0 && <div>{dupCount} posible(s) duplicado(s) de gastos ya cargados este período.</div>}
+              {lowConf > 0 && <div>{lowConf} {t.expenses.scanner.lowConfSuf}</div>}
+              {dupCount > 0 && <div>{dupCount} {t.expenses.scanner.dupSuf}</div>}
             </div>
           )}
 
           {/* Resumen */}
           <div style={{ fontSize: "13px", color: "var(--text)" }}>
-            <strong>{selected.length}</strong> de {rows.length} compras seleccionadas ·
-            total <strong style={{ color: "var(--accent)" }}>{selectedTotal.toFixed(2)}</strong>
+            <strong>{selected.length}</strong> {t.expenses.scanner.summaryMid}{" "}
+            {rows.length} {t.expenses.scanner.summarySuf}{" "}
+            <strong style={{ color: "var(--accent)" }}>{selectedTotal.toFixed(2)}</strong>
           </div>
 
           {/* Filas editables */}
@@ -433,28 +431,28 @@ export function StatementScanner({
                       checked={r.include}
                       onChange={(e) => updateRow(r.key, { include: e.target.checked })}
                     />
-                    Incluir
+                    {t.expenses.scanner.include}
                   </label>
                   <Badge tone={r.confianza === "baja" ? "danger" : r.confianza === "media" ? "gold" : "accent"}>
-                    confianza {r.confianza}
+                    {t.expenses.scanner.confidencePre} {r.confianza}
                   </Badge>
-                  {r.isDuplicate && <Badge tone="gold">posible duplicado</Badge>}
+                  {r.isDuplicate && <Badge tone="gold">{t.expenses.scanner.possibleDuplicate}</Badge>}
                 </div>
 
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  <Field label="Comercio">
+                  <Field label={t.expenses.scanner.fieldMerchant}>
                     <input value={r.comercio} onChange={(e) => updateRow(r.key, { comercio: e.target.value })} />
                   </Field>
-                  <Field label="Monto">
+                  <Field label={t.expenses.scanner.fieldAmount}>
                     <input type="number" step="0.01" min="0" value={r.monto} onChange={(e) => updateRow(r.key, { monto: e.target.value })} />
                   </Field>
-                  <Field label="Fecha">
+                  <Field label={t.expenses.scanner.fieldDate}>
                     <input type="date" value={r.fecha} onChange={(e) => updateRow(r.key, { fecha: e.target.value })} />
                   </Field>
-                  <Field label="Categoría">
+                  <Field label={t.expenses.scanner.fieldCategory}>
                     <input value={r.categoria} onChange={(e) => updateRow(r.key, { categoria: e.target.value })} />
                   </Field>
-                  <Field label="Canasta">
+                  <Field label={t.expenses.scanner.fieldBasket}>
                     <select value={r.canasta} onChange={(e) => updateRow(r.key, { canasta: e.target.value as Basket })}>
                       {BASKETS.map((b) => (
                         <option key={b} value={b}>{t.labels.baskets[b]}</option>
@@ -478,9 +476,8 @@ export function StatementScanner({
               margin: 0,
             }}
           >
-            Las compras se registran en el mes activo (<strong>{activeMonthLabel}</strong>),
-            el mes en que pagás este resumen. Se guarda la fecha original de cada
-            compra.
+            {t.expenses.scanner.monthNotePre}<strong>{activeMonthLabel}</strong>
+            {t.expenses.scanner.monthNoteSuf}
           </p>
 
           {/* Confirmar y crear (Etapa 3) */}
@@ -496,12 +493,13 @@ export function StatementScanner({
                 cursor: selected.length === 0 ? "not-allowed" : "pointer",
               }}
             >
-              Confirmar y crear {selected.length} gasto(s)
+              {t.expenses.scanner.confirmCreatePre} {selected.length}{" "}
+              {t.expenses.scanner.confirmCreateSuf}
             </button>
           </div>
 
           <button type="button" onClick={reset} style={linkBtn}>
-            Escanear otro resumen
+            {t.expenses.scanner.scanAnother}
           </button>
         </div>
       )}
