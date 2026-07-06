@@ -1,7 +1,21 @@
 "use client";
 
-import { formatMoneyShort } from "@/lib/format";
+import type { CSSProperties } from "react";
 import { useTranslations } from "@/lib/i18n/provider";
+import { MoneyAmount } from "./MoneyAmount";
+
+// Número de la escala del termostato: prefijo de moneda chico (MoneyAmount) y
+// tamaño que se achica con el ancho de la columna (cqi) y puede envolver, para
+// que "COP 100,000" nunca se recorte dentro de la tarjeta (overflow: hidden).
+const SCALE_NUM: CSSProperties = {
+  fontFamily: "Syne, sans-serif",
+  fontWeight: 800,
+  fontSize: "clamp(1rem, 16cqi, 1.5rem)",
+  letterSpacing: "-0.03em",
+  lineHeight: 1.05,
+  overflowWrap: "anywhere",
+  minWidth: 0,
+};
 
 /**
  * Termostato financiero VERTICAL y compacto (ANEXO REDISENO §2).
@@ -31,8 +45,6 @@ export function Thermostat({
   currency: string;
 }) {
   const t = useTranslations().dashboard.thermostat;
-  const money = (n: number) => formatMoneyShort(n, locale, currency);
-  const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
   const hasTarget = target > 0;
 
   // Nivel del tubo: actual sobre la escala 0..target (tope 100%).
@@ -79,32 +91,38 @@ export function Thermostat({
             {/* marca de ajuste deseado al tope (100% = meta) */}
             <div className="tgt" style={{ bottom: "calc(100% - 2px)" }} />
           </div>
-          <div className="scale" style={{ minWidth: 0 }}>
+          <div className="scale" style={{ minWidth: 0, containerType: "inline-size" }}>
             <div>
               <div className="label">{t.target2y}</div>
-              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-0.03em", lineHeight: 1, color: "var(--gold)" }}>
-                {moneyShort(target)}
+              <div style={{ ...SCALE_NUM, color: "var(--gold)" }}>
+                <MoneyAmount value={target} locale={locale} currency={currency} />
               </div>
             </div>
             <div>
               <div className="label">{t.todayAvg}</div>
-              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-0.03em", lineHeight: 1, color: "var(--accent-2)" }}>
-                {hasHistory ? moneyShort(current) : "—"}
+              <div style={{ ...SCALE_NUM, color: "var(--accent-2)" }}>
+                {hasHistory ? (
+                  <MoneyAmount value={current} locale={locale} currency={currency} />
+                ) : (
+                  "—"
+                )}
               </div>
             </div>
             <div>
               <div className="label">{reached ? t.stateReached : t.stateGap}</div>
               <div
                 style={{
-                  fontFamily: "Syne, sans-serif",
-                  fontWeight: 800,
-                  fontSize: "1.5rem",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
+                  ...SCALE_NUM,
                   color: reached ? "var(--accent)" : "var(--text)",
                 }}
               >
-                {reached ? t.reachedValue : hasHistory ? money(gap) : "—"}
+                {reached ? (
+                  t.reachedValue
+                ) : hasHistory ? (
+                  <MoneyAmount value={gap} locale={locale} currency={currency} />
+                ) : (
+                  "—"
+                )}
               </div>
               {!reached && hasHistory && gapPct > 0 && (
                 <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "2px" }}>
