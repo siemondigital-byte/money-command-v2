@@ -498,14 +498,14 @@ textarea:focus {
 .dash .d-kpi .v {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 1.9rem;
+  font-size: 1.55rem;
   letter-spacing: -0.03em;
   line-height: 1;
   margin-top: 10px;
   color: var(--text);
 }
 .dash .d-kpi.hero .v {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
 }
 .dash .d-kpi .v .u {
   font-family: 'DM Mono', monospace;
@@ -800,7 +800,7 @@ textarea:focus {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   color: var(--accent);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   letter-spacing: -0.03em;
   line-height: 1;
   margin-top: 6px;
@@ -854,7 +854,7 @@ textarea:focus {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   color: var(--accent);
-  font-size: 2.1rem;
+  font-size: 1.65rem;
   letter-spacing: -0.04em;
   line-height: 0.95;
   margin-top: 14px;

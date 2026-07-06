@@ -10,7 +10,7 @@ import { MoneyAmount } from "./MoneyAmount";
 const SCALE_NUM: CSSProperties = {
   fontFamily: "Syne, sans-serif",
   fontWeight: 800,
-  fontSize: "clamp(0.95rem, 13cqi, 1.35rem)",
+  fontSize: "clamp(0.9rem, 12cqi, 1.2rem)",
   letterSpacing: "-0.03em",
   lineHeight: 1.05,
   overflowWrap: "anywhere",

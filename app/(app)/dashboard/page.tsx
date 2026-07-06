@@ -267,7 +267,7 @@ export default async function DashboardPage() {
               style={{
                 fontFamily: "Syne, sans-serif",
                 fontWeight: 800,
-                fontSize: "clamp(1.5rem, 12cqi, 2.6rem)",
+                fontSize: "clamp(1.2rem, 10cqi, 1.9rem)",
                 letterSpacing: "-0.03em",
                 lineHeight: 1,
                 color: "var(--gold)",

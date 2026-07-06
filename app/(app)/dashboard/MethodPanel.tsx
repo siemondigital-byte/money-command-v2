@@ -10,12 +10,12 @@ import { MoneyAmount } from "./MoneyAmount";
 // largo + overflowWrap, para que NUNCA se corte ni desborde su tarjeta. La hero
 // (Ingreso del mes) queda apenas más grande.
 const HERO_AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.2rem, 4.2vw, 2rem)",
+  fontSize: "clamp(1.05rem, 3.2vw, 1.55rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
 const AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.05rem, 3.6vw, 1.7rem)",
+  fontSize: "clamp(0.95rem, 2.8vw, 1.35rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
