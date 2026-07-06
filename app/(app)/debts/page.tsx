@@ -101,15 +101,15 @@ export default async function DebtsPage({
   return (
     <div className="fade-up flex flex-col gap-6">
       <header>
-        <div className="label mb-1">Deudas y créditos</div>
-        <h1>Salí de la deuda</h1>
+        <div className="label mb-1">{dict.debts.headerLabel}</div>
+        <h1>{dict.debts.title}</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
-          Registrá tus deudas para ver su peso real y dirigir el dinero a
-          liberarlas. Pagar deuda es ordenar tus finanzas hacia la libertad.
+          {dict.debts.intro}
         </p>
         {monthlyRecord && (
           <p style={{ fontSize: "11px", color: "var(--hint)", marginTop: "6px" }}>
-            Consolidado al MonthlyRecord {periodToString(period)} · debtTotal ={" "}
+            {dict.debts.consolidatedPre} {periodToString(period)} ·{" "}
+            {dict.debts.consolidatedTotal}{" "}
             {money.format(Number(monthlyRecord.debtTotal))}
           </p>
         )}
@@ -130,16 +130,16 @@ export default async function DebtsPage({
         >
           <div>
             <div style={{ fontSize: "14px", color: "var(--text)" }}>
-              ¿Confirmás tus pagos de deuda de {dict.labels.months[period.month - 1]}?
+              {dict.debts.confirmPre} {dict.labels.months[period.month - 1]}
+              {dict.debts.confirmSuf}
             </div>
             <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
-              Si pagaste lo registrado, actualizamos el saldo. Si pagaste
-              distinto, editá la deuda abajo.
+              {dict.debts.confirmNote}
             </p>
           </div>
           <form action={confirmDebtPaymentsAction}>
             <button type="submit" className="btn-primary">
-              Sí, pagué lo registrado
+              {dict.debts.confirmButton}
             </button>
           </form>
         </section>
@@ -155,41 +155,41 @@ export default async function DebtsPage({
         }}
       >
         <Kpi
-          label="Deuda Total"
+          label={dict.debts.kpiTotalDebt}
           value={money.format(totalBalance)}
-          sub={`${debts.length} deuda${debts.length === 1 ? "" : "s"}`}
+          sub={`${debts.length} ${debts.length === 1 ? dict.debts.debtSingular : dict.debts.debtPlural}`}
         />
         <Kpi
-          label="Pago Mensual"
+          label={dict.debts.kpiMonthlyPayment}
           value={money.format(monthlyPayment)}
-          sub={income > 0 ? `${pct.format(paymentShare)} de tus ingresos` : "registrá tus ingresos"}
+          sub={income > 0 ? `${pct.format(paymentShare)} ${dict.debts.ofYourIncome}` : dict.debts.registerIncome}
         />
         <Kpi
-          label="APR Ponderado"
+          label={dict.debts.kpiWeightedApr}
           value={pct.format(wApr / 100)}
-          sub="prom. ponderado"
+          sub={dict.debts.weightedAprSub}
         />
         <Kpi
-          label="Ratio Deuda/Ingreso"
+          label={dict.debts.kpiDebtToIncome}
           value={pct.format(ratio)}
-          sub="saludable < 36%"
+          sub={dict.debts.debtToIncomeSub}
           valueColor={income > 0 ? ratioColor : "var(--muted)"}
         />
         <Kpi
-          label="Libre de Deudas"
+          label={dict.debts.kpiDebtFree}
           value={
             debts.length === 0
               ? "—"
               : recommended.converges
-                ? `${recommended.months} ${recommended.months === 1 ? "mes" : "meses"}`
-                : "no converge"
+                ? `${recommended.months} ${recommended.months === 1 ? dict.debts.monthSingular : dict.debts.monthPlural}`
+                : dict.debts.notConverge
           }
           sub={
             debts.length === 0
-              ? "sin deudas"
+              ? dict.debts.noDebts
               : recommended.converges
-                ? "estrategia Avalancha"
-                : "el pago no cubre el interés"
+                ? dict.debts.avalancheStrategyShort
+                : dict.debts.paymentNotCoverInterest
           }
           valueColor={
             debts.length === 0 || !recommended.converges
@@ -209,21 +209,21 @@ export default async function DebtsPage({
         }}
       >
         <div>
-          <div className="label">Deuda de consumo</div>
+          <div className="label">{dict.debts.consumptionDebt}</div>
           <div className="kpi-medium" style={{ marginTop: "4px", color: "var(--gold)" }}>
             {money.format(split.consumption)}
           </div>
           <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
-            De la que conviene salir y no repetir.
+            {dict.debts.consumptionDebtNote}
           </p>
         </div>
         <div>
-          <div className="label">Deuda de inversión</div>
+          <div className="label">{dict.debts.investmentDebt}</div>
           <div className="kpi-medium" style={{ marginTop: "4px", color: "var(--accent-2)" }}>
             {money.format(split.investment)}
           </div>
           <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}>
-            Justificada solo si genera retorno.
+            {dict.debts.investmentDebtNote}
           </p>
         </div>
       </section>
@@ -241,15 +241,15 @@ export default async function DebtsPage({
             >
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                  <Th>Nombre</Th>
-                  <Th>Tipo</Th>
-                  <Th>Etiqueta</Th>
-                  <Th align="right">Saldo</Th>
-                  <Th align="right">APR</Th>
-                  <Th align="right">Pago mín.</Th>
-                  <Th align="right">Pago real</Th>
-                  <Th align="right">Cuotas</Th>
-                  <Th align="right">Acción</Th>
+                  <Th>{dict.debts.colName}</Th>
+                  <Th>{dict.debts.colType}</Th>
+                  <Th>{dict.debts.colLabel}</Th>
+                  <Th align="right">{dict.debts.colBalance}</Th>
+                  <Th align="right">{dict.debts.colApr}</Th>
+                  <Th align="right">{dict.debts.colMinPayment}</Th>
+                  <Th align="right">{dict.debts.colRealPayment}</Th>
+                  <Th align="right">{dict.debts.colInstallments}</Th>
+                  <Th align="right">{dict.debts.colAction}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -277,9 +277,9 @@ export default async function DebtsPage({
                           href={`/debts?edit=${d.id}#form`}
                           style={{ color: "var(--accent-2)", fontSize: "12px" }}
                         >
-                          Editar
+                          {dict.debts.edit}
                         </Link>
-                        <DeleteButton id={d.id} />
+                        <DeleteButton id={d.id} label={dict.debts.delete} />
                       </div>
                     </Td>
                   </tr>
@@ -293,16 +293,15 @@ export default async function DebtsPage({
       {/* CAPA 2 — Estrategia de pago */}
       <section className="card flex flex-col gap-4">
         <div>
-          <div className="label">Estrategia de pago: ¿cuál te conviene?</div>
+          <div className="label">{dict.debts.strategyTitle}</div>
           <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>
-            Mismo presupuesto mensual, distinto orden de ataque. Cuando una
-            deuda se salda, su pago acelera la siguiente.
+            {dict.debts.strategyIntro}
           </p>
         </div>
 
         {debts.length === 0 ? (
           <p style={{ fontSize: "13px", color: "var(--hint)" }}>
-            Cuando registres deudas, acá vas a ver tu plan para liberarte.
+            {dict.debts.strategyEmpty}
           </p>
         ) : (
           <>
@@ -314,17 +313,19 @@ export default async function DebtsPage({
               }}
             >
               <StrategyCard
-                title="Avalancha"
+                title={dict.debts.avalanche}
                 recommended
-                desc="Paga primero la deuda con mayor interés. Ahorra más a largo plazo."
+                desc={dict.debts.avalancheDesc}
                 result={comparison.avalanche}
                 money={money}
+                dict={dict}
               />
               <StrategyCard
-                title="Bola de Nieve"
-                desc="Paga primero la deuda más pequeña. Más victorias rápidas."
+                title={dict.debts.snowball}
+                desc={dict.debts.snowballDesc}
                 result={comparison.snowball}
                 money={money}
+                dict={dict}
               />
             </div>
 
@@ -339,11 +340,11 @@ export default async function DebtsPage({
                     paddingTop: "12px",
                   }}
                 >
-                  La estrategia Avalancha te ahorra{" "}
+                  {dict.debts.savesPre}{" "}
                   <span style={{ color: "var(--accent)" }}>
                     {money.format(comparison.interestSaved)}
                   </span>{" "}
-                  en intereses vs Bola de Nieve.
+                  {dict.debts.savesSuf}
                 </p>
               )}
           </>
@@ -352,27 +353,27 @@ export default async function DebtsPage({
 
       {/* CAPA 2 — Proyección de reducción de deuda */}
       <section className="card flex flex-col gap-3">
-        <div className="label">Proyección de reducción de deuda</div>
+        <div className="label">{dict.debts.projectionTitle}</div>
         {debts.length === 0 ? (
           <p style={{ fontSize: "13px", color: "var(--hint)" }}>
-            Acá vas a ver cómo baja tu saldo mes a mes hasta llegar a cero.
+            {dict.debts.projectionEmpty}
           </p>
         ) : !recommended.converges ? (
           <p style={{ fontSize: "13px", color: "var(--muted)" }}>
-            Con el pago actual la deuda no se salda: el pago no alcanza a cubrir
-            el interés. Subí el pago mensual real de tus deudas para ver la
-            proyección.
+            {dict.debts.projectionNotConverge}
           </p>
         ) : (
           <>
             <p style={{ fontSize: "12px", color: "var(--muted)" }}>
-              Estrategia Avalancha, libre de deudas en {recommended.months}{" "}
-              {recommended.months === 1 ? "mes" : "meses"}.
+              {dict.debts.projectionCaptionPre} {recommended.months}{" "}
+              {recommended.months === 1 ? dict.debts.monthSingular : dict.debts.monthPlural}
+              {dict.debts.projectionCaptionSuf}
             </p>
             <DebtProjectionChart
               schedule={recommended.schedule}
               locale={profile.locale}
               currency={profile.currency}
+              todayLabel={dict.debts.chartToday}
             />
           </>
         )}
@@ -419,12 +420,14 @@ function StrategyCard({
   result,
   money,
   recommended,
+  dict,
 }: {
   title: string;
   desc: string;
   result: PayoffResult;
   money: Intl.NumberFormat;
   recommended?: boolean;
+  dict: ReturnType<typeof getDict>;
 }) {
   const startsWith = result.order[0]?.name ?? "—";
   return (
@@ -455,7 +458,7 @@ function StrategyCard({
               borderRadius: "6px",
             }}
           >
-            Recomendada
+            {dict.debts.recommended}
           </span>
         )}
       </div>
@@ -472,18 +475,18 @@ function StrategyCard({
         }}
       >
         <StrategyStat
-          label="Libre en"
+          label={dict.debts.freeIn}
           value={
             result.converges
-              ? `${result.months} ${result.months === 1 ? "mes" : "meses"}`
-              : "no converge"
+              ? `${result.months} ${result.months === 1 ? dict.debts.monthSingular : dict.debts.monthPlural}`
+              : dict.debts.notConverge
           }
         />
         <StrategyStat
-          label="Interés total"
+          label={dict.debts.totalInterest}
           value={result.converges ? money.format(result.totalInterest) : "—"}
         />
-        <StrategyStat label="Empieza por" value={startsWith} />
+        <StrategyStat label={dict.debts.startsWith} value={startsWith} />
       </div>
     </div>
   );
@@ -504,7 +507,7 @@ function StrategyStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DeleteButton({ id }: { id: string }) {
+function DeleteButton({ id, label }: { id: string; label: string }) {
   return (
     <form action={deleteDebtAction} style={{ display: "inline" }}>
       <input type="hidden" name="id" value={id} />
@@ -520,7 +523,7 @@ function DeleteButton({ id }: { id: string }) {
           padding: 0,
         }}
       >
-        Eliminar
+        {label}
       </button>
     </form>
   );

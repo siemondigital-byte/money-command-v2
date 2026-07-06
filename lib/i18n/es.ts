@@ -450,6 +450,111 @@ export const es = {
     saving: "Guardando…",
     saveChanges: "Guardar cambios",
   },
+  debts: {
+    // Header
+    headerLabel: "Deudas y créditos",
+    title: "Salí de la deuda",
+    intro:
+      "Registrá tus deudas para ver su peso real y dirigir el dinero a liberarlas. Pagar deuda es ordenar tus finanzas hacia la libertad.",
+    // Nota de consolidación: "Consolidado al MonthlyRecord {periodo} · debtTotal = {monto}"
+    consolidatedPre: "Consolidado al MonthlyRecord",
+    consolidatedTotal: "debtTotal =",
+    // Confirmación de pago del mes: "¿Confirmás tus pagos de deuda de {mes}?"
+    confirmPre: "¿Confirmás tus pagos de deuda de",
+    confirmSuf: "?",
+    confirmNote:
+      "Si pagaste lo registrado, actualizamos el saldo. Si pagaste distinto, editá la deuda abajo.",
+    confirmButton: "Sí, pagué lo registrado",
+    // KPIs
+    kpiTotalDebt: "Deuda Total",
+    // Contador de deudas: "{n} deuda" / "{n} deudas"
+    debtSingular: "deuda",
+    debtPlural: "deudas",
+    kpiMonthlyPayment: "Pago Mensual",
+    // "{pct} de tus ingresos" / fallback
+    ofYourIncome: "de tus ingresos",
+    registerIncome: "registrá tus ingresos",
+    kpiWeightedApr: "APR Ponderado",
+    weightedAprSub: "prom. ponderado",
+    kpiDebtToIncome: "Ratio Deuda/Ingreso",
+    debtToIncomeSub: "saludable < 36%",
+    kpiDebtFree: "Libre de Deudas",
+    // "{n} mes" / "{n} meses"
+    monthSingular: "mes",
+    monthPlural: "meses",
+    notConverge: "no converge",
+    noDebts: "sin deudas",
+    avalancheStrategyShort: "estrategia Avalancha",
+    paymentNotCoverInterest: "el pago no cubre el interés",
+    // Desglose consumo vs inversión
+    consumptionDebt: "Deuda de consumo",
+    consumptionDebtNote: "De la que conviene salir y no repetir.",
+    investmentDebt: "Deuda de inversión",
+    investmentDebtNote: "Justificada solo si genera retorno.",
+    // Tabla
+    colName: "Nombre",
+    colType: "Tipo",
+    colLabel: "Etiqueta",
+    colBalance: "Saldo",
+    colApr: "APR",
+    colMinPayment: "Pago mín.",
+    colRealPayment: "Pago real",
+    colInstallments: "Cuotas",
+    colAction: "Acción",
+    edit: "Editar",
+    delete: "Eliminar",
+    // Estrategia de pago
+    strategyTitle: "Estrategia de pago: ¿cuál te conviene?",
+    strategyIntro:
+      "Mismo presupuesto mensual, distinto orden de ataque. Cuando una deuda se salda, su pago acelera la siguiente.",
+    strategyEmpty:
+      "Cuando registres deudas, acá vas a ver tu plan para liberarte.",
+    avalanche: "Avalancha",
+    avalancheDesc:
+      "Paga primero la deuda con mayor interés. Ahorra más a largo plazo.",
+    snowball: "Bola de Nieve",
+    snowballDesc:
+      "Paga primero la deuda más pequeña. Más victorias rápidas.",
+    recommended: "Recomendada",
+    // StrategyCard stats
+    freeIn: "Libre en",
+    totalInterest: "Interés total",
+    startsWith: "Empieza por",
+    // "La estrategia Avalancha te ahorra {monto} en intereses vs Bola de Nieve."
+    savesPre: "La estrategia Avalancha te ahorra",
+    savesSuf: "en intereses vs Bola de Nieve.",
+    // Proyección de reducción de deuda
+    projectionTitle: "Proyección de reducción de deuda",
+    projectionEmpty:
+      "Acá vas a ver cómo baja tu saldo mes a mes hasta llegar a cero.",
+    projectionNotConverge:
+      "Con el pago actual la deuda no se salda: el pago no alcanza a cubrir el interés. Subí el pago mensual real de tus deudas para ver la proyección.",
+    // "Estrategia Avalancha, libre de deudas en {n} {mes(es)}."
+    projectionCaptionPre: "Estrategia Avalancha, libre de deudas en",
+    projectionCaptionSuf: ".",
+    // Label del eje X del chart (M0)
+    chartToday: "Hoy",
+    // Form crear / editar (DebtForm)
+    addDebt: "Agregar deuda o crédito",
+    editDebt: "Editar deuda",
+    fieldName: "Nombre",
+    placeholderName: "ej. Tarjeta Visa",
+    fieldType: "Tipo",
+    fieldPurpose: "Consumo o inversión",
+    fieldBalance: "Saldo",
+    fieldApr: "APR (%)",
+    fieldMinPayment: "Pago mínimo",
+    fieldCurrentPayment: "Pago mensual real",
+    fieldTermMonths: "Cuotas restantes (opcional)",
+    placeholderMonths: "meses",
+    termMonthsHelp:
+      "Si sabés cuántas cuotas te quedan, ingresalas. Si no, dejalo vacío.",
+    placeholderAmount: "0.00",
+    saving: "Guardando…",
+    saveChanges: "Guardar cambios",
+    add: "Agregar",
+    cancel: "Cancelar",
+  },
   expenses: {
     // Panel de fugas (suscripciones + gastos hormiga), alimentado por isLeak.
     leaks: {

@@ -52,14 +52,14 @@ export function DebtForm({
         className="btn-secondary"
         onClick={() => setOpen(true)}
       >
-        Agregar deuda o crédito
+        {t.debts.addDebt}
       </button>
     );
   }
 
   return (
     <section className="card flex flex-col gap-3" id="form">
-      {isEditing && <div className="label">Editar deuda</div>}
+      {isEditing && <div className="label">{t.debts.editDebt}</div>}
 
       {state.error && (
         <p style={{ color: "var(--danger)", fontSize: "12px" }}>{state.error}</p>
@@ -70,18 +70,18 @@ export function DebtForm({
 
         <div className="form-grid">
           <label className="flex flex-col gap-1">
-            <span className="label">Nombre</span>
+            <span className="label">{t.debts.fieldName}</span>
             <input
               name="name"
               type="text"
               maxLength={80}
               required
               defaultValue={editing?.name ?? ""}
-              placeholder="ej. Tarjeta Visa"
+              placeholder={t.debts.placeholderName}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">Tipo</span>
+            <span className="label">{t.debts.fieldType}</span>
             <select
               name="type"
               defaultValue={(editing?.type as DebtType) ?? "card"}
@@ -94,7 +94,7 @@ export function DebtForm({
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">Consumo o inversión</span>
+            <span className="label">{t.debts.fieldPurpose}</span>
             <select
               name="purpose"
               defaultValue={(editing?.purpose as DebtPurpose) ?? "consumption"}
@@ -110,7 +110,7 @@ export function DebtForm({
 
         <div className="form-grid">
           <label className="flex flex-col gap-1">
-            <span className="label">Saldo</span>
+            <span className="label">{t.debts.fieldBalance}</span>
             <input
               name="balance"
               type="number"
@@ -118,11 +118,11 @@ export function DebtForm({
               min="0"
               required
               defaultValue={editing ? editing.balance : ""}
-              placeholder="0.00"
+              placeholder={t.debts.placeholderAmount}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">APR (%)</span>
+            <span className="label">{t.debts.fieldApr}</span>
             <input
               name="apr"
               type="number"
@@ -131,22 +131,22 @@ export function DebtForm({
               max="200"
               required
               defaultValue={editing ? editing.apr : ""}
-              placeholder="0.00"
+              placeholder={t.debts.placeholderAmount}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">Pago mínimo</span>
+            <span className="label">{t.debts.fieldMinPayment}</span>
             <input
               name="minPayment"
               type="number"
               step="0.01"
               min="0"
               defaultValue={editing ? editing.minPayment : ""}
-              placeholder="0.00"
+              placeholder={t.debts.placeholderAmount}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">Pago mensual real</span>
+            <span className="label">{t.debts.fieldCurrentPayment}</span>
             <input
               name="currentPayment"
               type="number"
@@ -154,23 +154,23 @@ export function DebtForm({
               min="0"
               required
               defaultValue={editing ? editing.currentPayment : ""}
-              placeholder="0.00"
+              placeholder={t.debts.placeholderAmount}
             />
           </label>
         </div>
 
         <label className="flex flex-col gap-1" style={{ maxWidth: "260px" }}>
-          <span className="label">Cuotas restantes (opcional)</span>
+          <span className="label">{t.debts.fieldTermMonths}</span>
           <input
             name="termMonths"
             type="number"
             step="1"
             min="1"
             defaultValue={editing?.termMonths ?? ""}
-            placeholder="meses"
+            placeholder={t.debts.placeholderMonths}
           />
           <span style={{ fontSize: "11px", color: "var(--hint)", marginTop: 2 }}>
-            Si sabés cuántas cuotas te quedan, ingresalas. Si no, dejalo vacío.
+            {t.debts.termMonthsHelp}
           </span>
         </label>
 
@@ -181,7 +181,7 @@ export function DebtForm({
             disabled={pending}
             style={{ opacity: pending ? 0.6 : 1 }}
           >
-            {pending ? "Guardando…" : isEditing ? "Guardar cambios" : "Agregar"}
+            {pending ? t.debts.saving : isEditing ? t.debts.saveChanges : t.debts.add}
           </button>
           <button
             type="button"
@@ -190,7 +190,7 @@ export function DebtForm({
               isEditing ? router.replace("/debts") : setOpen(false)
             }
           >
-            Cancelar
+            {t.debts.cancel}
           </button>
         </div>
       </form>

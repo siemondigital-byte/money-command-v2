@@ -36,10 +36,12 @@ export function DebtProjectionChart({
   schedule,
   locale,
   currency,
+  todayLabel,
 }: {
   schedule: number[];
   locale: string;
   currency: string;
+  todayLabel: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -47,7 +49,7 @@ export function DebtProjectionChart({
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const labels = schedule.map((_, i) => (i === 0 ? "Hoy" : `M${i}`));
+    const labels = schedule.map((_, i) => (i === 0 ? todayLabel : `M${i}`));
 
     const cfg: ChartConfiguration<"line", number[], string> = {
       type: "line",
@@ -116,7 +118,7 @@ export function DebtProjectionChart({
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [schedule, locale, currency]);
+  }, [schedule, locale, currency, todayLabel]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: 240 }}>
