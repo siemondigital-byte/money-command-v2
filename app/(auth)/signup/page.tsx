@@ -8,7 +8,7 @@ export default function SignupPage() {
   return (
     <div>
       <div className="label mb-1">Crear cuenta</div>
-      <h2 className="mb-4">Empezá tu plan</h2>
+      <h2 className="mb-4">Empieza tu plan</h2>
 
       <AuthForm action={signupAction} submitLabel="Crear cuenta">
         <Field
@@ -31,7 +31,7 @@ export default function SignupPage() {
         className="mt-6"
         style={{ fontSize: "12px", color: "var(--muted)" }}
       >
-        ¿Ya tenés cuenta?{" "}
+        ¿Ya tienes cuenta?{" "}
         <Link href="/login" style={{ color: "var(--accent)" }}>
           Iniciar sesión
         </Link>

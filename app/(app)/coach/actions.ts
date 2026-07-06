@@ -23,7 +23,7 @@ export type CoachActionResult =
 const questionSchema = z
   .string()
   .trim()
-  .min(1, "Escribí una pregunta.")
+  .min(1, "Escribe una pregunta.")
   .max(1000, "La pregunta es muy larga (máximo 1000 caracteres).");
 
 export async function askCoachAction(

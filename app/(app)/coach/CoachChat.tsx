@@ -132,7 +132,7 @@ export function CoachChat() {
               padding: "8px 2px",
             }}
           >
-            Escribí una pregunta sobre tus finanzas y el método, o tocá una sugerencia.
+            Escribe una pregunta sobre tus finanzas y el método, o toca una sugerencia.
           </div>
         )}
 
@@ -186,7 +186,7 @@ export function CoachChat() {
           onChange={(e) => setInput(e.target.value)}
           maxLength={MAX_LEN}
           disabled={loading}
-          placeholder="Escribí tu pregunta…"
+          placeholder="Escribe tu pregunta…"
           aria-label="Tu pregunta para el Coach"
           style={{ flex: 1, minWidth: 0 }}
         />

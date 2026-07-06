@@ -50,7 +50,7 @@ const numericString = z
 
 const incomeRowSchema = z.object({
   plan: z.enum(["A", "C"]),
-  name: z.string().trim().min(1, "Ingresá un nombre").max(80),
+  name: z.string().trim().min(1, "Ingresa un nombre").max(80),
   amount: numericString,
 });
 

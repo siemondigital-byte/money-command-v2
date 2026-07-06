@@ -7,7 +7,7 @@ export default function ResetPage() {
   return (
     <div>
       <div className="label mb-1">Restablecer</div>
-      <h2 className="mb-4">Definí tu nueva contraseña</h2>
+      <h2 className="mb-4">Define tu nueva contraseña</h2>
 
       <AuthForm action={resetPasswordAction} submitLabel="Guardar contraseña">
         <Field

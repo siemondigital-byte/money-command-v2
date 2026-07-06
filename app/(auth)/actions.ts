@@ -61,7 +61,7 @@ export async function loginAction(
   const parsed = z
     .object({
       email: emailSchema,
-      password: z.string().min(1, "Ingresá tu contraseña"),
+      password: z.string().min(1, "Ingresa tu contraseña"),
       next: z.string().optional(),
     })
     .safeParse({

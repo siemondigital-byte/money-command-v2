@@ -133,7 +133,7 @@ export const es = {
   },
   // La brújula se arma concatenando estos fragmentos con los datos del perfil.
   compass: {
-    define: "Definí tu brújula",
+    define: "Define tu brújula",
     buildingTo: "Estoy construyendo este patrimonio para poder",
     forYear: "para el año",
     becauseContribute: "porque quiero contribuir",
@@ -174,9 +174,9 @@ export const es = {
     pageLabel: "Dashboard",
     title: "Tu situación financiera",
     intro:
-      "Todo lo que cargás en los otros módulos, reflejado en una vista. Cambiá el período en el header para ver otro mes.",
+      "Todo lo que cargas en los otros módulos, reflejado en una vista. Cambia el período en el header para ver otro mes.",
     // Aviso "sin datos": prefijo + los dos links + sufijo. Se arma en el JSX.
-    noDataPre: "Este período todavía no tiene datos. Cargá",
+    noDataPre: "Este período todavía no tiene datos. Carga",
     noDataIncomeLink: "ingresos",
     noDataAnd: "y",
     noDataExpensesLink: "egresos",
@@ -203,14 +203,14 @@ export const es = {
       ariaAdjust: "Ajustar",
       gapNoReal:
         "Todavía no hay egresos cargados para comparar. Estás viendo el preset de tu método preferido.",
-      // "Hoy destinás {real}% a Libertad. Para llegar a {sim}% tendrías que
+      // "Hoy destinas {real}% a Libertad. Para llegar a {sim}% tendrías que
       //  redirigir {monto} al mes desde Esenciales y Estilo."
-      gapMore1: "Hoy destinás",
+      gapMore1: "Hoy destinas",
       gapMore2: "a Libertad. Para llegar a",
       gapMore3: "tendrías que redirigir",
       gapMore4: "al mes desde Esenciales y Estilo.",
-      // "En este escenario destinás {sim}% a Libertad, {abs}% menos que hoy ({real}%)."
-      gapLess1: "En este escenario destinás",
+      // "En este escenario destinas {sim}% a Libertad, {abs}% menos que hoy ({real}%)."
+      gapLess1: "En este escenario destinas",
       gapLess2: "a Libertad,",
       gapLess3: "menos que hoy",
       // "Este escenario coincide con tu distribución real ({real}% a Libertad)."
@@ -219,7 +219,7 @@ export const es = {
     },
     thermostat: {
       label: "Termostato",
-      noTargetPre: "Configurá tu meta de ingreso a 2 años en",
+      noTargetPre: "Configura tu meta de ingreso a 2 años en",
       settingsLink: "Settings",
       noTargetSuf: "para medir tu temperatura.",
       target2y: "Meta 2 años",
@@ -241,14 +241,14 @@ export const es = {
       ageTargetLabel: "Edad objetivo de libertad",
       years: "años",
       today: "Hoy",
-      setAge: "Configurá tu edad",
+      setAge: "Configura tu edad",
       horizon: "Horizonte",
       yourFreedomNumber: "Tu número de libertad",
       perYearRate: "% anual",
       nlfCtx:
-        "El capital que necesitás invertido para que su retorno cubra tus egresos. El capital queda intacto: vivís de los flujos.",
+        "El capital que necesitas invertido para que su retorno cubra tus egresos. El capital queda intacto: vives de los flujos.",
       noExpenseCtx:
-        "Cargá tus egresos del mes para calcular tu Número de Libertad.",
+        "Carga tus egresos del mes para calcular tu Número de Libertad.",
       currentState: "Estado actual",
       projection: "Proyección ·",
       notConverge: "no converge",
@@ -258,7 +258,7 @@ export const es = {
     patrimony: {
       titlePre: "Patrimonio · proyección a",
       years: "años",
-      noAssetsPre: "Cargá posiciones en",
+      noAssetsPre: "Carga posiciones en",
       investmentsLink: "Inversiones",
       noAssetsSuf: "para ver crecer tu capital por interés compuesto.",
       balanceAccruedPre: "Balance acumulado ·",
@@ -270,7 +270,7 @@ export const es = {
       compoundGrowth: "crecimiento compuesto",
       legendCapital: "Capital",
       legendReturn: "Retorno",
-      legendHint: "pasá el cursor o tocá una barra",
+      legendHint: "pasa el cursor o toca una barra",
       year: "Año",
       tooltipCapitalInvested: "Capital invertido",
       tooltipReturn: "Retorno",
@@ -287,7 +287,7 @@ export const es = {
     monthSingular: "mes",
     monthPlural: "meses",
     countSuffix: "en tu historial.",
-    firstMonthPre: "Empezá registrando tu primer mes en",
+    firstMonthPre: "Empieza registrando tu primer mes en",
     colMonth: "Mes",
     colIncome: "Ingresos",
     colExpenses: "Egresos",
@@ -296,10 +296,10 @@ export const es = {
     colAction: "Acción",
     edit: "Editar",
     addMonth: "+ Agregar mes",
-    addMonthPre: "Para registrar un mes nuevo, elegilo arriba en",
+    addMonthPre: "Para registrar un mes nuevo, elígelo arriba en",
     addMonthPeriod: "PERÍODO",
     addMonthSuf:
-      "(mes y año), en la parte superior de la pantalla. El mes se crea solo al seleccionarlo, y después podés cargar sus ingresos, egresos e inversiones.",
+      "(mes y año), en la parte superior de la pantalla. El mes se crea solo al seleccionarlo, y después puedes cargar sus ingresos, egresos e inversiones.",
     // DeleteRecordButton
     delete: "Borrar",
     confirmDeletePre: "¿Borrar",
@@ -310,7 +310,7 @@ export const es = {
     // HistoryEditForm
     fieldYear: "Año",
     formHelp:
-      "La tasa de ahorro se recalcula sola a partir de Ingresos y Egresos. Si cambiás el mes/año a uno que ya tiene registro, no se sobrescribe.",
+      "La tasa de ahorro se recalcula sola a partir de Ingresos y Egresos. Si cambias el mes/año a uno que ya tiene registro, no se sobrescribe.",
     save: "Guardar",
     cancel: "Cancelar",
     savedPre: "Cambios guardados.",
@@ -321,7 +321,7 @@ export const es = {
     headerLabel: "Ingresos",
     title: "Plan A · B · C",
     intro:
-      "Plan A y Plan C son manuales. Plan B se consume desde Inversiones como suma de yields ÷ 12 — con override manual opcional. Lo que cargás acá se consolida automáticamente en el período activo.",
+      "Plan A y Plan C son manuales. Plan B se consume desde Inversiones como suma de yields ÷ 12 — con override manual opcional. Lo que cargas acá se consolida automáticamente en el período activo.",
     // Nota de consolidación: "Consolidado al MonthlyRecord {periodo} · incomeTotal = {monto}"
     consolidatedPre: "Consolidado al MonthlyRecord",
     consolidatedTotal: "incomeTotal =",
@@ -420,7 +420,7 @@ export const es = {
     chartAssetFallback: "Activo",
     // Tabla de activos
     assetsTitle: "Tus activos",
-    assetsEmpty: "Sin posiciones todavía. Agregá la primera más abajo.",
+    assetsEmpty: "Sin posiciones todavía. Agrega la primera más abajo.",
     colAsset: "Activo",
     colType: "Tipo",
     colValue: "Valor",
@@ -453,17 +453,17 @@ export const es = {
   debts: {
     // Header
     headerLabel: "Deudas y créditos",
-    title: "Salí de la deuda",
+    title: "Sal de la deuda",
     intro:
-      "Registrá tus deudas para ver su peso real y dirigir el dinero a liberarlas. Pagar deuda es ordenar tus finanzas hacia la libertad.",
+      "Registra tus deudas para ver su peso real y dirigir el dinero a liberarlas. Pagar deuda es ordenar tus finanzas hacia la libertad.",
     // Nota de consolidación: "Consolidado al MonthlyRecord {periodo} · debtTotal = {monto}"
     consolidatedPre: "Consolidado al MonthlyRecord",
     consolidatedTotal: "debtTotal =",
-    // Confirmación de pago del mes: "¿Confirmás tus pagos de deuda de {mes}?"
-    confirmPre: "¿Confirmás tus pagos de deuda de",
+    // Confirmación de pago del mes: "¿Confirmas tus pagos de deuda de {mes}?"
+    confirmPre: "¿Confirmas tus pagos de deuda de",
     confirmSuf: "?",
     confirmNote:
-      "Si pagaste lo registrado, actualizamos el saldo. Si pagaste distinto, editá la deuda abajo.",
+      "Si pagaste lo registrado, actualizamos el saldo. Si pagaste distinto, edita la deuda abajo.",
     confirmButton: "Sí, pagué lo registrado",
     // KPIs
     kpiTotalDebt: "Deuda Total",
@@ -473,7 +473,7 @@ export const es = {
     kpiMonthlyPayment: "Pago Mensual",
     // "{pct} de tus ingresos" / fallback
     ofYourIncome: "de tus ingresos",
-    registerIncome: "registrá tus ingresos",
+    registerIncome: "registra tus ingresos",
     kpiWeightedApr: "APR Ponderado",
     weightedAprSub: "prom. ponderado",
     kpiDebtToIncome: "Ratio Deuda/Ingreso",
@@ -528,7 +528,7 @@ export const es = {
     projectionEmpty:
       "Acá vas a ver cómo baja tu saldo mes a mes hasta llegar a cero.",
     projectionNotConverge:
-      "Con el pago actual la deuda no se salda: el pago no alcanza a cubrir el interés. Subí el pago mensual real de tus deudas para ver la proyección.",
+      "Con el pago actual la deuda no se salda: el pago no alcanza a cubrir el interés. Sube el pago mensual real de tus deudas para ver la proyección.",
     // "Estrategia Avalancha, libre de deudas en {n} {mes(es)}."
     projectionCaptionPre: "Estrategia Avalancha, libre de deudas en",
     projectionCaptionSuf: ".",
@@ -548,7 +548,7 @@ export const es = {
     fieldTermMonths: "Cuotas restantes (opcional)",
     placeholderMonths: "meses",
     termMonthsHelp:
-      "Si sabés cuántas cuotas te quedan, ingresalas. Si no, dejalo vacío.",
+      "Si sabes cuántas cuotas te quedan, ingrésalas. Si no, déjalo vacío.",
     placeholderAmount: "0.00",
     saving: "Guardando…",
     saveChanges: "Guardar cambios",
@@ -560,7 +560,7 @@ export const es = {
     headerLabel: "Metas",
     title: "Tus objetivos",
     intro:
-      "Definí cuánto destinás por mes a cada meta y seguí su progreso. Cada meta vive en una canasta: Esenciales, Estilo o Libertad.",
+      "Define cuánto destinas por mes a cada meta y sigue su progreso. Cada meta vive en una canasta: Esenciales, Estilo o Libertad.",
     // KPIs
     kpiActiveGoals: "Metas activas",
     kpiAvgProgress: "Progreso promedio",
@@ -568,14 +568,14 @@ export const es = {
     kpiNoValue: "—",
     // "en {n} {mes(es)}"
     inPre: "en",
-    defineContribution: "definí un aporte",
+    defineContribution: "define un aporte",
     kpiMonthlyContribution: "Aporte/mes",
     toAllYourGoals: "a todas tus metas",
     // "{n} mes" / "{n} meses"
     monthSingular: "mes",
     monthPlural: "meses",
     // Empty state
-    noGoals: "Todavía no tenés metas. Agregá la primera más abajo.",
+    noGoals: "Todavía no tienes metas. Agrega la primera más abajo.",
     // Contador de metas por canasta: "{n} meta" / "{n} metas"
     goalSingular: "meta",
     goalPlural: "metas",
@@ -620,7 +620,7 @@ export const es = {
     leaks: {
       title: "Suscripciones y egresos hormiga",
       intro:
-        "Reúne tus gastos hormiga del período (suscripciones, entretenimiento, delivery y otros). Mirá lo que pesan al mes, al año y a futuro. Cada gasto tiene un checkbox “Es gasto hormiga” para incluirlo o sacarlo, más allá de su categoría.",
+        "Reúne tus gastos hormiga del período (suscripciones, entretenimiento, delivery y otros). Mira lo que pesan al mes, al año y a futuro. Cada gasto tiene un checkbox “Es gasto hormiga” para incluirlo o sacarlo, más allá de su categoría.",
       perMonth: "Por mes",
       perYear: "Por año",
       inFiveYears: "En 5 años",
@@ -634,9 +634,9 @@ export const es = {
     list: {
       // Header: "Egresos · {Mes} {Año}". El mes/año se arma en el JSX.
       headerLabel: "Egresos",
-      title: "Dirigí tu dinero",
+      title: "Dirige tu dinero",
       intro:
-        "Registrá tus egresos del período y asigná cada uno a una canasta: Esenciales, Estilo o Libertad. El total real y el desglose por canasta se consolidan en el período activo.",
+        "Registra tus egresos del período y asigna cada uno a una canasta: Esenciales, Estilo o Libertad. El total real y el desglose por canasta se consolidan en el período activo.",
       // Nota de consolidación: "Consolidado al MonthlyRecord {periodo} · expensesTotal = {monto}"
       consolidatedPre: "Consolidado al MonthlyRecord",
       consolidatedTotal: "expensesTotal =",
@@ -720,7 +720,7 @@ export const es = {
       doneSuf: ". Ya aparecen en tu lista de Egresos.",
       scanAnother: "Escanear otro documento",
       // Advertencias
-      // "{n} renglón(es) con confianza baja: revisalos."
+      // "{n} renglón(es) con confianza baja: revísalos."
       lowConfSuf: "renglón(es) con confianza baja: revísalos.",
       // "{n} posible(s) duplicado(s) de gastos ya cargados este período."
       dupSuf: "posible(s) duplicado(s) de gastos ya cargados este período.",
@@ -751,7 +751,7 @@ export const es = {
       errWrongPassword: "Contraseña incorrecta. Prueba de nuevo.",
       errUnlock: "No pude desbloquear el PDF. Prueba subir una foto.",
       errNoValid: "No hay compras válidas para crear.",
-      errCreate: "No pude crear los gastos. Probá de nuevo.",
+      errCreate: "No pude crear los gastos. Prueba de nuevo.",
     },
   },
   labels: {

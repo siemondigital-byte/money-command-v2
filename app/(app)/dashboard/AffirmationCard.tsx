@@ -15,7 +15,7 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
   {
     text: "No trabajes por dinero, haz que el dinero trabaje para ti.",
     author: "Robert Kiyosaki",
-    tip: "Cada peso que invertís es un empleado que trabaja sin descanso.",
+    tip: "Cada peso que inviertes es un empleado que trabaja sin descanso.",
   },
   {
     text: "El interés compuesto es la octava maravilla del mundo.",
@@ -30,7 +30,7 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
   {
     text: "Gasta lo que queda después de ahorrar, no al revés.",
     author: "Warren Buffett",
-    tip: "Automatizá tu canasta de Libertad antes de tocar el resto.",
+    tip: "Automatiza tu canasta de Libertad antes de tocar el resto.",
   },
   {
     text: "Un presupuesto le dice a tu dinero a dónde ir.",
@@ -43,9 +43,9 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
     tip: "Diversificar entre tipos de activo reduce el riesgo.",
   },
   {
-    text: "Construir capital es plantar árboles bajo cuya sombra no esperás sentarte.",
+    text: "Construir capital es plantar árboles bajo cuya sombra no esperas sentarte.",
     author: "Proverbio adaptado",
-    tip: "El capital queda intacto y crece; vos vivís de sus frutos.",
+    tip: "El capital queda intacto y crece; tú vives de sus frutos.",
   },
   {
     text: "Gastar no es despilfarrar. Despilfarrar es gastar sin dirección.",
@@ -60,10 +60,10 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
   {
     text: "El dinero es tiempo de tu vida convertido en números.",
     author: "El Sistema Infalible de Riqueza",
-    tip: "Antes de un egreso, preguntá cuántas horas de vida cuesta.",
+    tip: "Antes de un egreso, pregunta cuántas horas de vida cuesta.",
   },
   {
-    text: "No es cuánto ganás, es cuánto conservás y multiplicás.",
+    text: "No es cuánto ganas, es cuánto conservas y multiplicas.",
     author: "Robert Kiyosaki",
     tip: "Tu tasa de ahorro pesa más que tu salario en el largo plazo.",
   },
@@ -85,7 +85,7 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
   {
     text: "La meta no es ser rico, es ser libre.",
     author: "El Sistema Infalible de Riqueza",
-    tip: "Medí tu avance contra tu Número de Libertad, no contra los demás.",
+    tip: "Mide tu avance contra tu Número de Libertad, no contra los demás.",
   },
 ];
 

@@ -246,7 +246,7 @@ export const COACH_CONCEPTS: CoachConcept[] = [
   {
     id: "C39",
     titulo: "El compromiso con el sistema, no con el resultado",
-    capsula: `El resultado tarda. El sistema es inmediato. Comprometete con aplicar el sistema —presupuesto, ahorro automático, educación continua— independiente de los resultados de los primeros meses. La mayoría abandona justo antes de que los resultados lleguen.`,
+    capsula: `El resultado tarda. El sistema es inmediato. Comprométete con aplicar el sistema —presupuesto, ahorro automático, educación continua— independiente de los resultados de los primeros meses. La mayoría abandona justo antes de que los resultados lleguen.`,
     explicacion: `La trampa más común en construcción de riqueza: querer ver resultados a los 3 meses. Los resultados tardan porque dependen del interés compuesto, que es exponencial pero lento al principio. Los primeros años parecen no pasar nada. A los 5 años empiezas a ver. A los 10, la curva se vuelve evidente. A los 20, exponencial. La mayoría abandona en el año 2-3, cuando los resultados aún no son visibles, sin saber que estaban a 1 año de la curva exponencial. La regla: comprométete con el sistema, no con el resultado. El sistema lo controlas, los resultados llegan solos si el sistema se sostiene.`,
   },
   {
@@ -435,7 +435,7 @@ export const COACH_CHALLENGES: CoachChallenge[] = [
   {
     id: "R07",
     titulo: "El Reto del Propósito",
-    descripcion: `Esta semana, completa esta frase con honestidad real: "Estoy construyendo este patrimonio para poder ___, para el año ___, porque quiero contribuir ___." Escribila en papel. Ponela donde la veas. Esa frase es tu brújula.`,
+    descripcion: `Esta semana, completa esta frase con honestidad real: "Estoy construyendo este patrimonio para poder ___, para el año ___, porque quiero contribuir ___." Escríbela en papel. Ponla donde la veas. Esa frase es tu brújula.`,
   },
   {
     id: "R08",
@@ -445,7 +445,7 @@ export const COACH_CHALLENGES: CoachChallenge[] = [
   {
     id: "R09",
     titulo: "El Reto del Café Hormiga",
-    descripcion: `Esta semana, suma cada café fuera de casa, snack y compra menor a $10. Anotalo todo. Al final de la semana, multiplica por 4 para ver el costo mensual. Después por 12 para el anual. Probablemente te sorprenda.`,
+    descripcion: `Esta semana, suma cada café fuera de casa, snack y compra menor a $10. Anótalo todo. Al final de la semana, multiplica por 4 para ver el costo mensual. Después por 12 para el anual. Probablemente te sorprenda.`,
   },
   {
     id: "R10",
@@ -475,7 +475,7 @@ export const COACH_CHALLENGES: CoachChallenge[] = [
   {
     id: "R15",
     titulo: "El Reto de la Carta al Futuro",
-    descripcion: `Esta semana escribe una carta a tu yo dentro de 2 años. Describile cómo es el proceso que estás empezando, qué te asusta, qué esperas lograr. Guardala en sobre cerrado. Abrila en 2 años. Vas a ver cuánto cambiaste — y eso refuerza la identidad de constructor de patrimonio.`,
+    descripcion: `Esta semana escribe una carta a tu yo dentro de 2 años. Descríbele cómo es el proceso que estás empezando, qué te asusta, qué esperas lograr. Guárdala en sobre cerrado. Ábrela en 2 años. Vas a ver cuánto cambiaste — y eso refuerza la identidad de constructor de patrimonio.`,
   },
 ];
 

@@ -64,7 +64,7 @@ const optionalIntString = z
   );
 
 const debtSchema = z.object({
-  name: z.string().trim().min(1, "Ingresá un nombre").max(80),
+  name: z.string().trim().min(1, "Ingresa un nombre").max(80),
   type: z.enum(DEBT_TYPES as [string, ...string[]]),
   purpose: z.enum(DEBT_PURPOSES as [string, ...string[]]),
   balance: numericString,

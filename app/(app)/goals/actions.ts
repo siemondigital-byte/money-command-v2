@@ -45,7 +45,7 @@ const numericString = z
   .refine((v) => Number.isFinite(v) && v >= 0, "Debe ser un número >= 0");
 
 const goalSchema = z.object({
-  name: z.string().trim().min(1, "Ingresá un nombre").max(80),
+  name: z.string().trim().min(1, "Ingresa un nombre").max(80),
   basket: z.enum(BASKETS as [Basket, ...Basket[]]),
   targetAmount: numericString.refine((v) => v > 0, "El objetivo debe ser mayor a 0"),
   currentAmount: numericString,

@@ -50,8 +50,8 @@ const numericString = z
   .refine((v) => Number.isFinite(v) && v >= 0, "Debe ser un número >= 0");
 
 const expenseSchema = z.object({
-  name: z.string().trim().min(1, "Ingresá un nombre").max(80),
-  category: z.string().trim().min(1, "Elegí una categoría").max(40),
+  name: z.string().trim().min(1, "Ingresa un nombre").max(80),
+  category: z.string().trim().min(1, "Elige una categoría").max(40),
   type: z.enum(["fixed", "variable"]),
   basket: z.enum(["essentials", "style", "freedom"]),
   budget: numericString,
@@ -75,7 +75,7 @@ function hormigaOverriddenFrom(category: string, isHormiga: boolean): boolean {
 }
 
 const subscriptionSchema = z.object({
-  name: z.string().trim().min(1, "Ingresá un nombre").max(80),
+  name: z.string().trim().min(1, "Ingresa un nombre").max(80),
   category: z.string().trim().max(40),
   amount: numericString,
 });

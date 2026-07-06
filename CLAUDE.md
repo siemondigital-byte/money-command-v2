@@ -93,6 +93,7 @@ Esto resuelve el problema raíz de v1: los módulos NO se interconectaban.
 4. **Mobile-first**: empezar mobile, escalar a desktop. Breakpoints estándar de Tailwind.
 5. **Sin gradientes, sin glow excesivo, sin shadows decorativas**. El glow se reserva para focus states.
 6. **Border-radius**: 8px estándar (`rounded-lg` en Tailwind), 12px tarjetas grandes, 16px containers principales.
+7. **Copy en español NEUTRO (sin voseo)**. Todo el texto que ve el usuario usa la conjugación de "tú": "Registra", "Carga", "puedes", "vives", "tienes" — NO "Registrá", "Cargá", "podés", "vivís", "tenés". Es la voz oficial de la app (global, no rioplatense). Los textos ya centralizados viven en `lib/i18n/es.ts` y el contenido del Coach en `lib/coach-content.ts`; cualquier copy nuevo se escribe directamente en neutro. Esto NO cambia términos doctrinales ni la moneda.
 
 ### Componentes
 
@@ -117,8 +118,9 @@ Esto resuelve el problema raíz de v1: los módulos NO se interconectaban.
 4. **Nunca permitir que un MonthlyRecord exista sin userId asociado**. Constraint y validación en Server Action.
 5. **Nunca hardcodear textos del Coach en componentes**. Importar desde `lib/coach-content.ts`.
 6. **Nunca implementar IA real en v2**. Todos los chips del Coach son mock pre-escritos con placeholders personalizables. IA real es v3.
-7. **Nunca decir "retirás el 4% del capital"**. La narrativa correcta es "vivís de los flujos, el capital queda intacto". Ver `docs/REFERENCIA_4_PORCIENTO_NLF.md`.
+7. **Nunca decir "retiras el 4% del capital"**. La narrativa correcta es "vives de los flujos, el capital queda intacto". Ver `docs/REFERENCIA_4_PORCIENTO_NLF.md`.
 8. **Nunca mostrar la sección del Scanner**. Está diferida a v3.
+9. **Nunca usar voseo en el copy**. El texto de la app va en español neutro (conjugación "tú"). Ver "UI y estilos" punto 7.
 
 ---
 

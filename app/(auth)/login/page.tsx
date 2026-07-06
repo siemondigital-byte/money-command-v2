@@ -41,7 +41,7 @@ export default async function LoginPage({
           Olvidé mi contraseña
         </Link>
         <span>
-          ¿No tenés cuenta?{" "}
+          ¿No tienes cuenta?{" "}
           <Link href="/signup" style={{ color: "var(--accent)" }}>
             Crear cuenta
           </Link>
