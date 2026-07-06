@@ -4,7 +4,8 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { gatherCoachData } from "@/lib/coach-data";
 import { formatCoachContext } from "@/lib/ai/coach-context";
-import { COACH_SYSTEM_PROMPT } from "@/lib/ai/coach-prompt";
+import { COACH_SYSTEM_PROMPT as COACH_PROMPT_ES } from "@/lib/ai/coach-prompt";
+import { COACH_SYSTEM_PROMPT as COACH_PROMPT_EN } from "@/lib/ai/coach-prompt.en";
 import { generateText, AIError } from "@/lib/ai";
 
 /**
@@ -45,9 +46,15 @@ export async function askCoachAction(
     });
     const context = formatCoachContext(data, profile.currency);
 
+    // System prompt por idioma del perfil ("en" → inglés; resto → español).
+    // Solo cambia el prompt; la concatenación de datos y la llamada al modelo
+    // quedan igual.
+    const coachPrompt =
+      profile.locale === "en" ? COACH_PROMPT_EN : COACH_PROMPT_ES;
+
     // System prompt (constante) + datos reales del usuario. La pregunta va como
     // mensaje de usuario.
-    const system = `${COACH_SYSTEM_PROMPT}\n\n=== DATOS DEL USUARIO (reales, usa SOLO estos) ===\n${context}`;
+    const system = `${coachPrompt}\n\n=== DATOS DEL USUARIO (reales, usa SOLO estos) ===\n${context}`;
 
     const answer = await generateText({
       system,
