@@ -12,7 +12,8 @@ import {
 } from "@/lib/monthly";
 import { classificationFromBasket, type Basket } from "@/lib/expenses";
 import { generateFromDocument, generateText, AIError } from "@/lib/ai";
-import { STATEMENT_EXTRACTION_PROMPT } from "@/lib/ai/statement-prompt";
+import { STATEMENT_EXTRACTION_PROMPT as STATEMENT_PROMPT_ES } from "@/lib/ai/statement-prompt";
+import { STATEMENT_EXTRACTION_PROMPT as STATEMENT_PROMPT_EN } from "@/lib/ai/statement-prompt.en";
 
 /**
  * Lector de extractos de tarjeta — Etapa 1: SOLO extracción.
@@ -132,7 +133,13 @@ function parseCompras(modelText: string): StatementItem[] | null {
 export async function scanStatementAction(
   formData: FormData,
 ): Promise<ScanStatementResult> {
-  await requireUser();
+  const { profile } = await requireUser();
+
+  // Prompt de extracción por idioma del perfil ("en" → inglés; resto → español).
+  // El esquema JSON y las claves son el CONTRATO con el parser: no cambian entre
+  // idiomas, así que el parsing queda igual. Solo se elige el prompt.
+  const extractionPrompt =
+    profile.locale === "en" ? STATEMENT_PROMPT_EN : STATEMENT_PROMPT_ES;
 
   const textField = formData.get("text");
   const fileField = formData.get("file");
@@ -147,7 +154,7 @@ export async function scanStatementAction(
         return { error: "El documento es demasiado grande." };
       }
       modelText = await generateText({
-        system: STATEMENT_EXTRACTION_PROMPT,
+        system: extractionPrompt,
         messages: [{ role: "user", content: textField }],
         ...EXTRACTION_OUTPUT,
       });
@@ -163,7 +170,7 @@ export async function scanStatementAction(
       }
       const fileBase64 = Buffer.from(await fileField.arrayBuffer()).toString("base64");
       modelText = await generateFromDocument({
-        prompt: STATEMENT_EXTRACTION_PROMPT,
+        prompt: extractionPrompt,
         fileBase64,
         mimeType,
         ...EXTRACTION_OUTPUT,
