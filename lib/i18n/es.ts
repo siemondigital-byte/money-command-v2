@@ -555,6 +555,66 @@ export const es = {
     add: "Agregar",
     cancel: "Cancelar",
   },
+  goals: {
+    // Header
+    headerLabel: "Metas",
+    title: "Tus objetivos",
+    intro:
+      "Definí cuánto destinás por mes a cada meta y seguí su progreso. Cada meta vive en una canasta: Esenciales, Estilo o Libertad.",
+    // KPIs
+    kpiActiveGoals: "Metas activas",
+    kpiAvgProgress: "Progreso promedio",
+    kpiNextGoal: "Próxima meta",
+    kpiNoValue: "—",
+    // "en {n} {mes(es)}"
+    inPre: "en",
+    defineContribution: "definí un aporte",
+    kpiMonthlyContribution: "Aporte/mes",
+    toAllYourGoals: "a todas tus metas",
+    // "{n} mes" / "{n} meses"
+    monthSingular: "mes",
+    monthPlural: "meses",
+    // Empty state
+    noGoals: "Todavía no tenés metas. Agregá la primera más abajo.",
+    // Contador de metas por canasta: "{n} meta" / "{n} metas"
+    goalSingular: "meta",
+    goalPlural: "metas",
+    // Bloques de visualización
+    allGoalsProgress: "Progreso de todas las metas",
+    timelineTitle: "Timeline — cuándo alcanzarás cada meta",
+    // GoalRow — estimaciones
+    noContributionNotReached: "sin aporte no se alcanza",
+    complete: "completa",
+    // "~{n} {mes(es)}"
+    approx: "~",
+    // "meta {fecha}"
+    goalDatePrefix: "meta",
+    // TimingBadge
+    onTrack: "a tiempo",
+    behind: "atrasado",
+    unreachable: "no se alcanza",
+    // whenLabel (timeline)
+    alreadyReached: "ya alcanzada",
+    // Acciones
+    edit: "Editar",
+    delete: "Borrar",
+    // Form crear / editar (GoalForm)
+    addGoal: "Agregar meta",
+    editGoal: "Editar meta",
+    fieldName: "Nombre",
+    placeholderName: "ej. Fondo de emergencia",
+    fieldBasket: "Canasta",
+    fieldTargetAmount: "Monto objetivo",
+    fieldCurrentAmount: "Ahorro actual",
+    fieldMonthlyContribution: "Aporte mensual",
+    placeholderAmount: "0.00",
+    fieldTargetDate: "Fecha objetivo (opcional)",
+    targetDateHelp: "Pon una fecha para medir si vas atrasado o a tiempo.",
+    saving: "Guardando…",
+    saveChanges: "Guardar cambios",
+    add: "Agregar",
+    cancel: "Cancelar",
+  },
   expenses: {
     // Panel de fugas (suscripciones + gastos hormiga), alimentado por isLeak.
     leaks: {

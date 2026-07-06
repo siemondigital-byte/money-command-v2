@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeGoal, type SerializedGoal } from "@/lib/serialize";
 import { BASKETS, BASKET_COLORS, type Basket } from "@/lib/expenses";
-import { getDict } from "@/lib/i18n";
+import { getDict, type Dict } from "@/lib/i18n";
 import { getServerDict } from "@/lib/i18n/server";
 import {
   progress,
@@ -92,11 +92,10 @@ export default async function GoalsPage({
   return (
     <div className="fade-up flex flex-col gap-6">
       <header>
-        <div className="label mb-1">Metas</div>
-        <h1>Tus objetivos</h1>
+        <div className="label mb-1">{dict.goals.headerLabel}</div>
+        <h1>{dict.goals.title}</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
-          Definí cuánto destinás por mes a cada meta y seguí su progreso. Cada
-          meta vive en una canasta: Esenciales, Estilo o Libertad.
+          {dict.goals.intro}
         </p>
       </header>
 
@@ -109,21 +108,21 @@ export default async function GoalsPage({
           gap: "20px",
         }}
       >
-        <Kpi label="Metas activas" value={String(goals.length)} />
-        <Kpi label="Progreso promedio" value={pct.format(avg)} />
+        <Kpi label={dict.goals.kpiActiveGoals} value={String(goals.length)} />
+        <Kpi label={dict.goals.kpiAvgProgress} value={pct.format(avg)} />
         <Kpi
-          label="Próxima meta"
-          value={next ? next.goal.name : "—"}
+          label={dict.goals.kpiNextGoal}
+          value={next ? next.goal.name : dict.goals.kpiNoValue}
           sub={
             next
-              ? `en ${next.months} ${next.months === 1 ? "mes" : "meses"}`
-              : "definí un aporte"
+              ? `${dict.goals.inPre} ${next.months} ${next.months === 1 ? dict.goals.monthSingular : dict.goals.monthPlural}`
+              : dict.goals.defineContribution
           }
         />
         <Kpi
-          label="Aporte/mes"
+          label={dict.goals.kpiMonthlyContribution}
           value={money.format(totalContribution)}
-          sub="a todas tus metas"
+          sub={dict.goals.toAllYourGoals}
           valueColor="var(--accent)"
         />
       </section>
@@ -132,7 +131,7 @@ export default async function GoalsPage({
       {!hasGoals ? (
         <div className="card">
           <p style={{ fontSize: "13px", color: "var(--muted)" }}>
-            Todavía no tenés metas. Agregá la primera más abajo.
+            {dict.goals.noGoals}
           </p>
         </div>
       ) : (
@@ -144,6 +143,7 @@ export default async function GoalsPage({
               key={basket}
               basket={basket}
               basketLabel={dict.labels.baskets[basket]}
+              t={dict.goals}
               goals={inBasket}
               money={money}
               pct={pct}
@@ -160,13 +160,13 @@ export default async function GoalsPage({
         <>
           {/* 1. Gráfico de barras de progreso */}
           <section className="card flex flex-col gap-4">
-            <div className="label">Progreso de todas las metas</div>
+            <div className="label">{dict.goals.allGoalsProgress}</div>
             <GoalsProgressChart bars={progressBars} />
           </section>
 
           {/* 2. Timeline — cuándo se alcanza cada meta (más cercana arriba) */}
           <section className="card flex flex-col gap-4">
-            <div className="label">Timeline — cuándo alcanzarás cada meta</div>
+            <div className="label">{dict.goals.timelineTitle}</div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               {timelineItems.map((it, idx) => (
                 <div
@@ -207,7 +207,7 @@ export default async function GoalsPage({
                       color: it.months === null ? "var(--muted)" : "var(--accent)",
                     }}
                   >
-                    {whenLabel(it.months, now)}
+                    {whenLabel(it.months, now, dict.goals)}
                   </span>
                 </div>
               ))}
@@ -224,9 +224,12 @@ export default async function GoalsPage({
   );
 }
 
+type GoalsDict = Dict["goals"];
+
 function BasketSection({
   basket,
   basketLabel,
+  t,
   goals,
   money,
   pct,
@@ -236,6 +239,7 @@ function BasketSection({
 }: {
   basket: Basket;
   basketLabel: string;
+  t: GoalsDict;
   goals: SerializedGoal[];
   money: Intl.NumberFormat;
   pct: Intl.NumberFormat;
@@ -259,7 +263,8 @@ function BasketSection({
           {basketLabel}
         </div>
         <span style={{ fontSize: "11px", color: "var(--muted)" }}>
-          {goals.length} meta{goals.length === 1 ? "" : "s"}
+          {goals.length}{" "}
+          {goals.length === 1 ? t.goalSingular : t.goalPlural}
         </span>
       </div>
 
@@ -268,6 +273,7 @@ function BasketSection({
           key={g.id}
           goal={g}
           color={BASKET_COLORS[basket]}
+          t={t}
           money={money}
           pct={pct}
           dateFmt={dateFmt}
@@ -282,6 +288,7 @@ function BasketSection({
 function GoalRow({
   goal,
   color,
+  t,
   money,
   pct,
   dateFmt,
@@ -290,6 +297,7 @@ function GoalRow({
 }: {
   goal: SerializedGoal;
   color: string;
+  t: GoalsDict;
   money: Intl.NumberFormat;
   pct: Intl.NumberFormat;
   dateFmt: Intl.DateTimeFormat;
@@ -301,7 +309,11 @@ function GoalRow({
   const timing = goalTiming(goal, now);
 
   const estimate =
-    months === null ? "sin aporte no se alcanza" : months === 0 ? "completa" : `~${months} ${months === 1 ? "mes" : "meses"}`;
+    months === null
+      ? t.noContributionNotReached
+      : months === 0
+        ? t.complete
+        : `${t.approx}${months} ${months === 1 ? t.monthSingular : t.monthPlural}`;
 
   return (
     <div
@@ -360,8 +372,10 @@ function GoalRow({
           {goal.targetDate && (
             <>
               {" · "}
-              <span>meta {dateFmt.format(new Date(goal.targetDate))}</span>{" "}
-              <TimingBadge timing={timing} />
+              <span>
+                {t.goalDatePrefix} {dateFmt.format(new Date(goal.targetDate))}
+              </span>{" "}
+              <TimingBadge timing={timing} t={t} />
             </>
           )}
         </span>
@@ -370,7 +384,7 @@ function GoalRow({
             href={`/goals?edit=${goal.id}#form`}
             style={{ color: "var(--accent-2)", fontSize: "12px" }}
           >
-            Editar
+            {t.edit}
           </Link>
           <form action={deleteGoalAction} style={{ display: "inline" }}>
             <input type="hidden" name="id" value={goal.id} />
@@ -386,7 +400,7 @@ function GoalRow({
                 padding: 0,
               }}
             >
-              Borrar
+              {t.delete}
             </button>
           </form>
         </span>
@@ -397,31 +411,35 @@ function GoalRow({
 
 function TimingBadge({
   timing,
+  t,
 }: {
   timing: ReturnType<typeof goalTiming>;
+  t: GoalsDict;
 }) {
   if (timing.status === "on_track") {
-    return <span style={{ color: "var(--accent)" }}>a tiempo</span>;
+    return <span style={{ color: "var(--accent)" }}>{t.onTrack}</span>;
   }
   if (timing.status === "behind") {
     return (
       <span style={{ color: "var(--gold)" }}>
-        atrasado {timing.monthsLate} {timing.monthsLate === 1 ? "mes" : "meses"}
+        {t.behind} {timing.monthsLate}{" "}
+        {timing.monthsLate === 1 ? t.monthSingular : t.monthPlural}
       </span>
     );
   }
   if (timing.status === "unreachable") {
-    return <span style={{ color: "var(--danger)" }}>no se alcanza</span>;
+    return <span style={{ color: "var(--danger)" }}>{t.unreachable}</span>;
   }
   return null;
 }
 
 /** Texto de "cuándo se alcanza" para el timeline. null = sin aporte; <12 meses
  * = meses; >=12 = el año estimado (now + meses). Reusa monthsToGoal de lib. */
-function whenLabel(months: number | null, now: Date): string {
-  if (months === null) return "sin aporte no se alcanza";
-  if (months === 0) return "ya alcanzada";
-  if (months < 12) return `${months} ${months === 1 ? "mes" : "meses"}`;
+function whenLabel(months: number | null, now: Date, t: GoalsDict): string {
+  if (months === null) return t.noContributionNotReached;
+  if (months === 0) return t.alreadyReached;
+  if (months < 12)
+    return `${months} ${months === 1 ? t.monthSingular : t.monthPlural}`;
   const d = new Date(now);
   d.setMonth(d.getMonth() + months);
   return String(d.getFullYear());

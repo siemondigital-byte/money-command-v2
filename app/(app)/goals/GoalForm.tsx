@@ -42,7 +42,7 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
         className="btn-secondary"
         onClick={() => setOpen(true)}
       >
-        Agregar meta
+        {t.goals.addGoal}
       </button>
     );
   }
@@ -54,7 +54,7 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
 
   return (
     <section className="card flex flex-col gap-3" id="form">
-      {isEditing && <div className="label">Editar meta</div>}
+      {isEditing && <div className="label">{t.goals.editGoal}</div>}
 
       {state.error && (
         <p style={{ color: "var(--danger)", fontSize: "12px" }}>{state.error}</p>
@@ -65,18 +65,18 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
 
         <div className="form-grid">
           <label className="flex flex-col gap-1">
-            <span className="label">Nombre</span>
+            <span className="label">{t.goals.fieldName}</span>
             <input
               name="name"
               type="text"
               maxLength={80}
               required
               defaultValue={editing?.name ?? ""}
-              placeholder="ej. Fondo de emergencia"
+              placeholder={t.goals.placeholderName}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">Canasta</span>
+            <span className="label">{t.goals.fieldBasket}</span>
             <select name="basket" defaultValue={editing?.basket ?? "essentials"}>
               {BASKETS.map((b) => (
                 <option key={b} value={b}>
@@ -89,7 +89,7 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
 
         <div className="form-grid">
           <label className="flex flex-col gap-1">
-            <span className="label">Monto objetivo</span>
+            <span className="label">{t.goals.fieldTargetAmount}</span>
             <input
               name="targetAmount"
               type="number"
@@ -97,38 +97,38 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
               min="0"
               required
               defaultValue={editing ? editing.targetAmount : ""}
-              placeholder="0.00"
+              placeholder={t.goals.placeholderAmount}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">Ahorro actual</span>
+            <span className="label">{t.goals.fieldCurrentAmount}</span>
             <input
               name="currentAmount"
               type="number"
               step="0.01"
               min="0"
               defaultValue={editing ? editing.currentAmount : ""}
-              placeholder="0.00"
+              placeholder={t.goals.placeholderAmount}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="label">Aporte mensual</span>
+            <span className="label">{t.goals.fieldMonthlyContribution}</span>
             <input
               name="monthlyContribution"
               type="number"
               step="0.01"
               min="0"
               defaultValue={editing ? editing.monthlyContribution : ""}
-              placeholder="0.00"
+              placeholder={t.goals.placeholderAmount}
             />
           </label>
         </div>
 
         <label className="flex flex-col gap-1" style={{ maxWidth: "260px" }}>
-          <span className="label">Fecha objetivo (opcional)</span>
+          <span className="label">{t.goals.fieldTargetDate}</span>
           <input name="targetDate" type="date" defaultValue={defaultDate} />
           <span style={{ fontSize: "11px", color: "var(--hint)", marginTop: 2 }}>
-            Pon una fecha para medir si vas atrasado o a tiempo.
+            {t.goals.targetDateHelp}
           </span>
         </label>
 
@@ -139,14 +139,18 @@ export function GoalForm({ editing }: { editing: SerializedGoal | null }) {
             disabled={pending}
             style={{ opacity: pending ? 0.6 : 1 }}
           >
-            {pending ? "Guardando…" : isEditing ? "Guardar cambios" : "Agregar"}
+            {pending
+              ? t.goals.saving
+              : isEditing
+                ? t.goals.saveChanges
+                : t.goals.add}
           </button>
           <button
             type="button"
             className="btn-secondary"
             onClick={() => (isEditing ? router.replace("/goals") : setOpen(false))}
           >
-            Cancelar
+            {t.goals.cancel}
           </button>
         </div>
       </form>
