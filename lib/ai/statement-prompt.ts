@@ -19,7 +19,8 @@ Devolvé EXCLUSIVAMENTE un objeto JSON válido, sin texto adicional, sin explica
       "monto": number,
       "categoria_sugerida": string,
       "canasta_sugerida": "essentials" | "style" | "freedom",
-      "confianza": "alta" | "media" | "baja"
+      "confianza": "alta" | "media" | "baja",
+      "es_fuga": boolean
     }
   ]
 }
@@ -40,6 +41,7 @@ CÓMO LLENAR CADA CAMPO:
 - "categoria_sugerida": elegí PREFERENTEMENTE una de estas categorías predefinidas de la app cuando la compra encaje en alguna (usá EXACTAMENTE ese texto, en minúscula): vivienda, comida, servicios, transporte, salud, seguros, entretenimiento, restaurantes, viajes, ropa, educacion, suscripciones, otros. Solo si ninguna aplica bien, sugerí una etiqueta corta propia en español (minúscula).
 - "canasta_sugerida": sugerencia según el tipo de gasto. essentials = necesidades (comida, servicios, transporte, salud). style = gustos y ocio (restaurantes, viajes, ropa, entretenimiento). freedom = deuda, ahorro, educación, inversión. Es solo una sugerencia; la persona decide.
 - "confianza": "alta" si la fila se lee clara; "media" si dudás de algún campo; "baja" si no estás seguro de que sea una compra.
+- "es_fuga": true si el movimiento PARECE una FUGA de dinero recurrente: suscripción o servicio con cobro periódico (streaming como Netflix, Spotify, Disney+, HBO, YouTube Premium; apps y nubes; gimnasio o membresías; software/SaaS; seguros y cargos fijos de la tarjeta) o un microgasto hormiga que se repite (cafés, delivery frecuente, cigarrillos, apps de transporte del día a día). false si es una compra puntual o grande (electrodoméstico, ropa, un viaje, mercado del mes). Ante la duda, false. Es solo una sugerencia; la persona la ajusta.
 
 REGLAS FINALES:
 - No inventes datos. Si un campo no se ve, dejalo vacío ("") pero incluí el item solo si tenés un monto legible.
