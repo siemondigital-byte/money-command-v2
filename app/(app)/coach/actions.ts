@@ -44,7 +44,11 @@ export async function askCoachAction(
       activeYear: profile.activeYear,
       activeMonth: profile.activeMonth,
     });
-    const context = formatCoachContext(data, profile.currency);
+    const context = formatCoachContext(
+      data,
+      profile.currency,
+      profile.locale === "en" ? "en" : "es",
+    );
 
     // System prompt por idioma del perfil ("en" → inglés; resto → español).
     // Solo cambia el prompt; la concatenación de datos y la llamada al modelo
