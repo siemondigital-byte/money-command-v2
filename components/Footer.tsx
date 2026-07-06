@@ -1,7 +1,13 @@
 /**
- * Footer discreto del producto. Aparece al pie del layout de la app.
+ * Footer discreto del producto. Aparece al pie del layout de la app y del login.
+ * El texto llega por prop (ya resuelto por idioma en el server) para que funcione
+ * igual en rutas con sesión (dict del perfil) y sin sesión (default).
  */
-export function Footer() {
+export function Footer({
+  footer,
+}: {
+  footer: { poweredBy: string; rights: string };
+}) {
   return (
     <footer
       style={{
@@ -11,7 +17,7 @@ export function Footer() {
       }}
     >
       <p style={{ fontSize: "11px", color: "var(--hint)", margin: 0 }}>
-        Creado por{" "}
+        {footer.poweredBy}{" "}
         <a
           href="https://siemondigital.com/"
           target="_blank"
@@ -20,7 +26,7 @@ export function Footer() {
         >
           Siemon Digital
         </a>{" "}
-        — Todos los derechos reservados
+        — {footer.rights}
       </p>
     </footer>
   );

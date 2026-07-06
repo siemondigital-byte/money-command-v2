@@ -29,7 +29,7 @@ export default async function AppLayout({
         >
           {children}
         </main>
-        <Footer />
+        <Footer footer={dict.footer} />
       </div>
     </I18nProvider>
   );

@@ -131,6 +131,10 @@ export const es = {
   header: {
     period: "Período",
   },
+  footer: {
+    poweredBy: "Powered by",
+    rights: "Todos los derechos reservados",
+  },
   // La brújula se arma concatenando estos fragmentos con los datos del perfil.
   compass: {
     define: "Define tu brújula",

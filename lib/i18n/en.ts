@@ -118,6 +118,10 @@ export const en = {
   header: {
     period: "Period",
   },
+  footer: {
+    poweredBy: "Powered by",
+    rights: "All rights reserved",
+  },
   compass: {
     define: "Define your compass",
     buildingTo: "I am building this wealth to be able to",
