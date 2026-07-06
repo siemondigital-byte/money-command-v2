@@ -318,6 +318,71 @@ export const es = {
     savedPre: "Cambios guardados.",
     backToHistory: "Volver al historial",
   },
+  income: {
+    // Header: "Ingresos · {Mes} {Año}". El mes/año se arma en el JSX con dict.labels.months.
+    headerLabel: "Ingresos",
+    title: "Plan A · B · C",
+    intro:
+      "Plan A y Plan C son manuales. Plan B se consume desde Inversiones como suma de yields ÷ 12 — con override manual opcional. Lo que cargás acá se consolida automáticamente en el período activo.",
+    // Nota de consolidación: "Consolidado al MonthlyRecord {periodo} · incomeTotal = {monto}"
+    consolidatedPre: "Consolidado al MonthlyRecord",
+    consolidatedTotal: "incomeTotal =",
+    // KPIs
+    kpiTotal: "Total ingresos/mes",
+    kpiPassivePct: "% pasivo",
+    passiveShareNote: "Plan B sobre el total",
+    noPassiveYet: "Sin ingreso pasivo aún",
+    // Etiquetas de plan (name + helper).
+    plans: {
+      A: {
+        name: "Plan A · Salario / Activos",
+        helper: "Tu ingreso principal recurrente.",
+      },
+      B: {
+        name: "Plan B · Ingreso pasivo",
+        helper:
+          "Ingreso pasivo de tus inversiones. Se calcula solo desde tu portafolio.",
+      },
+      C: {
+        name: "Plan C · Secundario / Freelance",
+        helper: "Ingresos variables: proyectos, segundo trabajo, comisiones.",
+      },
+    },
+    // Plan B badge
+    badgeManual: "Manual",
+    badgeAuto: "Auto",
+    planBMonthly: "Plan B mensual",
+    autoFromInvestments: "Auto desde Inversiones",
+    yieldsTotal: "Yields totales",
+    addPositionsLink: "Agrega tus posiciones",
+    // Plan B override form
+    useManualPlanB: "Usar valor manual de Plan B",
+    manualMonthlyAmount: "Monto mensual manual",
+    // Placeholder "auto: {monto}" y nota "El valor automático sigue siendo {monto} desde Inversiones. Tu valor manual va a sobrescribirlo."
+    autoPlaceholderPre: "auto:",
+    autoNotePre: "El valor automático sigue siendo",
+    autoNoteSuf: "desde Inversiones. Tu valor manual va a sobrescribirlo.",
+    apply: "Aplicar",
+    applying: "Guardando…",
+    saved: "Guardado.",
+    // Secciones Plan A/C
+    subtotal: "Subtotal/mes",
+    colName: "Nombre",
+    colAmount: "Monto",
+    colAction: "Acción",
+    edit: "Editar",
+    delete: "Eliminar",
+    // "Editar fila {plan}"
+    editRowPre: "Editar fila",
+    // IncomeRowForm
+    add: "Agregar",
+    save: "Guardar",
+    cancel: "Cancelar",
+    fieldName: "Nombre",
+    fieldMonthlyAmount: "Monto mensual",
+    placeholderNameA: "Salario principal",
+    placeholderNameC: "Freelance / proyecto",
+  },
   expenses: {
     // Panel de fugas (suscripciones + gastos hormiga), alimentado por isLeak.
     leaks: {

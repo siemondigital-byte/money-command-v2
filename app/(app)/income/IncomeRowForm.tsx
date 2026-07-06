@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SerializedIncome } from "@/lib/serialize";
+import { useTranslations } from "@/lib/i18n/provider";
 import {
   createIncomeAction,
   updateIncomeAction,
@@ -28,6 +29,7 @@ export function IncomeRowForm({
   onDoneHref: string;
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const isEditing = editing != null;
   const action = isEditing ? updateIncomeAction : createIncomeAction;
   const [state, formAction, pending] = useActionState<
@@ -51,7 +53,7 @@ export function IncomeRowForm({
         className="btn-secondary"
         onClick={() => setOpen(true)}
       >
-        Agregar
+        {t.income.add}
       </button>
     );
   }
@@ -63,7 +65,7 @@ export function IncomeRowForm({
 
       <div className="form-grid">
         <label className="flex flex-col gap-1">
-          <span className="label">Nombre</span>
+          <span className="label">{t.income.fieldName}</span>
           <input
             name="name"
             type="text"
@@ -71,12 +73,14 @@ export function IncomeRowForm({
             required
             defaultValue={editing?.name ?? ""}
             placeholder={
-              plan === "A" ? "Salario principal" : "Freelance / proyecto"
+              plan === "A"
+                ? t.income.placeholderNameA
+                : t.income.placeholderNameC
             }
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="label">Monto mensual</span>
+          <span className="label">{t.income.fieldMonthlyAmount}</span>
           <input
             name="amount"
             type="number"
@@ -92,7 +96,7 @@ export function IncomeRowForm({
           disabled={pending}
           style={{ opacity: pending ? 0.6 : 1 }}
         >
-          {pending ? "…" : isEditing ? "Guardar" : "Agregar"}
+          {pending ? "…" : isEditing ? t.income.save : t.income.add}
         </button>
       </div>
 
@@ -112,7 +116,7 @@ export function IncomeRowForm({
             padding: 0,
           }}
         >
-          Cancelar
+          {t.income.cancel}
         </button>
       </div>
 

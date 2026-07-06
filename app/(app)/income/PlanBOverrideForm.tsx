@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { formatMoney } from "@/lib/format";
+import { useTranslations } from "@/lib/i18n/provider";
 import {
   updatePlanBOverrideAction,
   type IncomeActionResult,
@@ -20,6 +21,7 @@ export function PlanBOverrideForm({
   locale: string;
   currency: string;
 }) {
+  const t = useTranslations();
   const fmt = (n: number) => formatMoney(n, locale, currency);
   const [state, formAction, pending] = useActionState<
     IncomeActionResult,
@@ -46,19 +48,19 @@ export function PlanBOverrideForm({
           onChange={(e) => setLocalEnabled(e.currentTarget.checked)}
           style={{ width: "auto", margin: 0 }}
         />
-        <span>Usar valor manual de Plan B</span>
+        <span>{t.income.useManualPlanB}</span>
       </label>
 
       {localEnabled && (
         <label className="flex flex-col gap-1">
-          <span className="label">Monto mensual manual</span>
+          <span className="label">{t.income.manualMonthlyAmount}</span>
           <input
             name="amount"
             type="number"
             step="0.01"
             min="0"
             defaultValue={amount ?? ""}
-            placeholder={`auto: ${fmt(autoAmount)}`}
+            placeholder={`${t.income.autoPlaceholderPre} ${fmt(autoAmount)}`}
           />
           <span
             style={{
@@ -67,8 +69,7 @@ export function PlanBOverrideForm({
               lineHeight: 1.5,
             }}
           >
-            El valor automático sigue siendo {fmt(autoAmount)} desde
-            Inversiones. Tu valor manual va a sobrescribirlo.
+            {t.income.autoNotePre} {fmt(autoAmount)} {t.income.autoNoteSuf}
           </span>
         </label>
       )}
@@ -89,7 +90,7 @@ export function PlanBOverrideForm({
           )}
           {state.ok && (
             <span style={{ color: "var(--accent)", fontSize: "12px" }}>
-              Guardado.
+              {t.income.saved}
             </span>
           )}
         </div>
@@ -99,7 +100,7 @@ export function PlanBOverrideForm({
           disabled={pending}
           style={{ opacity: pending ? 0.6 : 1 }}
         >
-          {pending ? "Guardando…" : "Aplicar"}
+          {pending ? t.income.applying : t.income.apply}
         </button>
       </div>
     </form>

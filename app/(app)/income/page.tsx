@@ -8,7 +8,7 @@ import {
   getMonthlyRecord,
   periodToString,
 } from "@/lib/monthly";
-import { getDict } from "@/lib/i18n";
+import { getDict, type Dict } from "@/lib/i18n";
 import { getServerDict } from "@/lib/i18n/server";
 import { IncomeRowForm } from "./IncomeRowForm";
 import { PlanBOverrideForm } from "./PlanBOverrideForm";
@@ -17,20 +17,6 @@ import { deleteIncomeAction } from "./actions";
 export async function generateMetadata() {
   return { title: (await getServerDict()).metadata.income };
 }
-
-
-const PLAN_LABELS = {
-  A: { name: "Plan A · Salario / Activos", helper: "Tu ingreso principal recurrente." },
-  B: {
-    name: "Plan B · Ingreso pasivo",
-    helper:
-      "Ingreso pasivo de tus inversiones. Se calcula solo desde tu portafolio.",
-  },
-  C: {
-    name: "Plan C · Secundario / Freelance",
-    helper: "Ingresos variables: proyectos, segundo trabajo, comisiones.",
-  },
-} as const;
 
 export default async function IncomePage({
   searchParams,
@@ -106,9 +92,10 @@ export default async function IncomePage({
     <div className="fade-up flex flex-col gap-6">
       <header>
         <div className="label mb-1">
-          Ingresos · {dict.labels.months[period.month - 1]} {period.year}
+          {dict.income.headerLabel} · {dict.labels.months[period.month - 1]}{" "}
+          {period.year}
         </div>
-        <h1>Plan A · B · C</h1>
+        <h1>{dict.income.title}</h1>
         <p
           style={{
             color: "var(--muted)",
@@ -116,9 +103,7 @@ export default async function IncomePage({
             marginTop: "8px",
           }}
         >
-          Plan A y Plan C son manuales. Plan B se consume desde Inversiones
-          como suma de yields ÷ 12 — con override manual opcional. Lo que
-          cargás acá se consolida automáticamente en el período activo.
+          {dict.income.intro}
         </p>
         {monthlyRecord && (
           <p
@@ -128,8 +113,9 @@ export default async function IncomePage({
               marginTop: "6px",
             }}
           >
-            Consolidado al MonthlyRecord {periodToString(period)} ·
-            incomeTotal = {money.format(Number(monthlyRecord.incomeTotal))}
+            {dict.income.consolidatedPre} {periodToString(period)} ·{" "}
+            {dict.income.consolidatedTotal}{" "}
+            {money.format(Number(monthlyRecord.incomeTotal))}
           </p>
         )}
       </header>
@@ -144,13 +130,13 @@ export default async function IncomePage({
         }}
       >
         <div>
-          <div className="label">Total ingresos/mes</div>
+          <div className="label">{dict.income.kpiTotal}</div>
           <div className="kpi-large" style={{ marginTop: "4px" }}>
             {money.format(totals.total)}
           </div>
         </div>
         <div>
-          <div className="label">% pasivo</div>
+          <div className="label">{dict.income.kpiPassivePct}</div>
           {totals.planB > 0 ? (
             <>
               <div className="kpi-medium" style={{ marginTop: "4px" }}>
@@ -159,7 +145,7 @@ export default async function IncomePage({
               <p
                 style={{ fontSize: "11px", color: "var(--muted)", marginTop: 2 }}
               >
-                Plan B sobre el total
+                {dict.income.passiveShareNote}
               </p>
             </>
           ) : (
@@ -170,7 +156,7 @@ export default async function IncomePage({
                 marginTop: "4px",
               }}
             >
-              Sin ingreso pasivo aún
+              {dict.income.noPassiveYet}
             </p>
           )}
         </div>
@@ -183,6 +169,7 @@ export default async function IncomePage({
         rows={rowsA}
         editing={editing?.plan === "A" ? editing : null}
         editingHref="/income"
+        dict={dict}
       />
 
       {/* Plan B */}
@@ -200,7 +187,7 @@ export default async function IncomePage({
           }}
         >
           <div>
-            <div className="label">{PLAN_LABELS.B.name}</div>
+            <div className="label">{dict.income.plans.B.name}</div>
             <p
               style={{
                 fontSize: "12px",
@@ -208,10 +195,10 @@ export default async function IncomePage({
                 marginTop: "4px",
               }}
             >
-              {PLAN_LABELS.B.helper}
+              {dict.income.plans.B.helper}
             </p>
           </div>
-          <PlanBBadge source={planB.source} />
+          <PlanBBadge source={planB.source} dict={dict} />
         </div>
 
         <div
@@ -224,7 +211,7 @@ export default async function IncomePage({
           }}
         >
           <div>
-            <div className="label">Plan B mensual</div>
+            <div className="label">{dict.income.planBMonthly}</div>
             <div
               className="kpi-large"
               style={{
@@ -240,7 +227,9 @@ export default async function IncomePage({
           </div>
           <div>
             <div className="label">
-              {planB.source === "manual" ? "Auto desde Inversiones" : "Yields totales"}
+              {planB.source === "manual"
+                ? dict.income.autoFromInvestments
+                : dict.income.yieldsTotal}
             </div>
             <div
               className="kpi-medium"
@@ -256,7 +245,7 @@ export default async function IncomePage({
               }}
             >
               <Link href="/investments" style={{ color: "var(--accent-2)" }}>
-                Agrega tus posiciones
+                {dict.income.addPositionsLink}
               </Link>
             </p>
           </div>
@@ -289,12 +278,19 @@ export default async function IncomePage({
         rows={rowsC}
         editing={editing?.plan === "C" ? editing : null}
         editingHref="/income"
+        dict={dict}
       />
     </div>
   );
 }
 
-function PlanBBadge({ source }: { source: "auto" | "manual" }) {
+function PlanBBadge({
+  source,
+  dict,
+}: {
+  source: "auto" | "manual";
+  dict: Dict;
+}) {
   if (source === "manual") {
     return (
       <span
@@ -309,7 +305,7 @@ function PlanBBadge({ source }: { source: "auto" | "manual" }) {
           borderRadius: "6px",
         }}
       >
-        Manual
+        {dict.income.badgeManual}
       </span>
     );
   }
@@ -326,7 +322,7 @@ function PlanBBadge({ source }: { source: "auto" | "manual" }) {
         borderRadius: "6px",
       }}
     >
-      Auto
+      {dict.income.badgeAuto}
     </span>
   );
 }
@@ -337,12 +333,14 @@ function PlanSection({
   editing,
   editingHref,
   money,
+  dict,
 }: {
   plan: "A" | "C";
   rows: ReturnType<typeof serializeIncome>[];
   editing: ReturnType<typeof serializeIncome> | null;
   editingHref: string;
   money: Intl.NumberFormat;
+  dict: Dict;
 }) {
   const subtotal = rows
     .filter((r) => r.isActive)
@@ -362,7 +360,7 @@ function PlanSection({
         }}
       >
         <div>
-          <div className="label">{PLAN_LABELS[plan].name}</div>
+          <div className="label">{dict.income.plans[plan].name}</div>
           <p
             style={{
               fontSize: "12px",
@@ -370,11 +368,11 @@ function PlanSection({
               marginTop: "4px",
             }}
           >
-            {PLAN_LABELS[plan].helper}
+            {dict.income.plans[plan].helper}
           </p>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div className="label">Subtotal/mes</div>
+          <div className="label">{dict.income.subtotal}</div>
           <div
             className="kpi-medium"
             style={{ marginTop: "4px", color: "var(--accent)" }}
@@ -395,9 +393,9 @@ function PlanSection({
         >
           <thead>
             <tr>
-              <Th>Nombre</Th>
-              <Th align="right">Monto</Th>
-              <Th align="right">Acción</Th>
+              <Th>{dict.income.colName}</Th>
+              <Th align="right">{dict.income.colAmount}</Th>
+              <Th align="right">{dict.income.colAction}</Th>
             </tr>
           </thead>
           <tbody>
@@ -423,7 +421,7 @@ function PlanSection({
                         fontSize: "12px",
                       }}
                     >
-                      Editar
+                      {dict.income.edit}
                     </Link>
                     <form action={deleteIncomeAction}>
                       <input type="hidden" name="id" value={r.id} />
@@ -439,7 +437,7 @@ function PlanSection({
                           padding: 0,
                         }}
                       >
-                        Eliminar
+                        {dict.income.delete}
                       </button>
                     </form>
                   </div>
@@ -462,7 +460,7 @@ function PlanSection({
             className="label"
             style={{ marginBottom: "8px", color: "var(--muted)" }}
           >
-            Editar fila {plan}
+            {dict.income.editRowPre} {plan}
           </div>
         )}
         <IncomeRowForm
