@@ -1,0 +1,6 @@
+# Espacio de backups: la CARPETA y su documentación se versionan, pero los
+# artefactos de backup (bundles/archivos) NO — son snapshots locales pesados y
+# no deben inflar el historial del repo.
+*
+!.gitignore
+!README.md
