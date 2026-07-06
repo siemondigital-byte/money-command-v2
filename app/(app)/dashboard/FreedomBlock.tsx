@@ -92,7 +92,9 @@ export function FreedomBlock({
               <span>{t.incomeMonthly}</span>
               <span style={{ color: "var(--accent)" }}>{t.editable}</span>
             </div>
-            <div className="iv">{money(income)}</div>
+            <div className="iv">
+              <MoneyAmount value={income} locale={locale} currency={currency} />
+            </div>
             <input
               type="range"
               className="d-range"
@@ -114,7 +116,9 @@ export function FreedomBlock({
               <span>{t.savingMonthly}</span>
               <span style={{ color: "var(--accent)" }}>{savingRatePct}{t.ofIncome}</span>
             </div>
-            <div className="iv">{money(saving)}</div>
+            <div className="iv">
+              <MoneyAmount value={saving} locale={locale} currency={currency} />
+            </div>
             <input
               type="range"
               className="d-range"

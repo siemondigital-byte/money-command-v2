@@ -25,11 +25,11 @@ export function MoneyAmount({
       {negative && "-"}
       <span
         style={{
-          fontSize: "0.55em",
+          fontSize: "0.42em",
           fontWeight: 700,
-          marginRight: "0.18em",
-          opacity: 0.9,
-          verticalAlign: "0.08em",
+          marginRight: "0.2em",
+          opacity: 0.8,
+          verticalAlign: "0.12em",
           whiteSpace: "nowrap",
         }}
       >
