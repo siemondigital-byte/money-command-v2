@@ -71,13 +71,12 @@ export function Thermostat({
         </p>
       ) : (
         <div className="meter">
-          {/* El tubo tiene ancho fijo (26px) y NO se puede encoger: flexShrink:0
-              + minWidth evitan que, en la columna angosta de escritorio, el
-              flexbox lo aplaste a ~1px para dejarle lugar al monto de la escala.
-              Height fija para conservar su forma de tubo en todas las vistas. */}
+          {/* Ancho fijo que no se encoge (flexShrink:0 + minWidth). El ALTO lo
+              define el CSS: sin height fija + align-self:stretch, el tubo estira
+              al alto de la tarjeta (queda a la altura de los números). */}
           <div
             className="tube"
-            style={{ height: "200px", flexShrink: 0, minWidth: "34px" }}
+            style={{ flexShrink: 0, minWidth: "40px" }}
           >
             <div
               className="level"

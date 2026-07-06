@@ -739,12 +739,15 @@ textarea:focus {
 }
 .dash .d-thermo .tube {
   position: relative;
-  width: 34px;
+  width: 40px;
   border-radius: 100px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   overflow: hidden;
-  min-height: 180px;
+  /* Sin height fija: con align-items:stretch del .meter, el tubo estira al alto
+     de la tarjeta. min-height como piso para el caso móvil (card corta). */
+  min-height: 200px;
+  align-self: stretch;
 }
 .dash .d-thermo .tube .level {
   position: absolute;
