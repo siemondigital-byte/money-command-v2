@@ -1,23 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { COACH_CONCEPTS } from "@/lib/coach-content";
+import type { CoachConcept } from "@/lib/coach-content";
 
 /**
  * Bloque "Concepto del día" del Coach.
  *
  * Muestra UN concepto (título + cápsula). El índice del día se calcula por
  * fecha en el server (determinístico: el mismo día muestra el mismo concepto)
- * y llega como `initialIndex`. "Explícamelo más" despliega/oculta la versión
+ * y llega como `initialIndex`. Los conceptos llegan por prop ya elegidos según
+ * el idioma del perfil (server). "Explícamelo más" despliega/oculta la versión
  * larga (estado local). "Otro concepto" rota a otro distinto. No persiste nada.
  */
-export function ConceptOfTheDay({ initialIndex }: { initialIndex: number }) {
-  const total = COACH_CONCEPTS.length;
+export function ConceptOfTheDay({
+  initialIndex,
+  concepts,
+}: {
+  initialIndex: number;
+  concepts: CoachConcept[];
+}) {
+  const total = concepts.length;
   const safeInitial = ((initialIndex % total) + total) % total;
   const [index, setIndex] = useState(safeInitial);
   const [showExplanation, setShowExplanation] = useState(false);
 
-  const concept = COACH_CONCEPTS[index]!;
+  const concept = concepts[index]!;
 
   function otherConcept() {
     setIndex((i) => (i + 1) % total);

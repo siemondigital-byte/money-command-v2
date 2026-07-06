@@ -6,9 +6,8 @@ import {
   conceptIndexForDate,
   reminderIndexForDate,
   challengeIndexForDate,
-  COACH_REMINDERS,
-  COACH_CHALLENGES,
 } from "@/lib/coach-content";
+import { coachContentForLocale } from "@/lib/coach-locale";
 import { Scorecard } from "./Scorecard";
 import { ConceptOfTheDay } from "./ConceptOfTheDay";
 import { CoachChat } from "./CoachChat";
@@ -30,10 +29,12 @@ export default async function CoachPage() {
   const scorecard = buildScorecard(data.inputs);
 
   // Contenido rotativo por fecha (determinístico, se calcula en el server).
+  // El texto sale del idioma del perfil; los índices por fecha son compartidos.
+  const content = coachContentForLocale(profile.locale);
   const now = new Date();
   const conceptIndex = conceptIndexForDate(now);
-  const reminder = COACH_REMINDERS[reminderIndexForDate(now)]!;
-  const challenge = COACH_CHALLENGES[challengeIndexForDate(now)]!;
+  const reminder = content.reminders[reminderIndexForDate(now)]!;
+  const challenge = content.challenges[challengeIndexForDate(now)]!;
 
   return (
     <div className="fade-up flex flex-col gap-6">
@@ -50,7 +51,7 @@ export default async function CoachPage() {
 
       <CoachChat />
 
-      <ConceptOfTheDay initialIndex={conceptIndex} />
+      <ConceptOfTheDay initialIndex={conceptIndex} concepts={content.concepts} />
 
       {/* Recordatorio del día (una frase ancla, rota por día) */}
       <section
