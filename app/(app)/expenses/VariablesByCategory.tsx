@@ -8,8 +8,30 @@ import {
   type Basket,
 } from "@/lib/expenses";
 import { normalizeCategoryKey, categoryLabel } from "./category-grouping";
+import { splitMoney } from "@/lib/format";
 import { useTranslations } from "@/lib/i18n/provider";
 import { deleteExpenseAction } from "./actions";
+
+/** Monto con el símbolo de moneda en chico (etiqueta), número a tamaño normal. */
+function Money({
+  value,
+  locale,
+  currency,
+}: {
+  value: number;
+  locale: string;
+  currency: string;
+}) {
+  const { symbol, number } = splitMoney(value, locale, currency);
+  return (
+    <>
+      <span style={{ fontSize: "0.7em", opacity: 0.7, marginRight: "0.28em" }}>
+        {symbol}
+      </span>
+      {number}
+    </>
+  );
+}
 
 /**
  * Vista de Egresos VARIABLES agrupada por categoría, con desplegables.
@@ -70,16 +92,6 @@ export function VariablesByCategory({
 }) {
   const t = useTranslations();
   const categories = t.labels.categories;
-  const money = useMemo(
-    () =>
-      new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-        minimumFractionDigits: 0,
-      }),
-    [locale, currency],
-  );
 
   // Colapsadas por defecto: el estado vive en cliente (sin localStorage).
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -183,10 +195,15 @@ export function VariablesByCategory({
                 </span>
               </span>
               <span
-                className="kpi-medium"
-                style={{ color: "var(--accent)", whiteSpace: "nowrap" }}
+                style={{
+                  fontFamily: "Syne, sans-serif",
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  color: "var(--accent)",
+                  whiteSpace: "nowrap",
+                }}
               >
-                {money.format(g.subtotal)}
+                <Money value={g.subtotal} locale={locale} currency={currency} />
               </span>
             </button>
 
@@ -225,7 +242,7 @@ export function VariablesByCategory({
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                       <span style={{ fontSize: "13px", color: "var(--accent)", whiteSpace: "nowrap" }}>
-                        {money.format(r.amount)}
+                        <Money value={r.amount} locale={locale} currency={currency} />
                       </span>
                       <Link
                         href={`/expenses?tab=${r.type === "fixed" ? "fixed" : "variable"}&edit=${r.id}#form`}
