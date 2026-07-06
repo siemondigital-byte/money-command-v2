@@ -133,6 +133,24 @@ export function ExpenseForm({
         </button>
       </div>
 
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "12px",
+          color: "var(--muted)",
+          cursor: "pointer",
+        }}
+      >
+        <input
+          type="checkbox"
+          name="excludeFromLeaks"
+          defaultChecked={editing?.excludeFromLeaks ?? false}
+        />
+        {t.expenses.leaks.notLeakCheckbox}
+      </label>
+
       <div>
         <button
           type="button"

@@ -55,6 +55,12 @@ const expenseSchema = z.object({
   basket: z.enum(["essentials", "style", "freedom"]),
   budget: numericString,
   amount: numericString,
+  // Checkbox "No es gasto hormiga": excluye el gasto del panel de fugas aunque
+  // su categoría sea de fuga. FormData manda "on" si está tildado, o nada.
+  excludeFromLeaks: z.preprocess(
+    (v) => v === "on" || v === "true" || v === true,
+    z.boolean(),
+  ),
 });
 
 const subscriptionSchema = z.object({
@@ -94,6 +100,7 @@ export async function createExpenseAction(
     basket: getStr(formData, "basket"),
     budget: getStr(formData, "budget"),
     amount: getStr(formData, "amount"),
+    excludeFromLeaks: getStr(formData, "excludeFromLeaks"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
@@ -110,6 +117,7 @@ export async function createExpenseAction(
         category: parsed.data.category,
         type: parsed.data.type,
         basket: parsed.data.basket,
+        excludeFromLeaks: parsed.data.excludeFromLeaks,
         // columna legacy NOT NULL: derivada del basket (ver CONTEXT.md)
         classification: classificationFromBasket(parsed.data.basket as Basket),
         periodicity: "monthly",
@@ -147,6 +155,7 @@ export async function updateExpenseAction(
     basket: getStr(formData, "basket"),
     budget: getStr(formData, "budget"),
     amount: getStr(formData, "amount"),
+    excludeFromLeaks: getStr(formData, "excludeFromLeaks"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
@@ -161,6 +170,7 @@ export async function updateExpenseAction(
         category: parsed.data.category,
         type: parsed.data.type,
         basket: parsed.data.basket,
+        excludeFromLeaks: parsed.data.excludeFromLeaks,
         classification: classificationFromBasket(parsed.data.basket as Basket),
         budget: dec(parsed.data.budget),
         amount: dec(parsed.data.amount),

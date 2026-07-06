@@ -108,7 +108,10 @@ export default async function ExpensesPage({
   // Capital de libertad = mensual × 150 (= mensual × 12 ÷ 0.08, renta al 8%).
   const round2 = (n: number) => Math.round(n * 100) / 100;
   const leakRows = rows.filter(
-    (r) => r.isActive && LEAK_CATEGORIES.has(normalizeCategoryKey(r.category)),
+    (r) =>
+      r.isActive &&
+      !r.excludeFromLeaks &&
+      LEAK_CATEGORIES.has(normalizeCategoryKey(r.category)),
   );
   // Mismas filas para la vista agrupada/desplegable (idéntica a la lista de arriba).
   const leakGroupedRows = leakRows.map(toCategoryRow);

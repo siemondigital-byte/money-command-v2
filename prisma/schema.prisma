@@ -231,10 +231,12 @@ model Expense {
   // Alimenta el resumen mensual/anual y la futura GASTOS_HORMIGA_MES del Coach.
   isSubscription Boolean @default(false)
 
-  // Marca "fuga" (suscripción o gasto hormiga). ORTOGONAL a la canasta: el gasto
-  // sigue contando en su canasta igual que hoy. Solo alimenta el panel de fugas
-  // (presentación); NO interviene en consolidación ni totales.
-  isLeak Boolean @default(false)
+  // Override manual del panel de fugas: un gasto cuya categoría es de fuga
+  // (suscripciones, entretenimiento, delivery, otros, mixtos) se EXCLUYE del
+  // panel si esto es true ("No es gasto hormiga"). ORTOGONAL a la canasta; no
+  // toca consolidación ni totales. Reusa la columna dormida `isLeak` vía @map
+  // (no requiere migración).
+  excludeFromLeaks Boolean @default(false) @map("isLeak")
 
   // Para gastos hormiga (microgastos)
   isAntExpense    Boolean  @default(false)
