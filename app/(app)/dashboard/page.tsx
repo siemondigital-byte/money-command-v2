@@ -17,6 +17,8 @@ import {
   type BasketDistribution,
 } from "@/lib/dashboard";
 import { AffirmationCard } from "./AffirmationCard";
+import { AFFIRMATIONS_ES } from "@/lib/affirmations";
+import { AFFIRMATIONS_EN } from "@/lib/affirmations.en";
 import { MethodPanel } from "./MethodPanel";
 import { Thermostat } from "./Thermostat";
 import { FreedomBlock } from "./FreedomBlock";
@@ -202,8 +204,10 @@ export default async function DashboardPage() {
         </p>
       </header>
 
-      {/* Afirmación del día (rota cada 10s) */}
-      <AffirmationCard />
+      {/* Afirmación del día (rota cada 10s) — frases según idioma del perfil */}
+      <AffirmationCard
+        quotes={locale === "en" ? AFFIRMATIONS_EN : AFFIRMATIONS_ES}
+      />
 
       {!hasRecord && (
         <p style={{ fontSize: "12px", color: "var(--hint)" }}>

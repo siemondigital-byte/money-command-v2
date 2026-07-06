@@ -78,7 +78,7 @@ export function CoachChat() {
         setError(chat.error);
       }
     } catch {
-      setError("No pude responder ahora, intentá de nuevo.");
+      setError(chat.error);
     } finally {
       setLoading(false);
     }

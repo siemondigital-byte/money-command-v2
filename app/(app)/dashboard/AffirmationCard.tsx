@@ -2,105 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "@/lib/i18n/provider";
+import type { Affirmation } from "@/lib/affirmations";
 
 /**
  * Afirmación del día. Una frase célebre + un tip que cambian AUTOMÁTICAMENTE
  * cada 10 segundos (setInterval en el client). Estado local, sin llamadas
  * externas (ANEXO REDISENO §Cambios de contenido).
  *
- * NOTA i18n: el array QUOTES es contenido editorial (frases + autor + tip). Se
- * deja en español; su traducción va en la fase de contenido (junto al Coach).
+ * Las frases llegan por prop, ya elegidas por idioma del perfil en el server
+ * (lib/affirmations · affirmations.en). La rotación no depende del idioma.
  */
-const QUOTES: { text: string; author: string; tip: string }[] = [
-  {
-    text: "No trabajes por dinero, haz que el dinero trabaje para ti.",
-    author: "Robert Kiyosaki",
-    tip: "Cada peso que inviertes es un empleado que trabaja sin descanso.",
-  },
-  {
-    text: "El interés compuesto es la octava maravilla del mundo.",
-    author: "Albert Einstein",
-    tip: "El tiempo en el mercado vale más que acertar el momento.",
-  },
-  {
-    text: "La riqueza es la capacidad de vivir plenamente sin trabajar.",
-    author: "Henry David Thoreau",
-    tip: "Tu meta no es acumular: es que tus flujos pasivos cubran tu vida.",
-  },
-  {
-    text: "Gasta lo que queda después de ahorrar, no al revés.",
-    author: "Warren Buffett",
-    tip: "Automatiza tu canasta de Libertad antes de tocar el resto.",
-  },
-  {
-    text: "Un presupuesto le dice a tu dinero a dónde ir.",
-    author: "John Maxwell",
-    tip: "Dirigir el dinero no es restringir: es elegir mejor.",
-  },
-  {
-    text: "El riesgo viene de no saber lo que estás haciendo.",
-    author: "Warren Buffett",
-    tip: "Diversificar entre tipos de activo reduce el riesgo.",
-  },
-  {
-    text: "Construir capital es plantar árboles bajo cuya sombra no esperas sentarte.",
-    author: "Proverbio adaptado",
-    tip: "El capital queda intacto y crece; tú vives de sus frutos.",
-  },
-  {
-    text: "Gastar no es despilfarrar. Despilfarrar es gastar sin dirección.",
-    author: "El Sistema Infalible de Riqueza",
-    tip: "Esenciales menos, Libertad más. Libertad más, Estilo menos.",
-  },
-  {
-    text: "La paciencia es la aliada secreta del inversor.",
-    author: "Charlie Munger",
-    tip: "El portafolio se construye en décadas, no en semanas.",
-  },
-  {
-    text: "El dinero es tiempo de tu vida convertido en números.",
-    author: "El Sistema Infalible de Riqueza",
-    tip: "Antes de un egreso, pregunta cuántas horas de vida cuesta.",
-  },
-  {
-    text: "No es cuánto ganas, es cuánto conservas y multiplicas.",
-    author: "Robert Kiyosaki",
-    tip: "Tu tasa de ahorro pesa más que tu salario en el largo plazo.",
-  },
-  {
-    text: "El segundo mejor momento para invertir es hoy.",
-    author: "Proverbio de inversión",
-    tip: "Empezar pequeño y temprano supera a empezar grande y tarde.",
-  },
-  {
-    text: "La disciplina es el puente entre las metas y los logros.",
-    author: "Jim Rohn",
-    tip: "Un aporte mensual constante vence al esfuerzo esporádico.",
-  },
-  {
-    text: "La brecha entre tu ingreso y tu egreso es el combustible de tu libertad.",
-    author: "Anónimo",
-    tip: "Vivir por debajo de tus posibilidades te da la posibilidad de vivir.",
-  },
-  {
-    text: "La meta no es ser rico, es ser libre.",
-    author: "El Sistema Infalible de Riqueza",
-    tip: "Mide tu avance contra tu Número de Libertad, no contra los demás.",
-  },
-];
-
-export function AffirmationCard() {
+export function AffirmationCard({ quotes }: { quotes: Affirmation[] }) {
   const t = useTranslations();
   const [i, setI] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setI((prev) => (prev + 1) % QUOTES.length);
+      setI((prev) => (prev + 1) % quotes.length);
     }, 10000);
     return () => clearInterval(id);
-  }, []);
+  }, [quotes.length]);
 
-  const q = QUOTES[i]!;
+  const q = quotes[i]!;
 
   return (
     <section className="d-card top-mint" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
