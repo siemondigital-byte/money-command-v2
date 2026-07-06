@@ -3,6 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import { formatMoneyShort } from "@/lib/format";
 import { distributionAmounts, type BasketDistribution } from "@/lib/dashboard";
+import { useTranslations } from "@/lib/i18n/provider";
 import { MoneyAmount } from "./MoneyAmount";
 
 // Monto de la tarjeta KPI: fuente fluida (clamp) que achica el número cuando es
@@ -30,10 +31,11 @@ const AMOUNT: CSSProperties = {
 
 type BasketKey = keyof BasketDistribution;
 
-const BASKET_META: { key: BasketKey; label: string; tone: "sky" | "gold" | "mint" }[] = [
-  { key: "essentials", label: "Esenciales", tone: "sky" },
-  { key: "style", label: "Estilo", tone: "gold" },
-  { key: "freedom", label: "Libertad", tone: "mint" },
+// La etiqueta de cada canasta se resuelve por locale (t.labels.baskets).
+const BASKET_META: { key: BasketKey; tone: "sky" | "gold" | "mint" }[] = [
+  { key: "essentials", tone: "sky" },
+  { key: "style", tone: "gold" },
+  { key: "freedom", tone: "mint" },
 ];
 
 const PRESETS: { label: string; dist: BasketDistribution }[] = [
@@ -73,6 +75,8 @@ export function MethodPanel({
   locale: string;
   currency: string;
 }) {
+  const dict = useTranslations();
+  const t = dict.dashboard.method;
   const money = (n: number) => formatMoneyShort(n, locale, currency);
   const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
 
@@ -104,7 +108,7 @@ export function MethodPanel({
 
   return (
     <section className="d-card top-mint" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-      <div className="d-section-label">Asignación del mes</div>
+      <div className="d-section-label">{t.title}</div>
 
       {/* KPIs — tres columnas parejas (en vez de 2fr 1fr 1fr). En móvil apilan.
           El monto usa fuente fluida (clamp) + overflowWrap para no cortarse. */}
@@ -113,32 +117,32 @@ export function MethodPanel({
         style={{ gap: "14px" }}
       >
         <div className="d-kpi hero mint top-mint">
-          <div className="lab">Ingreso del mes</div>
+          <div className="lab">{t.kpiIncome}</div>
           <div className="v" style={HERO_AMOUNT}>
             <MoneyAmount value={income} locale={locale} currency={currency} />
           </div>
-          <div className="ctx plain">Plan A + B + C</div>
+          <div className="ctx plain">{t.kpiIncomeCtx}</div>
         </div>
         <div className="d-kpi sky top-sky">
-          <div className="lab">Gastado</div>
+          <div className="lab">{t.kpiSpent}</div>
           <div className="v" style={AMOUNT}>
             <MoneyAmount value={gastado} locale={locale} currency={currency} />
           </div>
-          <div className="ctx plain">Esenciales + Estilo</div>
+          <div className="ctx plain">{t.kpiSpentCtx}</div>
         </div>
         <div className="d-kpi gold top-gold">
-          <div className="lab">Invertido</div>
+          <div className="lab">{t.kpiInvested}</div>
           <div className="v" style={AMOUNT}>
             <MoneyAmount value={invertido} locale={locale} currency={currency} />
           </div>
-          <div className="ctx plain">aporte mensual a inversión</div>
+          <div className="ctx plain">{t.kpiInvestedCtx}</div>
         </div>
         <div className="d-kpi coral top-coral">
-          <div className="lab">Sin asignar</div>
+          <div className="lab">{t.kpiUnassigned}</div>
           <div className="v" style={AMOUNT}>
             <MoneyAmount value={unassignedAmount} locale={locale} currency={currency} />
           </div>
-          <div className="ctx plain">{unassignedPct.toFixed(0)}% del ingreso</div>
+          <div className="ctx plain">{unassignedPct.toFixed(0)}{t.ofIncome}</div>
         </div>
       </div>
 
@@ -180,9 +184,9 @@ export function MethodPanel({
           return (
             <div key={b.key} className={`d-bar ${b.tone}`}>
               <div className="blabel">
-                <span className="cat">{b.label}</span>
+                <span className="cat">{dict.labels.baskets[b.key]}</span>
                 <span className="target">
-                  Target {tgt.toFixed(0)}% · {moneyShort(targetAmounts[b.key])}
+                  {t.targetPrefix} {tgt.toFixed(0)}% · {moneyShort(targetAmounts[b.key])}
                 </span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -198,7 +202,7 @@ export function MethodPanel({
                   step={1}
                   value={Math.round(pct)}
                   onChange={(e) => handleChange(b.key, Number(e.target.value))}
-                  aria-label={`Ajustar ${b.label}`}
+                  aria-label={`${t.ariaAdjust} ${dict.labels.baskets[b.key]}`}
                 />
               </div>
               <div className="pct">
@@ -220,26 +224,24 @@ export function MethodPanel({
         }}
       >
         {!hasReal ? (
-          <span>
-            Todavía no hay egresos cargados para comparar. Estás viendo el preset
-            de tu método preferido.
-          </span>
+          <span>{t.gapNoReal}</span>
         ) : diffPct > 0 ? (
           <span>
-            Hoy destinás <strong style={{ color: "var(--text)" }}>{realFreedom.toFixed(0)}%</strong> a
-            Libertad. Para llegar a{" "}
-            <strong style={{ color: "var(--accent)" }}>{simFreedom.toFixed(0)}%</strong> tendrías que
-            redirigir {money(diffAmount)} al mes desde Esenciales y Estilo.
+            {t.gapMore1}{" "}
+            <strong style={{ color: "var(--text)" }}>{realFreedom.toFixed(0)}%</strong>{" "}
+            {t.gapMore2}{" "}
+            <strong style={{ color: "var(--accent)" }}>{simFreedom.toFixed(0)}%</strong>{" "}
+            {t.gapMore3} {money(diffAmount)} {t.gapMore4}
           </span>
         ) : diffPct < 0 ? (
           <span>
-            En este escenario destinás{" "}
-            <strong style={{ color: "var(--text)" }}>{simFreedom.toFixed(0)}%</strong> a Libertad,{" "}
-            {Math.abs(diffPct).toFixed(0)}% menos que hoy ({realFreedom.toFixed(0)}%).
+            {t.gapLess1}{" "}
+            <strong style={{ color: "var(--text)" }}>{simFreedom.toFixed(0)}%</strong> {t.gapLess2}{" "}
+            {Math.abs(diffPct).toFixed(0)}% {t.gapLess3} ({realFreedom.toFixed(0)}%).
           </span>
         ) : (
           <span>
-            Este escenario coincide con tu distribución real ({realFreedom.toFixed(0)}% a Libertad).
+            {t.gapEqual1} ({realFreedom.toFixed(0)}% {t.gapEqualFreedom}).
           </span>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { formatMoneyShort } from "@/lib/format";
+import { useTranslations } from "@/lib/i18n/provider";
 import { MoneyAmount } from "./MoneyAmount";
 
 // Cada tarjeta es un "contenedor de consulta" (container query). Así el tamaño
@@ -68,6 +69,7 @@ export function PatrimonyBlock({
   locale: string;
   currency: string;
 }) {
+  const t = useTranslations().dashboard.patrimony;
   const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
 
   const [active, setActive] = useState<number | null>(null);
@@ -83,16 +85,16 @@ export function PatrimonyBlock({
       style={{ display: "flex", flexDirection: "column", gap: "20px" }}
     >
       <div className="d-section-label">
-        Patrimonio · proyección a {horizon} años
+        {t.titlePre} {horizon} {t.years}
       </div>
 
       {!hasAssets ? (
         <p style={{ fontSize: "13px", color: "var(--muted)", margin: 0 }}>
-          Cargá posiciones en{" "}
+          {t.noAssetsPre}{" "}
           <a href="/investments" style={{ color: "var(--accent-2)" }}>
-            Inversiones
+            {t.investmentsLink}
           </a>{" "}
-          para ver crecer tu capital por interés compuesto.
+          {t.noAssetsSuf}
         </p>
       ) : (
         <>
@@ -103,25 +105,25 @@ export function PatrimonyBlock({
             style={{ gap: "14px" }}
           >
             <div className="d-kpi hero mint top-mint" style={CARD_CONTAINER}>
-              <div className="lab">Balance acumulado · {horizon}A</div>
+              <div className="lab">{t.balanceAccruedPre} {horizon}{t.yearAbbrev}</div>
               <div className="v" style={HERO_AMOUNT}>
                 <MoneyAmount value={balance} locale={locale} currency={currency} />
               </div>
-              <div className="ctx plain">Capital + retorno</div>
+              <div className="ctx plain">{t.capitalPlusReturn}</div>
             </div>
             <div className="d-kpi sky top-sky" style={CARD_CONTAINER}>
-              <div className="lab">Capital aportado</div>
+              <div className="lab">{t.capitalContributed}</div>
               <div className="v" style={AMOUNT}>
                 <MoneyAmount value={capital} locale={locale} currency={currency} />
               </div>
-              <div className="ctx plain">depósito + aportes</div>
+              <div className="ctx plain">{t.depositPlusContrib}</div>
             </div>
             <div className="d-kpi mint top-gold" style={CARD_CONTAINER}>
-              <div className="lab">Retorno generado</div>
+              <div className="lab">{t.returnGenerated}</div>
               <div className="v" style={{ ...AMOUNT, color: "var(--gold)" }}>
                 <MoneyAmount value={interest} locale={locale} currency={currency} />
               </div>
-              <div className="ctx plain">crecimiento compuesto</div>
+              <div className="ctx plain">{t.compoundGrowth}</div>
             </div>
           </div>
 
@@ -129,14 +131,14 @@ export function PatrimonyBlock({
           <div className="d-legend">
             <span>
               <span className="sw" style={{ background: "var(--accent-2)" }} />
-              Capital
+              {t.legendCapital}
             </span>
             <span>
               <span className="sw" style={{ background: "var(--accent)" }} />
-              Retorno
+              {t.legendReturn}
             </span>
             <span style={{ color: "var(--hint)" }}>
-              pasá el cursor o tocá una barra
+              {t.legendHint}
             </span>
           </div>
 
@@ -172,11 +174,11 @@ export function PatrimonyBlock({
                       borderBottom: "1px dashed var(--border)",
                     }}
                   >
-                    Año {ap.year}
+                    {t.year} {ap.year}
                   </div>
-                  <TooltipRow label="Capital invertido" value={moneyShort(ap.capital)} color="var(--accent-2)" />
-                  <TooltipRow label="Retorno" value={moneyShort(ap.interest)} color="var(--accent)" />
-                  <TooltipRow label="Total" value={moneyShort(ap.value)} color="var(--text)" bold />
+                  <TooltipRow label={t.tooltipCapitalInvested} value={moneyShort(ap.capital)} color="var(--accent-2)" />
+                  <TooltipRow label={t.tooltipReturn} value={moneyShort(ap.interest)} color="var(--accent)" />
+                  <TooltipRow label={t.tooltipTotal} value={moneyShort(ap.value)} color="var(--text)" bold />
                 </div>
               )}
 
@@ -198,9 +200,9 @@ export function PatrimonyBlock({
                         ? "rgba(255,255,255,0.06)"
                         : undefined,
                     }}
-                    aria-label={`Año ${p.year}: capital invertido ${moneyShort(
+                    aria-label={`${t.year} ${p.year}: ${t.ariaCapitalInvested} ${moneyShort(
                       p.capital,
-                    )}, retorno ${moneyShort(p.interest)}`}
+                    )}, ${t.ariaReturn} ${moneyShort(p.interest)}`}
                   >
                     <div
                       className="seg i"

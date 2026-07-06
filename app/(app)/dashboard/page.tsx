@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { getDict } from "@/lib/i18n";
 import { getServerDict } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { activePeriod } from "@/lib/monthly";
@@ -28,15 +29,9 @@ export async function generateMetadata() {
 /** Horizonte del gráfico de patrimonio (años, barra por año). */
 const PATRIMONY_YEARS = 30;
 
-/** Etiquetas y paleta por posición del donut de Capital invertido. Mismo
- *  criterio que el módulo Inversiones (cada activo un color, se cicla). */
-const INVESTMENT_CATEGORY_LABELS_ES: Record<string, string> = {
-  fixed_income: "Renta fija",
-  equity: "Renta variable",
-  real_estate: "Bienes raíces",
-  speculative: "Cripto / Especulativo",
-  other: "Otros",
-};
+/** Paleta por posición del donut de Capital invertido. Mismo criterio que el
+ *  módulo Inversiones (cada activo un color, se cicla). Las etiquetas de
+ *  categoría viven en el diccionario (dashboard.investmentCategories). */
 const POSITION_COLORS = [
   "#7fffb2", "#4dd9ff", "#ffd166", "#ff6b6b",
   "#b388ff", "#ff9f6b", "#5ad1c8", "#f078c8",
@@ -60,6 +55,7 @@ export default async function DashboardPage() {
 
   const locale = profile.locale;
   const currency = profile.currency;
+  const t = getDict(locale).dashboard;
 
   // Datos consolidados / históricos (LECTURA, nunca escritura).
   const [record, records, investments] = await Promise.all([
@@ -103,7 +99,10 @@ export default async function DashboardPage() {
   const investmentSlices = investments
     .map((p, i) => ({
       category: p.id,
-      label: p.label ?? INVESTMENT_CATEGORY_LABELS_ES[p.category] ?? "Otros",
+      label:
+        p.label ??
+        t.investmentCategories[p.category] ??
+        t.capitalInvested.otherFallback,
       capital: Number(p.capital),
       color: POSITION_COLORS[i % POSITION_COLORS.length]!,
     }))
@@ -195,11 +194,10 @@ export default async function DashboardPage() {
   return (
     <div className="dash fade-up">
       <header style={{ marginBottom: "2px" }}>
-        <div className="d-section-label" style={{ marginBottom: "6px" }}>Dashboard</div>
-        <h1>Tu situación financiera</h1>
+        <div className="d-section-label" style={{ marginBottom: "6px" }}>{t.pageLabel}</div>
+        <h1>{t.title}</h1>
         <p style={{ color: "var(--muted)", fontSize: "13px", marginTop: "8px" }}>
-          Todo lo que cargás en los otros módulos, reflejado en una vista. Cambiá
-          el período en el header para ver otro mes.
+          {t.intro}
         </p>
       </header>
 
@@ -208,10 +206,9 @@ export default async function DashboardPage() {
 
       {!hasRecord && (
         <p style={{ fontSize: "12px", color: "var(--hint)" }}>
-          Este período todavía no tiene datos. Cargá{" "}
-          <Link href="/income" style={{ color: "var(--accent-2)" }}>ingresos</Link> y{" "}
-          <Link href="/expenses" style={{ color: "var(--accent-2)" }}>egresos</Link> para verlo
-          completo.
+          {t.noDataPre}{" "}
+          <Link href="/income" style={{ color: "var(--accent-2)" }}>{t.noDataIncomeLink}</Link> {t.noDataAnd}{" "}
+          <Link href="/expenses" style={{ color: "var(--accent-2)" }}>{t.noDataExpensesLink}</Link> {t.noDataSuf}
         </p>
       )}
 
@@ -259,7 +256,7 @@ export default async function DashboardPage() {
           Dos columnas en desktop: monto + textos a la izquierda, donut por
           posición a la derecha. Apiladas en móvil. */}
       <section className="d-card top-gold">
-        <div className="d-section-label">Capital invertido</div>
+        <div className="d-section-label">{t.capitalInvested.label}</div>
         <div
           className="flex flex-col md:flex-row md:items-center"
           style={{ gap: "24px", marginTop: "12px" }}
@@ -301,14 +298,14 @@ export default async function DashboardPage() {
                   {formatPct(wYield, locale)}
                 </span>
                 <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                  rentabilidad ponderada · genera{" "}
+                  {t.capitalInvested.weightedReturnPre}{" "}
                   {formatMoneyShort(portfolio * wYield, locale, currency)}
-                  /año
+                  {t.capitalInvested.perYear}
                 </span>
               </div>
             )}
             <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px" }}>
-              Suma del capital de tus posiciones activas en Inversiones.
+              {t.capitalInvested.sumNote}
             </p>
           </div>
 

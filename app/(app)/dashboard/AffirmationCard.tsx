@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "@/lib/i18n/provider";
 
 /**
  * Afirmación del día. Una frase célebre + un tip que cambian AUTOMÁTICAMENTE
  * cada 10 segundos (setInterval en el client). Estado local, sin llamadas
  * externas (ANEXO REDISENO §Cambios de contenido).
+ *
+ * NOTA i18n: el array QUOTES es contenido editorial (frases + autor + tip). Se
+ * deja en español; su traducción va en la fase de contenido (junto al Coach).
  */
 const QUOTES: { text: string; author: string; tip: string }[] = [
   {
@@ -86,6 +90,7 @@ const QUOTES: { text: string; author: string; tip: string }[] = [
 ];
 
 export function AffirmationCard() {
+  const t = useTranslations();
   const [i, setI] = useState(0);
 
   useEffect(() => {
@@ -99,7 +104,7 @@ export function AffirmationCard() {
 
   return (
     <section className="d-card top-mint" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <div className="d-section-label">Afirmación del día</div>
+      <div className="d-section-label">{t.dashboard.affirmationLabel}</div>
       <blockquote
         key={i}
         className="fade-up"

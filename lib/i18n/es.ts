@@ -57,6 +57,16 @@ const debtPurposes: Record<DebtPurpose, string> = {
   investment: "Inversión",
 };
 
+// Categorías de inversión (Dashboard). Record<string,string> a propósito: se
+// indexa por category libre. Duplica el mapa local del módulo Inversiones.
+const investmentCategories: Record<string, string> = {
+  fixed_income: "Renta fija",
+  equity: "Renta variable",
+  real_estate: "Bienes raíces",
+  speculative: "Cripto / Especulativo",
+  other: "Otros",
+};
+
 // Meses (1-12). Antes: MONTH_LABELS_ES duplicado en 5 archivos.
 const months: string[] = [
   "Enero",
@@ -138,6 +148,118 @@ export const es = {
     saved: "Guardado.",
     save: "Guardar cambios",
     saving: "Guardando…",
+  },
+  dashboard: {
+    pageLabel: "Dashboard",
+    title: "Tu situación financiera",
+    intro:
+      "Todo lo que cargás en los otros módulos, reflejado en una vista. Cambiá el período en el header para ver otro mes.",
+    // Aviso "sin datos": prefijo + los dos links + sufijo. Se arma en el JSX.
+    noDataPre: "Este período todavía no tiene datos. Cargá",
+    noDataIncomeLink: "ingresos",
+    noDataAnd: "y",
+    noDataExpensesLink: "egresos",
+    noDataSuf: "para verlo completo.",
+    affirmationLabel: "Afirmación del día",
+    // Etiquetas de categoría de inversión (duplican las del módulo Inversiones;
+    // consolidar cuando se migre Inversiones a i18n).
+    investmentCategories,
+    capitalInvested: {
+      label: "Capital invertido",
+      weightedReturnPre: "rentabilidad ponderada · genera",
+      perYear: "/año",
+      sumNote: "Suma del capital de tus posiciones activas en Inversiones.",
+      otherFallback: "Otros",
+    },
+    method: {
+      title: "Asignación del mes",
+      kpiIncome: "Ingreso del mes",
+      kpiIncomeCtx: "Plan A + B + C",
+      kpiSpent: "Gastado",
+      kpiSpentCtx: "Esenciales + Estilo",
+      kpiInvested: "Invertido",
+      kpiInvestedCtx: "aporte mensual a inversión",
+      kpiUnassigned: "Sin asignar",
+      ofIncome: "% del ingreso",
+      targetPrefix: "Target",
+      ariaAdjust: "Ajustar",
+      gapNoReal:
+        "Todavía no hay egresos cargados para comparar. Estás viendo el preset de tu método preferido.",
+      // "Hoy destinás {real}% a Libertad. Para llegar a {sim}% tendrías que
+      //  redirigir {monto} al mes desde Esenciales y Estilo."
+      gapMore1: "Hoy destinás",
+      gapMore2: "a Libertad. Para llegar a",
+      gapMore3: "tendrías que redirigir",
+      gapMore4: "al mes desde Esenciales y Estilo.",
+      // "En este escenario destinás {sim}% a Libertad, {abs}% menos que hoy ({real}%)."
+      gapLess1: "En este escenario destinás",
+      gapLess2: "a Libertad,",
+      gapLess3: "menos que hoy",
+      // "Este escenario coincide con tu distribución real ({real}% a Libertad)."
+      gapEqual1: "Este escenario coincide con tu distribución real",
+      gapEqualFreedom: "a Libertad",
+    },
+    thermostat: {
+      label: "Termostato",
+      noTargetPre: "Configurá tu meta de ingreso a 2 años en",
+      settingsLink: "Settings",
+      noTargetSuf: "para medir tu temperatura.",
+      target2y: "Meta 2 años",
+      todayAvg: "Hoy (prom.)",
+      stateReached: "Estado",
+      stateGap: "Te falta",
+      reachedValue: "Alcanzada",
+      overCurrentSuffix: "% sobre tu actual",
+    },
+    freedom: {
+      label: "Calculadora de libertad",
+      incomeMonthly: "Ingreso mensual",
+      editable: "editable",
+      savingMonthly: "Ahorro mensual",
+      ofIncome: "% del ingreso",
+      compoundInterest: "Interés compuesto",
+      rate: "tasa",
+      ariaRate: "Tasa de interés compuesto",
+      ageTargetLabel: "Edad objetivo de libertad",
+      years: "años",
+      today: "Hoy",
+      setAge: "Configurá tu edad",
+      horizon: "Horizonte",
+      yourFreedomNumber: "Tu número de libertad",
+      perYearRate: "% anual",
+      nlfCtx:
+        "El capital que necesitás invertido para que su retorno cubra tus egresos. El capital queda intacto: vivís de los flujos.",
+      noExpenseCtx:
+        "Cargá tus egresos del mes para calcular tu Número de Libertad.",
+      currentState: "Estado actual",
+      projection: "Proyección ·",
+      notConverge: "no converge",
+      achieved: "logrado",
+      passivePerMonth: "Renta pasiva / mes",
+    },
+    patrimony: {
+      titlePre: "Patrimonio · proyección a",
+      years: "años",
+      noAssetsPre: "Cargá posiciones en",
+      investmentsLink: "Inversiones",
+      noAssetsSuf: "para ver crecer tu capital por interés compuesto.",
+      balanceAccruedPre: "Balance acumulado ·",
+      yearAbbrev: "A",
+      capitalPlusReturn: "Capital + retorno",
+      capitalContributed: "Capital aportado",
+      depositPlusContrib: "depósito + aportes",
+      returnGenerated: "Retorno generado",
+      compoundGrowth: "crecimiento compuesto",
+      legendCapital: "Capital",
+      legendReturn: "Retorno",
+      legendHint: "pasá el cursor o tocá una barra",
+      year: "Año",
+      tooltipCapitalInvested: "Capital invertido",
+      tooltipReturn: "Retorno",
+      tooltipTotal: "Total",
+      ariaCapitalInvested: "capital invertido",
+      ariaReturn: "retorno",
+    },
   },
   labels: {
     baskets,

@@ -1,6 +1,7 @@
 "use client";
 
 import { formatMoneyShort } from "@/lib/format";
+import { useTranslations } from "@/lib/i18n/provider";
 
 /**
  * Termostato financiero VERTICAL y compacto (ANEXO REDISENO §2).
@@ -29,6 +30,7 @@ export function Thermostat({
   locale: string;
   currency: string;
 }) {
+  const t = useTranslations().dashboard.thermostat;
   const money = (n: number) => formatMoneyShort(n, locale, currency);
   const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
   const hasTarget = target > 0;
@@ -45,15 +47,15 @@ export function Thermostat({
       // de la Calculadora de Libertad en desktop (sin alignSelf:start que lo
       // dejaba compacto).
     >
-      <div className="d-section-label">Termostato</div>
+      <div className="d-section-label">{t.label}</div>
 
       {!hasTarget ? (
         <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0 }}>
-          Configurá tu meta de ingreso a 2 años en{" "}
+          {t.noTargetPre}{" "}
           <a href="/settings#thermostat" style={{ color: "var(--accent-2)" }}>
-            Settings
+            {t.settingsLink}
           </a>{" "}
-          para medir tu temperatura.
+          {t.noTargetSuf}
         </p>
       ) : (
         <div className="meter">
@@ -79,19 +81,19 @@ export function Thermostat({
           </div>
           <div className="scale" style={{ minWidth: 0 }}>
             <div>
-              <div className="label">Meta 2 años</div>
+              <div className="label">{t.target2y}</div>
               <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-0.03em", lineHeight: 1, color: "var(--gold)" }}>
                 {moneyShort(target)}
               </div>
             </div>
             <div>
-              <div className="label">Hoy (prom.)</div>
+              <div className="label">{t.todayAvg}</div>
               <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-0.03em", lineHeight: 1, color: "var(--accent-2)" }}>
                 {hasHistory ? moneyShort(current) : "—"}
               </div>
             </div>
             <div>
-              <div className="label">{reached ? "Estado" : "Te falta"}</div>
+              <div className="label">{reached ? t.stateReached : t.stateGap}</div>
               <div
                 style={{
                   fontFamily: "Syne, sans-serif",
@@ -102,11 +104,11 @@ export function Thermostat({
                   color: reached ? "var(--accent)" : "var(--text)",
                 }}
               >
-                {reached ? "Alcanzada" : hasHistory ? money(gap) : "—"}
+                {reached ? t.reachedValue : hasHistory ? money(gap) : "—"}
               </div>
               {!reached && hasHistory && gapPct > 0 && (
                 <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "2px" }}>
-                  +{gapPct.toFixed(0)}% sobre tu actual
+                  +{gapPct.toFixed(0)}{t.overCurrentSuffix}
                 </div>
               )}
             </div>

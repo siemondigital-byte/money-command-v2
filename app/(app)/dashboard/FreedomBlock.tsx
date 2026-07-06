@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatMoneyShort } from "@/lib/format";
+import { useTranslations } from "@/lib/i18n/provider";
 import { MoneyAmount } from "./MoneyAmount";
 import { futureValueWithContributions } from "@/lib/formulas";
 import {
@@ -45,6 +46,7 @@ export function FreedomBlock({
   locale: string;
   currency: string;
 }) {
+  const t = useTranslations().dashboard.freedom;
   const money = (n: number) => formatMoneyShort(n, locale, currency);
   const moneyShort = (n: number) => formatMoneyShort(n, locale, currency);
 
@@ -80,15 +82,15 @@ export function FreedomBlock({
 
   return (
     <section className="d-card top-mint" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <div className="d-section-label">Calculadora de libertad</div>
+      <div className="d-section-label">{t.label}</div>
 
       <div className="d-free">
         {/* Inputs movibles */}
         <div className="d-inputs">
           <div className="d-input">
             <div className="lbl">
-              <span>Ingreso mensual</span>
-              <span style={{ color: "var(--accent)" }}>editable</span>
+              <span>{t.incomeMonthly}</span>
+              <span style={{ color: "var(--accent)" }}>{t.editable}</span>
             </div>
             <div className="iv">{money(income)}</div>
             <input
@@ -99,7 +101,7 @@ export function FreedomBlock({
               step={100}
               value={Math.min(income, incomeMax)}
               onChange={(e) => setIncome(Number(e.target.value))}
-              aria-label="Ingreso mensual"
+              aria-label={t.incomeMonthly}
             />
             <div className="ticks">
               <span>{moneyShort(0)}</span>
@@ -109,8 +111,8 @@ export function FreedomBlock({
 
           <div className="d-input">
             <div className="lbl">
-              <span>Ahorro mensual</span>
-              <span style={{ color: "var(--accent)" }}>{savingRatePct}% del ingreso</span>
+              <span>{t.savingMonthly}</span>
+              <span style={{ color: "var(--accent)" }}>{savingRatePct}{t.ofIncome}</span>
             </div>
             <div className="iv">{money(saving)}</div>
             <input
@@ -121,7 +123,7 @@ export function FreedomBlock({
               step={50}
               value={Math.min(saving, savingMax)}
               onChange={(e) => setSaving(Number(e.target.value))}
-              aria-label="Ahorro mensual"
+              aria-label={t.savingMonthly}
             />
             <div className="ticks">
               <span>{moneyShort(0)}</span>
@@ -131,8 +133,8 @@ export function FreedomBlock({
 
           <div className="d-input">
             <div className="lbl">
-              <span>Interés compuesto</span>
-              <span style={{ color: "var(--accent)" }}>tasa</span>
+              <span>{t.compoundInterest}</span>
+              <span style={{ color: "var(--accent)" }}>{t.rate}</span>
             </div>
             <div className="iv">{Math.round(ratePct)}%</div>
             <input
@@ -143,7 +145,7 @@ export function FreedomBlock({
               step={0.5}
               value={Math.min(20, Math.max(1, ratePct))}
               onChange={(e) => setRatePct(Number(e.target.value))}
-              aria-label="Tasa de interés compuesto"
+              aria-label={t.ariaRate}
             />
             <div className="ticks">
               <span>1%</span>
@@ -153,16 +155,16 @@ export function FreedomBlock({
 
           <div className="d-input read">
             <div className="lbl">
-              <span>Edad objetivo de libertad</span>
+              <span>{t.ageTargetLabel}</span>
             </div>
             <div className="iv">
-              {ageFreedomTarget !== null ? `${ageFreedomTarget} años` : "—"}
+              {ageFreedomTarget !== null ? `${ageFreedomTarget} ${t.years}` : "—"}
             </div>
             <div className="ticks">
               <span>
-                {ageCurrent !== null ? `Hoy ${ageCurrent}` : "Configurá tu edad"}
+                {ageCurrent !== null ? `${t.today} ${ageCurrent}` : t.setAge}
               </span>
-              <span>{`Horizonte ${horizon} años`}</span>
+              <span>{`${t.horizon} ${horizon} ${t.years}`}</span>
             </div>
           </div>
         </div>
@@ -171,8 +173,8 @@ export function FreedomBlock({
         <div className="d-output">
           <div>
             <div className="head">
-              <span>Tu número de libertad</span>
-              <span className="rule">{Math.round(ratePct)}% anual</span>
+              <span>{t.yourFreedomNumber}</span>
+              <span className="rule">{Math.round(ratePct)}{t.perYearRate}</span>
             </div>
             {hasExpense ? (
               <>
@@ -180,13 +182,12 @@ export function FreedomBlock({
                   <MoneyAmount value={nlf} locale={locale} currency={currency} />
                 </div>
                 <div className="ctx">
-                  El capital que necesitás invertido para que su retorno cubra
-                  tus egresos. El capital queda intacto: vivís de los flujos.
+                  {t.nlfCtx}
                 </div>
               </>
             ) : (
               <div className="ctx" style={{ marginTop: "16px" }}>
-                Cargá tus egresos del mes para calcular tu Número de Libertad.
+                {t.noExpenseCtx}
               </div>
             )}
           </div>
@@ -194,20 +195,20 @@ export function FreedomBlock({
           {hasExpense && (
             <div className="prog">
               <div className="row">
-                <span>Estado actual</span>
+                <span>{t.currentState}</span>
                 <span className="yrs">{Math.round(progressActual)}%</span>
               </div>
               <div className="bar">
                 <div className="seg now" style={{ width: `${progressActual}%` }} />
               </div>
               <div className="row">
-                <span>Proyección · {horizon} años</span>
+                <span>{t.projection} {horizon} {t.years}</span>
                 <span className="yrs">
                   {years === null
-                    ? "no converge"
+                    ? t.notConverge
                     : years === 0
-                      ? "logrado"
-                      : `${Math.round(years)} años`}
+                      ? t.achieved
+                      : `${Math.round(years)} ${t.years}`}
                 </span>
               </div>
               <div className="bar">
@@ -222,7 +223,7 @@ export function FreedomBlock({
                   marginTop: "4px",
                 }}
               >
-                <span>Renta pasiva / mes</span>
+                <span>{t.passivePerMonth}</span>
                 <span style={{ color: "var(--accent)", fontFamily: "Syne, sans-serif", fontWeight: 700 }}>
                   {money(passiveIncome)}
                 </span>
