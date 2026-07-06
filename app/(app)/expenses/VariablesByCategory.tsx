@@ -28,6 +28,8 @@ export interface CategoryExpenseRow {
   category: string;
   basket: Basket;
   isActive: boolean;
+  /** "fixed" | "variable": define a qué tab apunta el link de Editar. */
+  type: string;
   /** Fecha real de compra "YYYY-MM-DD" (lector de extractos) o null. */
   purchaseDate: string | null;
 }
@@ -61,13 +63,10 @@ export function VariablesByCategory({
   rows,
   locale,
   currency,
-  tab,
 }: {
   rows: CategoryExpenseRow[];
   locale: string;
   currency: string;
-  /** Pestaña activa, para el href de Editar (vuelve a esta vista). */
-  tab: string;
 }) {
   const t = useTranslations();
   const categories = t.labels.categories;
@@ -229,7 +228,7 @@ export function VariablesByCategory({
                         {money.format(r.amount)}
                       </span>
                       <Link
-                        href={`/expenses?tab=${tab}&edit=${r.id}#form`}
+                        href={`/expenses?tab=${r.type === "fixed" ? "fixed" : "variable"}&edit=${r.id}#form`}
                         style={{ color: "var(--accent-2)", fontSize: "12px" }}
                       >
                         Editar

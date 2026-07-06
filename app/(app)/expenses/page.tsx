@@ -42,6 +42,22 @@ const LEAK_CATEGORIES = new Set([
   "mixto",
 ]);
 
+/** SerializedExpense → fila liviana para <VariablesByCategory> (vista agrupada). */
+function toCategoryRow(r: SerializedExpense): CategoryExpenseRow {
+  return {
+    id: r.id,
+    name: r.name,
+    amount: r.amount,
+    category: r.category,
+    basket: r.basket as Basket,
+    isActive: r.isActive,
+    type: r.type,
+    purchaseDate: r.purchaseDate
+      ? new Date(r.purchaseDate).toISOString().slice(0, 10)
+      : null,
+  };
+}
+
 export default async function ExpensesPage({
   searchParams,
 }: {
@@ -94,6 +110,8 @@ export default async function ExpensesPage({
   const leakRows = rows.filter(
     (r) => r.isActive && LEAK_CATEGORIES.has(normalizeCategoryKey(r.category)),
   );
+  // Mismas filas para la vista agrupada/desplegable (idéntica a la lista de arriba).
+  const leakGroupedRows = leakRows.map(toCategoryRow);
   const leakMonthly = round2(leakRows.reduce((s, r) => s + r.amount, 0));
   const leakAnnual = round2(leakMonthly * 12);
   const leakFiveYears = round2(leakMonthly * 60);
@@ -247,54 +265,16 @@ export default async function ExpensesPage({
           {dict.expenses.leaks.freedomCapitalNote}
         </p>
 
-        {/* Qué está contando el panel (según su categoría). Mismo formato que la
-            lista principal, con Editar/Eliminar; para incluir o excluir un gasto,
-            se le cambia la categoría (acá o arriba). */}
-        {leakRows.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", paddingTop: "4px" }}>
-            {leakRows.map((r) => (
-              <div
-                key={r.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "12px",
-                  padding: "10px 0",
-                  borderTop: "1px solid var(--border)",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: "2px" }}>
-                  <span style={{ fontSize: "13px", overflowWrap: "anywhere" }}>{r.name}</span>
-                  <span style={{ fontSize: "11px", color: "var(--muted)" }}>
-                    {categoryLabel(
-                      normalizeCategoryKey(r.category),
-                      r.category,
-                      dict.labels.categories,
-                    )}
-                  </span>
-                  {r.purchaseDate && (
-                    <span style={{ fontSize: "11px", color: "var(--hint)" }}>
-                      {new Date(r.purchaseDate).toISOString().slice(0, 10)}
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "16px" }}>
-                  <span style={{ fontSize: "13px", color: "var(--accent)", whiteSpace: "nowrap" }}>
-                    {money.format(r.amount)}
-                  </span>
-                  <Link
-                    href={`/expenses?tab=${r.type === "fixed" ? "fixed" : "variable"}&edit=${r.id}#form`}
-                    style={{ color: "var(--accent-2)", fontSize: "12px" }}
-                  >
-                    Editar
-                  </Link>
-                  <DeleteButton id={r.id} />
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Ítems agrupados por categoría, idéntico a la lista de arriba
+            (desplegable, nombre + fecha, Editar/Eliminar). La diferencia es que
+            acá solo están las categorías de fuga. Para incluir o excluir un
+            gasto, se le cambia la categoría. */}
+        {leakGroupedRows.length > 0 && (
+          <VariablesByCategory
+            rows={leakGroupedRows}
+            locale={locale}
+            currency={profile.currency}
+          />
         )}
 
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: "12px" }}>
@@ -339,17 +319,7 @@ function ExpenseTypeSection({
   // Vista agrupada: mismas filas, reagrupadas por categoría (solo presentación).
   // El subtotal de arriba sigue siendo Σ activos (igual que totalsByType).
   const groupedRows: CategoryExpenseRow[] = grouped
-    ? rows.map((r) => ({
-        id: r.id,
-        name: r.name,
-        amount: r.amount,
-        category: r.category,
-        basket: r.basket as Basket,
-        isActive: r.isActive,
-        purchaseDate: r.purchaseDate
-          ? new Date(r.purchaseDate).toISOString().slice(0, 10)
-          : null,
-      }))
+    ? rows.map(toCategoryRow)
     : [];
 
   return (
@@ -387,7 +357,6 @@ function ExpenseTypeSection({
           rows={groupedRows}
           locale={locale ?? "en-US"}
           currency={currency ?? "USD"}
-          tab={tab}
         />
       )}
 
