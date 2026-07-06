@@ -702,10 +702,10 @@ export const es = {
       // Segunda vía de entrada: abre la cámara en móvil, selector de archivo en escritorio.
       takePhotoButton: "Tomar foto",
       uploadHelp:
-        "Subí o sacale una foto a una factura, recibo o resumen de tarjeta (PDF o imagen). El texto del PDF se lee en tu navegador y las imágenes se comprimen ahí mismo. Vas a poder revisar y ajustar la lista antes de crear los gastos.",
+        "Sube o toma una foto de una factura, recibo o resumen de tarjeta (PDF o imagen). El texto del PDF se lee en tu navegador y las imágenes se comprimen ahí mismo. Podrás revisar y ajustar la lista antes de crear los gastos.",
       // Fase contraseña
       passwordIntro:
-        "El PDF está protegido con contraseña. Ingresala para desbloquearlo en tu navegador (la contraseña no se envía a ningún servidor), o subí una foto del documento.",
+        "El PDF está protegido con contraseña. Ingrésala para desbloquearlo en tu navegador (la contraseña no se envía a ningún servidor), o sube una foto del documento.",
       passwordPlaceholder: "Contraseña del PDF",
       passwordAriaLabel: "Contraseña del PDF",
       unlockAndRead: "Desbloquear y leer",
@@ -721,7 +721,7 @@ export const es = {
       scanAnother: "Escanear otro documento",
       // Advertencias
       // "{n} renglón(es) con confianza baja: revisalos."
-      lowConfSuf: "renglón(es) con confianza baja: revisalos.",
+      lowConfSuf: "renglón(es) con confianza baja: revísalos.",
       // "{n} posible(s) duplicado(s) de gastos ya cargados este período."
       dupSuf: "posible(s) duplicado(s) de gastos ya cargados este período.",
       // Resumen: "{n} de {total} compras seleccionadas · total {monto}"
@@ -740,16 +740,16 @@ export const es = {
       // Nota informativa: "Las compras se registran en el mes activo ({mes}), el mes en que pagás este resumen. Se guarda la fecha original de cada compra."
       monthNotePre: "Las compras se registran en el mes activo (",
       monthNoteSuf:
-        "), el mes en que registrás este comprobante. Se guarda la fecha original de cada compra.",
+        "), el mes en que registras este comprobante. Se guarda la fecha original de cada compra.",
       // "Confirmar y crear {n} gasto(s)"
       confirmCreatePre: "Confirmar y crear",
       confirmCreateSuf: "gasto(s)",
       // Errores
-      errRead: "No pude leer el documento. Probá con otra foto o archivo.",
-      errUnsupported: "Formato no soportado. Subí un PDF o una imagen.",
-      errPrepare: "No pude preparar el archivo. Probá con otro.",
-      errWrongPassword: "Contraseña incorrecta. Probá de nuevo.",
-      errUnlock: "No pude desbloquear el PDF. Probá subir una foto.",
+      errRead: "No pude leer el documento. Prueba con otra foto o archivo.",
+      errUnsupported: "Formato no soportado. Sube un PDF o una imagen.",
+      errPrepare: "No pude preparar el archivo. Prueba con otro.",
+      errWrongPassword: "Contraseña incorrecta. Prueba de nuevo.",
+      errUnlock: "No pude desbloquear el PDF. Prueba subir una foto.",
       errNoValid: "No hay compras válidas para crear.",
       errCreate: "No pude crear los gastos. Probá de nuevo.",
     },

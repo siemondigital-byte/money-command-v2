@@ -79,7 +79,7 @@ const itemSchema = z.object({
 });
 
 const READ_ERROR =
-  "No pude leer el documento, intentá con otra foto o PDF más claro.";
+  "No pude leer el documento, intenta con otra foto o PDF más claro.";
 
 /** Quita cercos de markdown (```json ... ```), por si el modelo los agrega. */
 function stripFences(s: string): string {
