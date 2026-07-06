@@ -37,6 +37,7 @@ const categories: Record<string, string> = {
   delivery: "Delivery",
   viajes: "Viajes",
   ropa: "Ropa",
+  hobbies: "Hobbies",
   educacion: "Educación",
   suscripciones: "Suscripciones",
   "redes sociales": "Redes sociales",

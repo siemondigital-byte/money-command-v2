@@ -37,6 +37,7 @@ export const EXPENSE_CATEGORIES = [
   "delivery",
   "viajes",
   "ropa",
+  "hobbies",
   "educacion",
   "suscripciones",
   "redes sociales",
