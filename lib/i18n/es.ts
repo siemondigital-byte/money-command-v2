@@ -135,6 +135,35 @@ export const es = {
     poweredBy: "Powered by",
     rights: "Todos los derechos reservados",
   },
+  auth: {
+    // Login
+    signInLabel: "Iniciar sesión",
+    signInSubmit: "Entrar",
+    email: "Email",
+    password: "Contraseña",
+    forgotPassword: "Olvidé mi contraseña",
+    noAccount: "¿No tienes cuenta?",
+    createAccount: "Crear cuenta",
+    // Crear cuenta
+    signupLabel: "Crear cuenta",
+    signupTitle: "Empieza tu plan",
+    signupSubmit: "Crear cuenta",
+    passwordNew: "Contraseña (8+ caracteres)",
+    haveAccount: "¿Ya tienes cuenta?",
+    // Recuperar
+    recoveryLabel: "Recuperación",
+    recoveryTitle: "Restablecer contraseña",
+    recoverySubmit: "Enviar link",
+    recoverySuccess:
+      "Si el email existe, te enviamos un link para restablecer la contraseña.",
+    backToLogin: "Volver al login",
+    // Nueva contraseña
+    resetLabel: "Restablecer",
+    resetTitle: "Define tu nueva contraseña",
+    resetSubmit: "Guardar contraseña",
+    resetNewPassword: "Nueva contraseña (8+ caracteres)",
+    resetConfirmPassword: "Confirmar contraseña",
+  },
   coach: {
     pageLabel: "Coach",
     title: "Tu Coach financiero",

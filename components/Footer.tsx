@@ -19,7 +19,7 @@ export function Footer({
       <p style={{ fontSize: "11px", color: "var(--hint)", margin: 0 }}>
         {footer.poweredBy}{" "}
         <a
-          href="https://siemondigital.com/"
+          href="https://siemondigital.com/?utm_source=app-finanzas&utm_medium=app&utm_campaign=powered-by"
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: "var(--muted)" }}

@@ -122,6 +122,35 @@ export const en = {
     poweredBy: "Powered by",
     rights: "All rights reserved",
   },
+  auth: {
+    // Login
+    signInLabel: "Sign in",
+    signInSubmit: "Enter",
+    email: "Email",
+    password: "Password",
+    forgotPassword: "I forgot my password",
+    noAccount: "Don't have an account?",
+    createAccount: "Create account",
+    // Sign up
+    signupLabel: "Create account",
+    signupTitle: "Start your plan",
+    signupSubmit: "Create account",
+    passwordNew: "Password (8+ characters)",
+    haveAccount: "Already have an account?",
+    // Recovery
+    recoveryLabel: "Recovery",
+    recoveryTitle: "Reset your password",
+    recoverySubmit: "Send link",
+    recoverySuccess:
+      "If that email exists, we've sent you a link to reset your password.",
+    backToLogin: "Back to sign in",
+    // New password
+    resetLabel: "Reset",
+    resetTitle: "Set your new password",
+    resetSubmit: "Save password",
+    resetNewPassword: "New password (8+ characters)",
+    resetConfirmPassword: "Confirm password",
+  },
   coach: {
     pageLabel: "Coach",
     title: "Your financial Coach",

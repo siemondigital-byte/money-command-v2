@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { loginAction } from "@/app/(auth)/actions";
 import { AuthForm, Field } from "@/app/(auth)/_components/AuthForm";
+import { getDict } from "@/lib/i18n";
+import { getBrowserLocale } from "@/lib/i18n/server";
 
 export const metadata = { title: "Sign in · The Money Command" };
 
@@ -10,21 +12,23 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
+  // Sin sesión todavía: el idioma sale del navegador (Accept-Language).
+  const t = getDict(await getBrowserLocale()).auth;
 
   return (
     <div>
-      <div className="label mb-4">Iniciar sesión</div>
+      <div className="label mb-4">{t.signInLabel}</div>
 
-      <AuthForm action={loginAction} submitLabel="Entrar">
+      <AuthForm action={loginAction} submitLabel={t.signInSubmit}>
         <Field
-          label="Email"
+          label={t.email}
           name="email"
           type="email"
           autoComplete="email"
           required
         />
         <Field
-          label="Contraseña"
+          label={t.password}
           name="password"
           type="password"
           autoComplete="current-password"
@@ -38,12 +42,12 @@ export default async function LoginPage({
         style={{ fontSize: "12px", color: "var(--muted)" }}
       >
         <Link href="/recovery" style={{ color: "var(--accent-2)" }}>
-          Olvidé mi contraseña
+          {t.forgotPassword}
         </Link>
         <span>
-          ¿No tienes cuenta?{" "}
+          {t.noAccount}{" "}
           <Link href="/signup" style={{ color: "var(--accent)" }}>
-            Crear cuenta
+            {t.createAccount}
           </Link>
         </span>
       </div>
