@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getDict } from "@/lib/i18n";
+import { getBrowserLocale } from "@/lib/i18n/server";
 
 const emailSchema = z.string().email("Email inválido");
 const passwordSchema = z
@@ -15,6 +17,20 @@ export type ActionResult = { error?: string; ok?: boolean };
 function siteUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 }
+
+/**
+ * Restablecer contraseña vía la automatización propia (n8n), NO vía el correo
+ * de Supabase. Motivos: el correo lleva la marca y el color de esta app, y el
+ * enlace usa un token propio (60 min, un solo uso) que funciona en cualquier
+ * navegador — el flujo PKCE de Supabase falla si el usuario abre el correo en
+ * un dispositivo distinto al que pidió el reset.
+ */
+const RESET_REQUEST_URL =
+  process.env.N8N_RESET_REQUEST_URL ??
+  "https://hooks.siemondigital.com/webhook/password-reset-request";
+const RESET_CONFIRM_URL =
+  process.env.N8N_RESET_CONFIRM_URL ??
+  "https://hooks.siemondigital.com/webhook/password-reset-confirm";
 
 // ============================================================================
 // Signup
@@ -110,12 +126,21 @@ export async function recoveryAction(
     return { error: parsed.error.issues[0]?.message ?? "Email inválido" };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-    redirectTo: `${siteUrl()}/reset`,
-  });
+  const t = getDict(await getBrowserLocale()).auth;
+  const lang = (await getBrowserLocale()) === "en" ? "en" : "es";
 
-  if (error) return { error: error.message };
+  try {
+    const res = await fetch(RESET_REQUEST_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: parsed.data, app: "finanzas", lang }),
+    });
+    if (!res.ok) throw new Error(`n8n_${res.status}`);
+  } catch {
+    return { error: t.errSendFailed };
+  }
+
+  // Respuesta genérica siempre (no revelar si el email existe).
   return { ok: true };
 }
 
@@ -130,6 +155,7 @@ export async function resetPasswordAction(
     .object({
       password: passwordSchema,
       confirm: z.string().min(1),
+      token: z.string().min(1),
     })
     .refine((d) => d.password === d.confirm, {
       message: "Las contraseñas no coinciden",
@@ -137,18 +163,30 @@ export async function resetPasswordAction(
     .safeParse({
       password: formData.get("password"),
       confirm: formData.get("confirm"),
+      token: formData.get("token"),
     });
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({
-    password: parsed.data.password,
-  });
+  const t = getDict(await getBrowserLocale()).auth;
 
-  if (error) return { error: error.message };
+  try {
+    const res = await fetch(RESET_CONFIRM_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        token: parsed.data.token,
+        password: parsed.data.password,
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { ok?: boolean };
+    if (!res.ok || !data.ok) return { error: t.errLinkInvalid };
+  } catch {
+    return { error: t.errSendFailed };
+  }
 
-  redirect("/dashboard");
+  // Sin sesión: el usuario entra con su contraseña nueva desde el login.
+  redirect("/login");
 }

@@ -150,6 +150,9 @@ export const en = {
     resetSubmit: "Save password",
     resetNewPassword: "New password (8+ characters)",
     resetConfirmPassword: "Confirm password",
+    // Errors
+    errSendFailed: "Could not send the link. Try again in a moment.",
+    errLinkInvalid: "The link expired or was already used. Request a new one.",
   },
   coach: {
     pageLabel: "Coach",

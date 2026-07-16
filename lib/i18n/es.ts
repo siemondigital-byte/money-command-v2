@@ -163,6 +163,9 @@ export const es = {
     resetSubmit: "Guardar contraseña",
     resetNewPassword: "Nueva contraseña (8+ caracteres)",
     resetConfirmPassword: "Confirmar contraseña",
+    // Errores
+    errSendFailed: "No se pudo enviar el enlace. Intenta de nuevo en un momento.",
+    errLinkInvalid: "El enlace expiró o ya fue usado. Pide uno nuevo.",
   },
   coach: {
     pageLabel: "Coach",

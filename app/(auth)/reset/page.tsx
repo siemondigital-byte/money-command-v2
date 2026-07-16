@@ -5,9 +5,15 @@ import { getBrowserLocale } from "@/lib/i18n/server";
 
 export const metadata = { title: "Nueva contraseña · The Money Command" };
 
-export default async function ResetPage() {
+export default async function ResetPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string }>;
+}) {
   // Sin sesión todavía: el idioma sale del navegador (Accept-Language).
   const t = getDict(await getBrowserLocale()).auth;
+  // El token viaja en el enlace del correo (?token=...) y lo valida n8n al guardar.
+  const { token } = await searchParams;
 
   return (
     <div>
@@ -15,6 +21,7 @@ export default async function ResetPage() {
       <h2 className="mb-4">{t.resetTitle}</h2>
 
       <AuthForm action={resetPasswordAction} submitLabel={t.resetSubmit}>
+        <input type="hidden" name="token" value={token ?? ""} />
         <Field
           label={t.resetNewPassword}
           name="password"
