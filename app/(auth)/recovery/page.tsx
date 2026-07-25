@@ -6,14 +6,29 @@ import { getBrowserLocale } from "@/lib/i18n/server";
 
 export const metadata = { title: "Recuperar contraseña · The Money Command" };
 
-export default async function RecoveryPage() {
+export default async function RecoveryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ expired?: string }>;
+}) {
   // Sin sesión todavía: el idioma sale del navegador (Accept-Language).
   const t = getDict(await getBrowserLocale()).auth;
+  // Llega con ?expired=1 cuando el enlace de reset caduco/ya se uso (redirigido desde /reset).
+  const { expired } = await searchParams;
 
   return (
     <div>
       <div className="label mb-1">{t.recoveryLabel}</div>
       <h2 className="mb-4">{t.recoveryTitle}</h2>
+
+      {expired && (
+        <p
+          className="mb-4"
+          style={{ color: "var(--accent-2)", fontSize: "12px", lineHeight: 1.5 }}
+        >
+          {t.errLinkInvalid}
+        </p>
+      )}
 
       <AuthForm
         action={recoveryAction}

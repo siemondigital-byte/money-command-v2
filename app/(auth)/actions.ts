@@ -172,6 +172,9 @@ export async function resetPasswordAction(
 
   const t = getDict(await getBrowserLocale()).auth;
 
+  // El redirect() de Next.js lanza NEXT_REDIRECT; NO puede ir dentro del try/catch
+  // (el catch se lo tragaria). Por eso marcamos y redirigimos despues del bloque.
+  let invalidToken = false;
   try {
     const res = await fetch(RESET_CONFIRM_URL, {
       method: "POST",
@@ -182,10 +185,14 @@ export async function resetPasswordAction(
       }),
     });
     const data = (await res.json().catch(() => ({}))) as { ok?: boolean };
-    if (!res.ok || !data.ok) return { error: t.errLinkInvalid };
+    if (!res.ok || !data.ok) invalidToken = true;
   } catch {
+    // Error transitorio de red: se queda en la pantalla y puede reintentar.
     return { error: t.errSendFailed };
   }
+
+  // Enlace caducado / invalido / ya usado: llevar a pedir uno nuevo (paridad con mind-app).
+  if (invalidToken) redirect("/recovery?expired=1");
 
   // Sin sesión: el usuario entra con su contraseña nueva desde el login.
   redirect("/login");
