@@ -656,23 +656,23 @@ textarea:focus {
   .dash .d-kpi .v,
   .dash .d-kpi.hero .v,
   .dash .d-output .big {
-    font-size: 2.1rem;
+    font-size: 2.4rem;
   }
   /* Nivel 2 - numeros SECUNDARIOS (%, valores de entrada): mismo tamano. */
   .dash .d-bar .pct,
   .dash .d-input .iv {
-    font-size: 1.45rem;
+    font-size: 1.6rem;
   }
   /* Unidad (COP) proporcional al numero grande, igual en ambos. */
   .dash .d-kpi .v .u,
   .dash .d-output .big .u {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
   /* Patrimonio: nivel principal, pero con clamp para que el monto (millones)
      entre completo en la tarjeta. */
   .dash .d-kpis.patrimony .d-kpi .v,
   .dash .d-kpis.patrimony .d-kpi.hero .v {
-    font-size: clamp(1.6rem, 6vw, 2.1rem);
+    font-size: clamp(1.7rem, 6.5vw, 2.4rem);
   }
 }
 
