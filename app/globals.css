@@ -647,35 +647,6 @@ textarea:focus {
   font-size: clamp(1.25rem, 3.2vw, 1.8rem);
 }
 
-/* En movil las tarjetas se apilan a todo el ancho, pero los numeros quedaban
-   chicos (sobre todo los de Patrimonio, que escalan con vw). Los subimos un
-   poco para que se lean mejor. */
-@media (max-width: 760px) {
-  /* Escala UNIFORME en movil: dos niveles, sin tamanos sueltos.
-     Nivel 1 - numeros PRINCIPALES (KPI, hero y Numero de Libertad): mismo tamano. */
-  .dash .d-kpi .v,
-  .dash .d-kpi.hero .v,
-  .dash .d-output .big {
-    font-size: 2.4rem;
-  }
-  /* Nivel 2 - numeros SECUNDARIOS (%, valores de entrada): mismo tamano. */
-  .dash .d-bar .pct,
-  .dash .d-input .iv {
-    font-size: 1.6rem;
-  }
-  /* Unidad (COP) proporcional al numero grande, igual en ambos. */
-  .dash .d-kpi .v .u,
-  .dash .d-output .big .u {
-    font-size: 0.9rem;
-  }
-  /* Patrimonio: nivel principal, pero con clamp para que el monto (millones)
-     entre completo en la tarjeta. */
-  .dash .d-kpis.patrimony .d-kpi .v,
-  .dash .d-kpis.patrimony .d-kpi.hero .v {
-    font-size: clamp(1.7rem, 6.5vw, 2.4rem);
-  }
-}
-
 /* Barras de distribución (mockup m1-bar) */
 .dash .d-bars {
   display: flex;

@@ -6,16 +6,20 @@ import { distributionAmounts, type BasketDistribution } from "@/lib/dashboard";
 import { useTranslations } from "@/lib/i18n/provider";
 import { MoneyAmount } from "./MoneyAmount";
 
-// Monto de la tarjeta KPI: fuente fluida (clamp) que achica el número cuando es
-// largo + overflowWrap, para que NUNCA se corte ni desborde su tarjeta. La hero
-// (Ingreso del mes) queda apenas más grande.
+// Cada tarjeta es un "contenedor de consulta" (container query): el tamaño del
+// monto se mide contra el ancho de SU tarjeta (unidad cqi), no contra el viewport.
+// Mismo sistema que el bloque de Proyección (PatrimonyBlock) para que ambos se
+// vean igual de grandes. En móvil la tarjeta es ancha y manda el TECHO del clamp
+// (1.7rem / 1.5rem); en desktop las 4 columnas son angostas y manda cqi, así el
+// número se achica solo lo justo para no cortarse.
+const CARD_CONTAINER: CSSProperties = { containerType: "inline-size" };
 const HERO_AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.05rem, 3.2vw, 1.55rem)",
+  fontSize: "clamp(1.1rem, 9cqi, 1.7rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
 const AMOUNT: CSSProperties = {
-  fontSize: "clamp(0.95rem, 2.8vw, 1.35rem)",
+  fontSize: "clamp(1rem, 8cqi, 1.5rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
@@ -116,28 +120,28 @@ export function MethodPanel({
         className="grid grid-cols-1 md:grid-cols-4"
         style={{ gap: "14px" }}
       >
-        <div className="d-kpi hero mint top-mint">
+        <div className="d-kpi hero mint top-mint" style={CARD_CONTAINER}>
           <div className="lab">{t.kpiIncome}</div>
           <div className="v" style={HERO_AMOUNT}>
             <MoneyAmount value={income} locale={locale} currency={currency} />
           </div>
           <div className="ctx plain">{t.kpiIncomeCtx}</div>
         </div>
-        <div className="d-kpi sky top-sky">
+        <div className="d-kpi sky top-sky" style={CARD_CONTAINER}>
           <div className="lab">{t.kpiSpent}</div>
           <div className="v" style={AMOUNT}>
             <MoneyAmount value={gastado} locale={locale} currency={currency} />
           </div>
           <div className="ctx plain">{t.kpiSpentCtx}</div>
         </div>
-        <div className="d-kpi gold top-gold">
+        <div className="d-kpi gold top-gold" style={CARD_CONTAINER}>
           <div className="lab">{t.kpiInvested}</div>
           <div className="v" style={AMOUNT}>
             <MoneyAmount value={invertido} locale={locale} currency={currency} />
           </div>
           <div className="ctx plain">{t.kpiInvestedCtx}</div>
         </div>
-        <div className="d-kpi coral top-coral">
+        <div className="d-kpi coral top-coral" style={CARD_CONTAINER}>
           <div className="lab">{t.kpiUnassigned}</div>
           <div className="v" style={AMOUNT}>
             <MoneyAmount value={unassignedAmount} locale={locale} currency={currency} />
