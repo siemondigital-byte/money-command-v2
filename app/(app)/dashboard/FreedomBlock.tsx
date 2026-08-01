@@ -173,8 +173,10 @@ export function FreedomBlock({
           </div>
         </div>
 
-        {/* Output: número + barras */}
-        <div className="d-output">
+        {/* Output: número + barras. La tarjeta es container query para que el
+            Número de Libertad escale con su ancho (cqi) y llegue al mismo techo
+            que los KPI de Allocation/Proyección: se ve igual de grande y unificado. */}
+        <div className="d-output" style={{ containerType: "inline-size" }}>
           <div>
             <div className="head">
               <span>{t.yourFreedomNumber}</span>
@@ -182,7 +184,14 @@ export function FreedomBlock({
             </div>
             {hasExpense ? (
               <>
-                <div className="big">
+                <div
+                  className="big"
+                  style={{
+                    fontSize: "clamp(1.3rem, 13cqi, 2.7rem)",
+                    overflowWrap: "anywhere",
+                    minWidth: 0,
+                  }}
+                >
                   <MoneyAmount value={nlf} locale={locale} currency={currency} />
                 </div>
                 <div className="ctx">
