@@ -20,12 +20,12 @@ const CARD_CONTAINER: CSSProperties = { containerType: "inline-size" };
 // eso allí los montos quedan grandes igual que ahora. En escritorio/tablet, las
 // tarjetas son más angostas y manda cqi, así el número se achica solo lo justo.
 const HERO_AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.1rem, 9cqi, 1.7rem)",
+  fontSize: "clamp(1.3rem, 13cqi, 2.7rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
 const AMOUNT: CSSProperties = {
-  fontSize: "clamp(1rem, 8cqi, 1.5rem)",
+  fontSize: "clamp(1.2rem, 12cqi, 2.4rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };

@@ -14,12 +14,12 @@ import { MoneyAmount } from "./MoneyAmount";
 // número se achica solo lo justo para no cortarse.
 const CARD_CONTAINER: CSSProperties = { containerType: "inline-size" };
 const HERO_AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.1rem, 9cqi, 1.7rem)",
+  fontSize: "clamp(1.3rem, 13cqi, 2.7rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
 const AMOUNT: CSSProperties = {
-  fontSize: "clamp(1rem, 8cqi, 1.5rem)",
+  fontSize: "clamp(1.2rem, 12cqi, 2.4rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
