@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { SerializedProfile } from "@/lib/serialize";
 import { PeriodSelector } from "./PeriodSelector";
 import { HeaderNav } from "./HeaderNav";
+import { ThemeToggle } from "./ThemeToggle";
 import { activePeriod } from "@/lib/monthly";
 import { getDict } from "@/lib/i18n";
 
@@ -54,9 +55,11 @@ export function Header({ profile }: { profile: SerializedProfile }) {
           </span>
         </Link>
 
-        {/* Período */}
+        {/* Período + switch de tema (arriba a la derecha, la fecha y a su
+            derecha el interruptor dark/white) */}
         <div className="ah-period">
           <PeriodSelector activeYear={period.year} activeMonth={period.month} />
+          <ThemeToggle />
         </div>
 
         {/* Hamburguesa + navegación (cliente: maneja el toggle en móvil) */}

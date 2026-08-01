@@ -187,6 +187,9 @@ h3 {
   grid-area: period;
   justify-self: end;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 /* Navegación como PÍLDORAS en TODOS los anchos (desktop y móvil). En móvil el
    contenedor agrega scroll horizontal (ver media query); el estilo de cada
@@ -232,8 +235,9 @@ h3 {
   border-color: var(--accent);
   background: var(--surface-2);
 }
-/* Switch de tema (dark/white): misma pildora que la nav, pero cuadrada (icono). */
-.ah-nav .ah-theme {
+/* Switch de tema (dark/white): pildora cuadrada (icono). Vive junto a la fecha
+   en .ah-period (arriba a la derecha). */
+.ah-theme {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -246,11 +250,11 @@ h3 {
   border-radius: 100px;
   transition: 0.16s;
 }
-.ah-nav .ah-theme:hover {
+.ah-theme:hover {
   color: var(--text);
   border-color: var(--accent);
 }
-.ah-nav .ah-theme svg {
+.ah-theme svg {
   width: 15px;
   height: 15px;
   display: block;
@@ -641,6 +645,24 @@ textarea:focus {
 }
 .dash .d-kpis.patrimony .d-kpi.hero .v {
   font-size: clamp(1.25rem, 3.2vw, 1.8rem);
+}
+
+/* En movil las tarjetas se apilan a todo el ancho, pero los numeros quedaban
+   chicos (sobre todo los de Patrimonio, que escalan con vw). Los subimos un
+   poco para que se lean mejor. */
+@media (max-width: 760px) {
+  .dash .d-kpi .v {
+    font-size: 1.72rem;
+  }
+  .dash .d-kpi.hero .v {
+    font-size: 1.95rem;
+  }
+  .dash .d-kpis.patrimony .d-kpi .v {
+    font-size: clamp(1.28rem, 5.4vw, 1.6rem);
+  }
+  .dash .d-kpis.patrimony .d-kpi.hero .v {
+    font-size: clamp(1.45rem, 6vw, 1.85rem);
+  }
 }
 
 /* Barras de distribución (mockup m1-bar) */

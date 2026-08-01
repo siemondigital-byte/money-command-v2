@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/(auth)/actions";
 import { useTranslations } from "@/lib/i18n/provider";
 import type { Dict } from "@/lib/i18n";
-import { ThemeToggle } from "./ThemeToggle";
 
 // href + clave en dict.nav. La etiqueta se resuelve por locale en el render.
 const NAV_ITEMS: { href: string; key: keyof Dict["nav"] }[] = [
@@ -52,7 +51,6 @@ export function HeaderNav() {
           {t.nav.logout}
         </button>
       </form>
-      <ThemeToggle />
     </nav>
   );
 }
