@@ -13,13 +13,16 @@ import { MoneyAmount } from "./MoneyAmount";
 // (1.7rem / 1.5rem); en desktop las 4 columnas son angostas y manda cqi, así el
 // número se achica solo lo justo para no cortarse.
 const CARD_CONTAINER: CSSProperties = { containerType: "inline-size" };
+// Allocation son 4 columnas (tarjetas mas angostas que las 3 de Proyeccion), asi
+// que su coeficiente cqi es mayor para compensar y llegar al mismo tamano visual;
+// el techo del clamp los iguala en anchos amplios. overflowWrap de red de seguridad.
 const HERO_AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.3rem, 13cqi, 2.7rem)",
+  fontSize: "clamp(1.3rem, 15cqi, 2.7rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
 const AMOUNT: CSSProperties = {
-  fontSize: "clamp(1.2rem, 12cqi, 2.4rem)",
+  fontSize: "clamp(1.2rem, 14cqi, 2.4rem)",
   overflowWrap: "anywhere",
   minWidth: 0,
 };
