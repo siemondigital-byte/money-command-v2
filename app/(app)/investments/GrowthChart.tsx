@@ -13,6 +13,7 @@ import {
   type ChartConfiguration,
 } from "chart.js";
 import { formatMoney } from "@/lib/format";
+import { useChartTheme } from "@/lib/useChartTheme";
 
 Chart.register(
   LineController,
@@ -54,6 +55,7 @@ export function GrowthChart({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
+  const ct = useChartTheme();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -83,11 +85,11 @@ export function GrowthChart({
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "#1c1c27",
-            borderColor: "rgba(255,255,255,0.12)",
+            backgroundColor: ct.tooltipBg,
+            borderColor: ct.tooltipBorder,
             borderWidth: 1,
-            titleColor: "#f0f0f8",
-            bodyColor: "#f0f0f8",
+            titleColor: ct.text,
+            bodyColor: ct.text,
             padding: 10,
             callbacks: {
               label: (ctx) =>
@@ -100,7 +102,7 @@ export function GrowthChart({
             stacked: true,
             grid: { display: false },
             ticks: {
-              color: "#6b6b80",
+              color: ct.muted,
               maxRotation: 0,
               autoSkip: true,
               maxTicksLimit: 9,
@@ -109,9 +111,9 @@ export function GrowthChart({
           y: {
             stacked: true,
             beginAtZero: true,
-            grid: { color: "rgba(255,255,255,0.06)" },
+            grid: { color: ct.grid },
             ticks: {
-              color: "#6b6b80",
+              color: ct.muted,
               maxTicksLimit: 5,
               callback: (value) =>
                 new Intl.NumberFormat(locale, {
@@ -130,7 +132,7 @@ export function GrowthChart({
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [years, perAsset, labels, colors, locale, currency, todayLabel, assetFallback]);
+  }, [years, perAsset, labels, colors, locale, currency, todayLabel, assetFallback, ct]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: 280 }}>

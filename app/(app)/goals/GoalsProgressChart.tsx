@@ -10,6 +10,7 @@ import {
   Tooltip,
   type ChartConfiguration,
 } from "chart.js";
+import { useChartTheme } from "@/lib/useChartTheme";
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -26,6 +27,7 @@ export type GoalBar = { label: string; pct: number; color: string };
 export function GoalsProgressChart({ bars }: { bars: GoalBar[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
+  const ct = useChartTheme();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -56,25 +58,25 @@ export function GoalsProgressChart({ bars }: { bars: GoalBar[] }) {
             min: 0,
             max: 100,
             ticks: {
-              color: "#6b6b80",
+              color: ct.muted,
               font: { size: 10 },
               callback: (v) => `${v}%`,
             },
-            grid: { color: "rgba(255,255,255,0.06)" },
+            grid: { color: ct.grid },
           },
           y: {
-            ticks: { color: "#f0f0f8", font: { size: 11 } },
+            ticks: { color: ct.text, font: { size: 11 } },
             grid: { display: false },
           },
         },
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "#1c1c27",
-            borderColor: "rgba(255,255,255,0.12)",
+            backgroundColor: ct.tooltipBg,
+            borderColor: ct.tooltipBorder,
             borderWidth: 1,
-            titleColor: "#f0f0f8",
-            bodyColor: "#f0f0f8",
+            titleColor: ct.text,
+            bodyColor: ct.text,
             padding: 10,
             displayColors: true,
             callbacks: {
@@ -89,7 +91,7 @@ export function GoalsProgressChart({ bars }: { bars: GoalBar[] }) {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [bars]);
+  }, [bars, ct]);
 
   // Alto proporcional a la cantidad de metas (cada barra ~34px + márgenes).
   const height = Math.max(120, bars.length * 34 + 40);

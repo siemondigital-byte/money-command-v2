@@ -103,6 +103,7 @@ export const en = {
     history: "History",
     settings: "Settings",
     logout: "Log out",
+    themeToggle: "Toggle theme",
   },
   metadata: {
     dashboard: "Dashboard · The Money Command",

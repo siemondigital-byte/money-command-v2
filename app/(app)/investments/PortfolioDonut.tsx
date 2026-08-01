@@ -9,6 +9,7 @@ import {
   Legend,
   type ChartConfiguration,
 } from "chart.js";
+import { useChartTheme } from "@/lib/useChartTheme";
 
 Chart.register(ArcElement, DoughnutController, Tooltip, Legend);
 
@@ -28,6 +29,7 @@ export function PortfolioDonut({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
+  const ct = useChartTheme();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -54,11 +56,11 @@ export function PortfolioDonut({
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "#1c1c27",
-            borderColor: "rgba(255,255,255,0.12)",
+            backgroundColor: ct.tooltipBg,
+            borderColor: ct.tooltipBorder,
             borderWidth: 1,
-            titleColor: "#f0f0f8",
-            bodyColor: "#f0f0f8",
+            titleColor: ct.text,
+            bodyColor: ct.text,
             padding: 10,
             displayColors: true,
           },
@@ -70,7 +72,7 @@ export function PortfolioDonut({
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [slices]);
+  }, [slices, ct]);
 
   return (
     <div

@@ -116,6 +116,7 @@ export const es = {
     history: "Historial",
     settings: "Settings",
     logout: "Salir",
+    themeToggle: "Cambiar tema",
   },
   metadata: {
     dashboard: "Dashboard · The Money Command",

@@ -159,7 +159,7 @@ export function PatrimonyBlock({
                     borderRadius: 8,
                     padding: "8px 10px",
                     minWidth: 158,
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.45)",
+                    boxShadow: "var(--shadow)",
                   }}
                 >
                   <div

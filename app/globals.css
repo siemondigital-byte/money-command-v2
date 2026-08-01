@@ -24,6 +24,64 @@
   --danger: #ff6b6b;
   --warning: #ffd166;
   --success: #7fffb2;
+
+  /* Sombra flotante (tooltips/popovers) — themeable */
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* ============================================================================
+   TEMA CLARO — mismos tokens, valores de marca del planner (paridad de marca
+   entre las dos apps). Se activa con data-theme="light" en <html> (lo pone el
+   script anti-parpadeo del layout + el switch del header). Todo el color de la
+   app sale de estas variables, asi que basta redefinirlas aca.
+   ============================================================================ */
+:root[data-theme='light'] {
+  /* Backgrounds */
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --surface-2: #eef0f3;
+  --border: rgba(15, 15, 31, 0.09);
+  --border-strong: rgba(15, 15, 31, 0.16);
+
+  /* Text */
+  --text: #15151f;
+  --muted: #6a6a7c;
+  --hint: #9a9aa8;
+
+  /* Accents (marca en claro) */
+  --accent: #07b277;
+  --accent-2: #1499c9;
+  --gold: #bd8b16;
+
+  /* Semantic */
+  --danger: #e0556b;
+  --warning: #bd8b16;
+  --success: #07b277;
+
+  /* Sombra flotante mas suave en claro */
+  --shadow: 0 8px 24px rgba(15, 15, 31, 0.12);
+}
+
+/* Grid sutil: en claro la linea mint es invisible sobre blanco; usamos un cian
+   tenue (mismo criterio que el planner) para conservar la textura. */
+:root[data-theme='light'] .bg-grid {
+  background-image: linear-gradient(rgba(20, 153, 201, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 153, 201, 0.05) 1px, transparent 1px);
+}
+
+/* Focus ring en claro: el mint por defecto casi no se ve sobre blanco; usamos
+   el verde de marca claro. Solo aplica en tema claro; el oscuro no cambia. */
+:root[data-theme='light'] input:focus,
+:root[data-theme='light'] select:focus,
+:root[data-theme='light'] textarea:focus {
+  border-color: rgba(7, 178, 119, 0.5);
+  box-shadow: 0 0 0 1px rgba(7, 178, 119, 0.25);
+}
+
+/* Hover del boton primario en claro: oscurecer (no aclarar) para no perder el
+   texto blanco. */
+:root[data-theme='light'] .btn-primary:hover {
+  background: #06a06c;
 }
 
 * {
@@ -173,6 +231,29 @@ h3 {
   color: var(--text);
   border-color: var(--accent);
   background: var(--surface-2);
+}
+/* Switch de tema (dark/white): misma pildora que la nav, pero cuadrada (icono). */
+.ah-nav .ah-theme {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  padding: 8px 11px;
+  border-radius: 100px;
+  transition: 0.16s;
+}
+.ah-nav .ah-theme:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.ah-nav .ah-theme svg {
+  width: 15px;
+  height: 15px;
+  display: block;
 }
 .ah-compass {
   grid-area: compass;

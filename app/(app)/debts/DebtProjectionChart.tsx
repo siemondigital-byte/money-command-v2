@@ -13,6 +13,7 @@ import {
   type ChartConfiguration,
 } from "chart.js";
 import { formatMoney } from "@/lib/format";
+import { useChartTheme } from "@/lib/useChartTheme";
 
 Chart.register(
   LineController,
@@ -45,6 +46,7 @@ export function DebtProjectionChart({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
+  const ct = useChartTheme();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -76,11 +78,11 @@ export function DebtProjectionChart({
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "#1c1c27",
-            borderColor: "rgba(255,255,255,0.12)",
+            backgroundColor: ct.tooltipBg,
+            borderColor: ct.tooltipBorder,
             borderWidth: 1,
-            titleColor: "#f0f0f8",
-            bodyColor: "#f0f0f8",
+            titleColor: ct.text,
+            bodyColor: ct.text,
             padding: 10,
             callbacks: {
               label: (ctx) =>
@@ -92,7 +94,7 @@ export function DebtProjectionChart({
           x: {
             grid: { display: false },
             ticks: {
-              color: "#6b6b80",
+              color: ct.muted,
               maxRotation: 0,
               autoSkip: true,
               maxTicksLimit: 8,
@@ -100,9 +102,9 @@ export function DebtProjectionChart({
           },
           y: {
             beginAtZero: true,
-            grid: { color: "rgba(255,255,255,0.06)" },
+            grid: { color: ct.grid },
             ticks: {
-              color: "#6b6b80",
+              color: ct.muted,
               maxTicksLimit: 5,
               callback: (value) =>
                 formatMoney(Number(value), locale, currency, {
@@ -118,7 +120,7 @@ export function DebtProjectionChart({
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [schedule, locale, currency, todayLabel]);
+  }, [schedule, locale, currency, todayLabel, ct]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: 240 }}>
