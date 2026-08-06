@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>The Money Command — App Section (Fase 3)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="design-system-tokens.css" />
+<style>
+  /* ─── Page chrome (this is a LANDING SECTION, not a full page) ─── */
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; position: relative; overflow-x: hidden; }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(127,255,178,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(127,255,178,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .glow-tr-fixed { position: fixed; top: -260px; right: -200px; width: 720px; height: 720px; border-radius: 50%; background: radial-gradient(circle, rgba(127,255,178,0.06) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+  .glow-bl-fixed { position: fixed; bottom: -320px; left: -220px; width: 720px; height: 720px; border-radius: 50%; background: radial-gradient(circle, rgba(77,217,255,0.04) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+  .tmc-section {
+    position: relative; z-index: 1;
+    max-width: 1280px; margin: 0 auto; padding: 80px 48px 96px;
+  }
+  @media (max-width: 720px) { .tmc-section { padding: 56px 20px 72px; } }
+
+  /* section bracket: top mark to signal this is one slice of a larger page */
+  .section-bracket {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 18px; margin-bottom: 56px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+  }
+  .section-bracket .left  { color: var(--accent); display: flex; align-items: center; gap: 10px; }
+  .section-bracket .left .led { width:6px; height:6px; border-radius:50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); display:inline-block; }
+
+  /* Section heading */
+  .sec-head { display: grid; grid-template-columns: 1.5fr 1fr; gap: 56px; align-items: end; margin-bottom: 64px; }
+  @media (max-width: 920px) { .sec-head { grid-template-columns: 1fr; } }
+  .sec-head .h { font-family: var(--display); font-weight: 800; font-size: 84px; letter-spacing: -0.035em; line-height: 0.96; color: var(--text); }
+  .sec-head .h .mint { color: var(--accent); }
+  .sec-head .sub { font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--text-2); max-width: 460px; }
+  .sec-head .sub-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+
+  /* Mockup frame: app chrome (top bar) inside surface card */
+  .mockup {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-20);
+    position: relative; overflow: hidden;
+  }
+  .mockup::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); z-index: 2; }
+  .mock-chrome {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 22px; border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+  }
+  .mock-chrome .lhs { display: flex; align-items: center; gap: 14px; color: var(--text); }
+  .mock-chrome .lhs .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .mock-chrome .lhs .name { font-family: var(--display); font-weight: 800; letter-spacing: -0.01em; font-size: 12px; }
+  .mock-chrome .tabs { display: flex; gap: 22px; }
+  .mock-chrome .tabs a { color: var(--muted); text-decoration: none; }
+  .mock-chrome .tabs a.on { color: var(--accent); }
+  .mock-chrome .tabs a.on::before { content: '› '; }
+  .mock-chrome .rhs { display: flex; gap: 18px; align-items: center; }
+  .mock-chrome .rhs .led { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); margin-right: 6px; display: inline-block; }
+  .mock-body { padding: 28px 32px; }
+
+  .mock-caption {
+    font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.015em; color: var(--text);
+    margin-top: 24px; line-height: 1.3; max-width: 720px;
+  }
+  .mock-caption .mint { color: var(--accent); }
+  .mock-caption .sub {
+    display: block; font-family: var(--mono); font-size: 12px; color: var(--muted);
+    letter-spacing: 0.15em; text-transform: uppercase; margin-top: 10px; font-weight: 400;
+  }
+
+  /* Mockup 1 — 50/30/20 dashboard */
+  .m1-top { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .m1-hero {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-12);
+    padding: 22px 24px; position: relative; overflow: hidden;
+  }
+  .m1-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+  .m1-hero .lab { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .m1-hero .v { font-family: var(--display); font-weight: 800; font-size: 60px; color: var(--accent); letter-spacing: -0.045em; line-height: 1; margin-top: 12px; }
+  .m1-hero .v .u { font-family: var(--mono); font-weight: 400; font-size: 18px; color: var(--accent); margin-right: 6px; opacity: 0.85; vertical-align: 14px; }
+  .m1-hero .ctx { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .m1-mini {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-12);
+    padding: 18px 20px; position: relative; overflow: hidden;
+  }
+  .m1-mini::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .m1-mini.k::before { background: var(--accent2); }
+  .m1-mini.b::before { background: var(--gold); }
+  .m1-mini .lab { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .m1-mini .v { font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: -0.03em; line-height: 1; margin-top: 12px; }
+  .m1-mini.k .v { color: var(--accent2); }
+  .m1-mini.b .v { color: var(--gold); }
+  .m1-mini .ctx { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+  .m1-bars { display: flex; flex-direction: column; gap: 18px; }
+  .m1-bar { display: grid; grid-template-columns: 180px 1fr 110px; gap: 22px; align-items: center; }
+  .m1-bar .label { display: flex; flex-direction: column; gap: 4px; }
+  .m1-bar .label .cat { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: -0.005em; color: var(--text); }
+  .m1-bar .label .target { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
+  .m1-bar .track {
+    height: 16px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .m1-bar .fill { position: absolute; top: -1px; bottom: -1px; left: -1px; border-radius: 8px; border: 1px solid currentColor; background: rgba(255,255,255,0.0); }
+  .m1-bar .fill.sky   { color: var(--accent2); background: rgba(77,217,255,0.18); box-shadow: inset 0 0 6px rgba(77,217,255,0.25); }
+  .m1-bar .fill.mint  { color: var(--accent);  background: rgba(127,255,178,0.20); box-shadow: inset 0 0 6px rgba(127,255,178,0.25); }
+  .m1-bar .fill.gold  { color: var(--gold);    background: rgba(255,209,102,0.18); box-shadow: inset 0 0 6px rgba(255,209,102,0.25); }
+  .m1-bar .marker {
+    position: absolute; top: -4px; bottom: -4px; width: 1px;
+    background: var(--text); opacity: 0.4;
+  }
+  .m1-bar .marker::after {
+    content: 'TGT'; position: absolute; top: -16px; left: 2px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase;
+  }
+  .m1-bar .pct {
+    text-align: right; font-family: var(--display); font-weight: 800; font-size: 22px;
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .m1-bar.sky  .pct { color: var(--accent2); }
+  .m1-bar.mint .pct { color: var(--accent); }
+  .m1-bar.gold .pct { color: var(--gold); }
+  .m1-bar .pct .amt { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-top: 4px; font-weight: 400; }
+
+  .m1-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border);
+    font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em;
+  }
+  .m1-foot .ok { color: var(--accent); }
+
+  /* Mockup 2 — Freedom Number Calculator */
+  .m2-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 24px; }
+  @media (max-width: 920px) { .m2-grid { grid-template-columns: 1fr; } }
+  .m2-input-group { display: flex; flex-direction: column; gap: 26px; }
+  .m2-input { }
+  .m2-input .lbl { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .m2-input .lbl .right { color: var(--accent); }
+  .m2-input .v { font-family: var(--display); font-weight: 800; color: var(--accent); font-size: 34px; letter-spacing: -0.04em; line-height: 1; margin-top: 10px; }
+  .m2-input .v .u { font-family: var(--mono); font-weight: 400; font-size: 13px; color: var(--accent); margin-right: 4px; opacity: 0.8; vertical-align: 8px; }
+  .m2-input .track { position: relative; height: 2px; margin: 16px 0 8px; border-radius: 2px; }
+  .m2-input .handle { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(127,255,178,0.5); }
+  .m2-input .ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+  .m2-output { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-16); padding: 24px 22px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .m2-output::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+  .m2-output .head { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .m2-output .head .rule { color: var(--muted); }
+  .m2-output .v { font-family: var(--display); font-weight: 800; color: var(--accent); font-size: 48px; letter-spacing: -0.045em; line-height: 0.95; margin-top: 18px; text-shadow: 0 0 28px rgba(127,255,178,0.32); white-space: nowrap; }
+  .m2-output .v .u { font-family: var(--mono); font-weight: 400; font-size: 13px; color: var(--accent); margin-right: 6px; opacity: 0.85; vertical-align: 14px; }
+  .m2-output .ctx { font-family: var(--mono); font-size: 11px; color: var(--text-2); margin-top: 16px; line-height: 1.65; }
+  .m2-output .progress { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .m2-output .progress .row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 8px; text-transform: uppercase; }
+  .m2-output .progress .row .yrs { color: var(--accent); }
+  .m2-output .progress .bar { height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; position: relative; }
+  .m2-output .progress .seg { position: absolute; top: 0; bottom: 0; left: 0; height: 100%; border-radius: 2px; }
+  .m2-output .progress .seg.now { width: 46%; background: var(--danger); opacity: 0.65; }
+  .m2-output .progress .seg.sys { width: 100%; background: var(--accent); opacity: 0.3; z-index: -1; }
+
+  /* Mockup 3 — Monthly Progress (stacked chart) */
+  .m3-top { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .m3-month {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-12);
+    padding: 20px 24px; position: relative; overflow: hidden;
+  }
+  .m3-month::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+  .m3-month .lab { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .m3-month .v { font-family: var(--display); font-weight: 800; font-size: 52px; color: var(--accent); letter-spacing: -0.04em; line-height: 1; margin-top: 12px; }
+  .m3-month .v .u { font-family: var(--mono); font-weight: 400; font-size: 16px; color: var(--accent); margin-right: 6px; vertical-align: 14px; opacity: 0.85; }
+  .m3-month .ctx { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .m3-month .ctx .delta { color: var(--accent); }
+
+  .m3-chart { position: relative; height: 240px; padding-left: 42px; padding-bottom: 26px; }
+  .m3-chart .y-axis { position: absolute; left: 0; top: -4px; bottom: 26px; width: 36px; display: flex; flex-direction: column; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .m3-chart .y-axis span { text-align: right; padding-right: 6px; line-height: 1; }
+  .m3-chart .plot { position: relative; height: 100%; display: flex; align-items: flex-end; gap: 3px; padding: 0 2px; }
+  .m3-chart .plot::before, .m3-chart .plot::after, .m3-chart .plot > .gridline { content: ''; position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.04); pointer-events: none; }
+  .m3-chart .plot::before { top: 25%; }
+  .m3-chart .plot::after  { top: 50%; }
+  .m3-chart .plot > .gridline { top: 75%; }
+  .m3-chart .col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; }
+  .m3-chart .col .seg { width: 100%; border-radius: 1px; }
+  .m3-chart .col .seg.k { background: rgba(77,217,255,0.13); border: 1px solid var(--accent2); border-bottom: 0; }
+  .m3-chart .col .seg.i { background: rgba(127,255,178,0.20); border: 1px solid var(--accent); border-bottom: 0; }
+  .m3-chart .xlabels { position: absolute; left: 42px; right: 0; bottom: 6px; display: flex; gap: 3px; padding: 0 2px; }
+  .m3-chart .xlabels span { flex: 1; text-align: center; font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.04em; }
+  .m3-tooltip {
+    position: absolute; top: 16px; right: 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; min-width: 180px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+  }
+  .m3-tooltip .ttl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
+  .m3-tooltip .r { display: flex; justify-content: space-between; padding: 2px 0; font-family: var(--mono); font-size: 11px; }
+  .m3-tooltip .r .lab { color: var(--muted); }
+  .m3-tooltip .r .v.k { color: var(--accent2); }
+  .m3-tooltip .r .v.i { color: var(--accent); }
+  .m3-tooltip .r .v.b { color: var(--gold); font-weight: 600; }
+
+  /* Mockups grid (2 + 3 side by side) */
+  .mock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 56px; }
+  @media (max-width: 1100px) { .mock-grid { grid-template-columns: 1fr; } }
+
+  /* Comparison table */
+  .compare-block { margin-top: 80px; }
+  .compare-block .ttl-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 0;
+  }
+  .compare-block .ttl-row .lhs { display: flex; gap: 24px; align-items: baseline; }
+  .compare-block .ttl-row .idx { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--accent); }
+  .compare-block .ttl-row .ttl { font-family: var(--display); font-weight: 800; font-size: 32px; letter-spacing: -0.025em; color: var(--text); }
+  .compare-block .ttl-row .right { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .compare-tbl {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-20);
+    overflow: hidden; margin-top: 32px;
+  }
+  .compare-tbl .row {
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.1fr; gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-tbl .row:last-child { border-bottom: none; }
+  .compare-tbl .row > div { padding: 18px 24px; font-family: var(--mono); font-size: 13px; color: var(--text-2); display: flex; align-items: center; gap: 12px; }
+  .compare-tbl .row > div + div { border-left: 1px solid var(--border); justify-content: center; text-align: center; }
+  .compare-tbl .row > div.feat { color: var(--text); font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: -0.005em; }
+  .compare-tbl .head { background: var(--surface2); }
+  .compare-tbl .head > div {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+    padding: 18px 24px; justify-content: center;
+  }
+  .compare-tbl .head > div:first-child { justify-content: flex-start; }
+  .compare-tbl .head > div.us { color: var(--accent); }
+  .compare-tbl .price-row > div { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; font-size: 22px; color: var(--text-2); }
+  .compare-tbl .price-row > div.us { color: var(--accent); font-size: 22px; }
+  .compare-tbl .price-row > div:first-child { font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .compare-tbl .price-row > div .u { font-family: var(--mono); font-size: 12px; opacity: 0.8; margin-right: 4px; font-weight: 400; }
+  .compare-tbl .check { color: var(--accent); font-size: 18px; }
+  .compare-tbl .check-sky { color: var(--accent2); font-size: 18px; }
+  .compare-tbl .dash { color: var(--muted-2); font-family: var(--mono); font-size: 13px; }
+  .compare-tbl .col-us-bg { background: rgba(127,255,178,0.03); }
+
+  /* Closing phrase */
+  .closing {
+    margin-top: 88px; padding-top: 56px;
+    border-top: 1px solid var(--border);
+    text-align: left;
+    display: grid; grid-template-columns: 1.6fr 1fr; gap: 56px; align-items: end;
+  }
+  @media (max-width: 920px) { .closing { grid-template-columns: 1fr; } }
+  .closing .phrase {
+    font-family: var(--display); font-weight: 800; font-size: 96px; letter-spacing: -0.04em; line-height: 0.96; color: var(--text);
+  }
+  .closing .phrase .mint { color: var(--accent); }
+  .closing .cta-stack { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+  .closing .cta-stack .pill { padding: 6px 14px; }
+
+  /* CTAs (button atoms) */
+  .btn-mint, .btn-ghost { font-family: var(--display); }
+  .btn-mint {
+    display: inline-flex; align-items: center; gap: 14px;
+    background: var(--accent); color: #06190E; font-weight: 700; font-size: 15px;
+    padding: 16px 28px; border-radius: var(--r-pill); border: none; cursor: pointer;
+    letter-spacing: -0.005em;
+    box-shadow: 0 0 0 1px rgba(127,255,178,.3), 0 0 32px rgba(127,255,178,.45), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .btn-mint .arr { font-family: var(--mono); font-size: 14px; opacity: 0.75; font-weight: 400; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 14px;
+    background: transparent; color: var(--accent); font-weight: 600; font-size: 14px;
+    padding: 14px 24px; border-radius: var(--r-pill); border: 1px solid rgba(127,255,178,0.35); cursor: pointer;
+  }
+  .btn-ghost .arr { font-family: var(--mono); font-size: 13px; opacity: 0.8; font-weight: 400; }
+</style>
+</head>
+<body data-screen-label="03 App Section">
+<template id="__bundler_thumbnail" data-bg-color="#0a0a0f">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0a0a0f"/>
+    <rect x="180" y="120" width="840" height="3" fill="#7fffb2"/>
+    <rect x="180" y="170" width="420" height="44" rx="8" fill="#13131a" stroke="#7fffb2" stroke-opacity="0.4"/>
+    <rect x="180" y="280" width="640" height="20" rx="4" fill="#4dd9ff" fill-opacity="0.25" stroke="#4dd9ff"/>
+    <rect x="180" y="330" width="380" height="20" rx="4" fill="#7fffb2" fill-opacity="0.3" stroke="#7fffb2"/>
+    <rect x="180" y="380" width="300" height="20" rx="4" fill="#ffd166" fill-opacity="0.25" stroke="#ffd166"/>
+    <text x="180" y="560" font-family="monospace" font-size="120" font-weight="800" fill="#7fffb2" letter-spacing="-4">USD 39</text>
+    <text x="180" y="650" font-family="monospace" font-size="28" fill="#6b6b80" letter-spacing="6">THE MONEY COMMAND APP</text>
+  </svg>
+</template>
+<div class="glow-tr-fixed"></div>
+<div class="glow-bl-fixed"></div>
+
+<section class="tmc-section">
+
+  <!-- Section bracket: this is one slice of the landing -->
+  <div class="section-bracket">
+    <div class="left"><span class="led"></span>Landing · Section 04 / 08</div>
+    <div>The Money Command App</div>
+    <div>Variante B · 2026.05</div>
+  </div>
+
+  <!-- Section heading -->
+  <div class="sec-head">
+    <div>
+      <span class="pill" style="margin-bottom:24px;"><span class="led"></span>The Money Command App · incluida</span>
+      <div class="h">
+        El dashboard que opera<br/>el método del libro. <span class="mint">No es un PDF más.</span>
+      </div>
+    </div>
+    <div>
+      <div class="sub">
+        Tres pantallas. Tres operaciones. La aritmética del 50/30/20, el número exacto al que vas, y el mes a mes que te lleva. <span class="mint">Monarch USD 99/año. YNAB USD 109/año. Money Command: incluida con el libro.</span>
+      </div>
+      <div class="sub-foot">
+        <span style="color:var(--accent);">›</span> Acceso lifetime para los primeros 500 alumnos
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── MOCKUP 1 — 50/30/20 Dashboard ────────── -->
+  <div class="mockup">
+    <div class="mock-chrome">
+      <div class="lhs">
+        <span class="dot"></span>
+        <span class="name">The Money Command App</span>
+        <span class="tabs">
+          <a class="on" href="#">Asignación</a>
+          <a href="#">Compound</a>
+          <a href="#">Libertad</a>
+          <a href="#">Mentalidad</a>
+        </span>
+      </div>
+      <div class="rhs">
+        <span><span class="led"></span>Live · Mayo 2026</span>
+        <span>Andrea S. · Founders 042</span>
+      </div>
+    </div>
+
+    <div class="mock-body">
+      <!-- KPI strip -->
+      <div class="m1-top">
+        <div class="m1-hero">
+          <div class="lab">Ingreso neto · Mayo</div>
+          <div class="v"><span class="u">USD</span>7,400</div>
+          <div class="ctx"><span>15 días al cierre</span><span style="color:var(--accent);">+4.2% vs Abril</span></div>
+        </div>
+        <div class="m1-mini k">
+          <div class="lab">Gastado</div>
+          <div class="v">$3,840</div>
+          <div class="ctx">52% del mes</div>
+        </div>
+        <div class="m1-mini b">
+          <div class="lab">Invertido</div>
+          <div class="v">$1,776</div>
+          <div class="ctx">×1.2 vs target</div>
+        </div>
+      </div>
+
+      <!-- 50/30/20 bars -->
+      <div class="m1-bars">
+        <div class="m1-bar sky">
+          <div class="label">
+            <span class="cat">Necesidades</span>
+            <span class="target">Target 50% · USD 3,700</span>
+          </div>
+          <div class="track">
+            <div class="fill sky" style="width: 48%;"></div>
+            <div class="marker" style="left: 50%;"></div>
+          </div>
+          <div class="pct">48%<span class="amt">USD 3,552</span></div>
+        </div>
+
+        <div class="m1-bar mint">
+          <div class="label">
+            <span class="cat">Quiero</span>
+            <span class="target">Target 30% · USD 2,220</span>
+          </div>
+          <div class="track">
+            <div class="fill mint" style="width: 28%;"></div>
+            <div class="marker" style="left: 30%;"></div>
+          </div>
+          <div class="pct">28%<span class="amt">USD 2,072</span></div>
+        </div>
+
+        <div class="m1-bar gold">
+          <div class="label">
+            <span class="cat">Invertir</span>
+            <span class="target">Target 20% · USD 1,480</span>
+          </div>
+          <div class="track">
+            <div class="fill gold" style="width: 24%;"></div>
+            <div class="marker" style="left: 20%;"></div>
+          </div>
+          <div class="pct">24%<span class="amt">USD 1,776</span></div>
+        </div>
+      </div>
+
+      <div class="m1-foot">
+        <span><span class="ok">●</span> On track · 15 días al cierre del mes</span>
+        <span>Reasignación automática activada · próxima revisión 31.05</span>
+        <span style="color:var(--accent);">Excedente invertido: +USD 296 vs target</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mock-caption">
+    El 50/30/20 deja de ser teoría y se vuelve <span class="mint">aritmética viva</span>.
+    <span class="sub">Mockup 01 · Asignación del mes</span>
+  </div>
+
+  <!-- ────────── MOCKUP 2 + 3 GRID ────────── -->
+  <div class="mock-grid">
+
+    <!-- Mockup 2 — Freedom Number -->
+    <div>
+      <div class="mockup">
+        <div class="mock-chrome">
+          <div class="lhs">
+            <span class="dot"></span>
+            <span class="name">The Money Command App</span>
+            <span class="tabs"><a href="#">Asignación</a><a href="#">Compound</a><a class="on" href="#">Libertad</a></span>
+          </div>
+          <div class="rhs">
+            <span><span class="led"></span>Calc · v1.0</span>
+          </div>
+        </div>
+
+        <div class="mock-body">
+          <div class="m2-grid">
+            <div class="m2-input-group">
+              <div class="m2-input">
+                <div class="lbl"><span>Ingreso mensual neto</span><span class="right">[ Input ]</span></div>
+                <div class="v"><span class="u">$</span>7,400</div>
+                <div class="track" style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) 42%, rgba(255,255,255,0.08) 42%, rgba(255,255,255,0.08) 100%);">
+                  <div class="handle" style="left: 42%;"></div>
+                </div>
+                <div class="ticks"><span>$2k</span><span>$20k+</span></div>
+              </div>
+              <div class="m2-input">
+                <div class="lbl"><span>Ahorro mensual</span><span class="right">[ Input ]</span></div>
+                <div class="v"><span class="u">$</span>1,400</div>
+                <div class="track" style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) 28%, rgba(255,255,255,0.08) 28%, rgba(255,255,255,0.08) 100%);">
+                  <div class="handle" style="left: 28%;"></div>
+                </div>
+                <div class="ticks"><span>$0</span><span>$5k+</span></div>
+              </div>
+              <div class="m2-input">
+                <div class="lbl"><span>Edad objetivo de libertad</span><span class="right">[ Input ]</span></div>
+                <div class="v">55</div>
+                <div class="track" style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) 50%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.08) 100%);">
+                  <div class="handle" style="left: 50%;"></div>
+                </div>
+                <div class="ticks"><span>40</span><span>70</span></div>
+              </div>
+            </div>
+
+            <div class="m2-output">
+              <div>
+                <div class="head"><span>Tu número de libertad</span><span class="rule">4% rule · CAGR 7%</span></div>
+                <div class="v" style="font-size: 28px;"><span class="u">USD</span>1,250,000</div>
+                <div class="ctx">El capital que necesitas para vivir de los rendimientos sin trabajar. Calculado contra tu gasto actual.</div>
+              </div>
+              <div class="progress">
+                <div class="row"><span>A tu ritmo actual</span><span class="yrs">24 años</span></div>
+                <div class="bar"><div class="seg sys"></div><div class="seg now"></div></div>
+                <div class="row" style="margin-top:14px;"><span>Con el sistema del libro</span><span class="yrs">11 años</span></div>
+                <div class="bar"><div class="seg" style="width:100%; background: var(--accent); opacity: 0.85;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-caption">
+        Sabés exactamente cuánto necesitás. <span class="mint">Y cuánto te falta.</span>
+        <span class="sub">Mockup 02 · Calculadora de libertad</span>
+      </div>
+    </div>
+
+    <!-- Mockup 3 — Monthly Progress -->
+    <div>
+      <div class="mockup">
+        <div class="mock-chrome">
+          <div class="lhs">
+            <span class="dot"></span>
+            <span class="name">The Money Command App</span>
+            <span class="tabs"><a href="#">Asignación</a><a class="on" href="#">Compound</a><a href="#">Libertad</a></span>
+          </div>
+          <div class="rhs"><span><span class="led"></span>Mayo · 30 días</span></div>
+        </div>
+
+        <div class="mock-body">
+          <div class="m3-top">
+            <div class="m3-month">
+              <div class="lab">Balance acumulado · 30 días</div>
+              <div class="v" style="font-size: 29px;"><span class="u">USD</span>11,776</div>
+              <div class="ctx"><span>Capital + interés</span><span class="delta">▲ +USD 1,776 mes</span></div>
+            </div>
+            <div class="m1-mini k">
+              <div class="lab">Capital aportado</div>
+              <div class="v" style="font-size: 22px;">$10,000</div>
+              <div class="ctx">Depósito inicial</div>
+            </div>
+            <div class="m1-mini b">
+              <div class="lab">Interés ganado</div>
+              <div class="v" style="font-size: 24px;">$1,776</div>
+              <div class="ctx">CAGR 7% mensual</div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: -0.01em;">Crecimiento · día por día</div>
+            <div style="display: flex; gap: 14px; font-family: var(--mono); font-size: 10px; color: var(--muted);">
+              <span><span style="display:inline-block; width:8px; height:8px; background:var(--accent2); border-radius:2px; margin-right:6px; vertical-align: middle;"></span>Capital</span>
+              <span><span style="display:inline-block; width:8px; height:8px; background:var(--accent); border-radius:2px; margin-right:6px; vertical-align: middle;"></span>Interés</span>
+            </div>
+          </div>
+
+          <div class="m3-chart">
+            <div class="y-axis"><span>$12k</span><span>$11k</span><span>$10.5k</span><span>$10k</span></div>
+            <div class="plot">
+              <div class="gridline"></div>
+              <!-- 30 columns: capital flat ~62%, interest grows -->
+              <!-- generated -->
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:1%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:2%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:3%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:4%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:5.4%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:6.6%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:8%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:9.4%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:10.8%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:12%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:13.4%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:15%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:16.5%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:18%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:19.6%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:21%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:22.6%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:24.2%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:25.8%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:27.4%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:29%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:30.5%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:32%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:33.4%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:34.6%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:35.6%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:36.4%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:37%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:37.6%"></div></div>
+              <div class="col"><div class="seg k" style="height:62%"></div><div class="seg i" style="height:38%"></div></div>
+            </div>
+            <div class="m3-tooltip">
+              <div class="ttl">Día 22 · drill</div>
+              <div class="r"><span class="lab">Capital</span><span class="v k">$10,000</span></div>
+              <div class="r"><span class="lab">Interés</span><span class="v i">$1,302</span></div>
+              <div class="r"><span class="lab">Balance</span><span class="v b">$11,302</span></div>
+            </div>
+            <div class="xlabels">
+              <span>D1</span><span></span><span></span><span></span><span></span>
+              <span>D6</span><span></span><span></span><span></span><span></span>
+              <span>D11</span><span></span><span></span><span></span><span></span>
+              <span>D16</span><span></span><span></span><span></span><span></span>
+              <span>D21</span><span></span><span></span><span></span><span></span>
+              <span>D26</span><span></span><span></span><span></span><span>D30</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-caption">
+        Cada día tu capital trabaja. <span class="mint">Lo ves a tiempo real.</span>
+        <span class="sub">Mockup 03 · Progreso mensual</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── COMPARISON TABLE ────────── -->
+  <div class="compare-block">
+    <div class="ttl-row">
+      <div class="lhs">
+        <span class="idx">/ 04.04</span>
+        <span class="ttl">Vs Monarch · YNAB</span>
+      </div>
+      <div class="right">Comparativa funcional · Mayo 2026</div>
+    </div>
+
+    <div class="compare-tbl">
+      <!-- Head -->
+      <div class="row head">
+        <div></div>
+        <div>Monarch Money</div>
+        <div>YNAB</div>
+        <div class="us">The Money Command</div>
+      </div>
+
+      <!-- Price -->
+      <div class="row price-row">
+        <div>Precio anual</div>
+        <div><span class="u">USD</span>99</div>
+        <div><span class="u">USD</span>109</div>
+        <div class="us col-us-bg">Incluida</div>
+      </div>
+
+      <!-- Features -->
+      <div class="row">
+        <div class="feat">Método 50/30/20 nativo</div>
+        <div><span class="check-sky">●</span> Manual</div>
+        <div><span class="dash">—</span></div>
+        <div class="col-us-bg"><span class="check">●</span> Automático</div>
+      </div>
+
+      <div class="row">
+        <div class="feat">Número de libertad financiera</div>
+        <div><span class="dash">—</span></div>
+        <div><span class="dash">—</span></div>
+        <div class="col-us-bg"><span class="check">●</span> Output USD</div>
+      </div>
+
+      <div class="row">
+        <div class="feat">Tracker mentalidad + metas</div>
+        <div><span class="dash">—</span></div>
+        <div><span class="dash">—</span></div>
+        <div class="col-us-bg"><span class="check">●</span> Integrado</div>
+      </div>
+
+      <div class="row">
+        <div class="feat">Setup por país · LATAM + US</div>
+        <div><span class="dash">—</span></div>
+        <div><span class="dash">—</span></div>
+        <div class="col-us-bg"><span class="check">●</span> Nativo</div>
+      </div>
+
+      <div class="row">
+        <div class="feat">Bilingüe ES + EN</div>
+        <div><span class="dash">—</span></div>
+        <div><span class="dash">—</span></div>
+        <div class="col-us-bg"><span class="check">●</span> Toggle</div>
+      </div>
+
+      <div class="row">
+        <div class="feat">Lifetime sin renovación</div>
+        <div><span class="dash">—</span></div>
+        <div><span class="dash">—</span></div>
+        <div class="col-us-bg"><span class="check">●</span> Primeros 500</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.04em; line-height: 1.7; max-width: 720px;">
+      A partir del comprador 501: 12 meses incluidos + renovación opcional <span style="color:var(--accent);">USD 29/año</span>. La devolución del libro dentro de los 30 días desactiva el acceso a la app — ver T&Cs.
+    </div>
+  </div>
+
+  <!-- ────────── CLOSING PHRASE ────────── -->
+  <div class="closing">
+    <div class="phrase">El dinero se administra.<br/><span class="mint">No se juega.</span></div>
+    <div class="cta-stack">
+      <span class="pill"><span class="led"></span>347 plazas restantes</span>
+      <button class="btn-mint">Quiero The Money Command — USD 39 <span class="arr">→</span></button>
+      <button class="btn-ghost">Empieza gratis con la Calculadora <span class="arr">→</span></button>
+    </div>
+  </div>
+
+</section>
+
+</body>
+</html>
