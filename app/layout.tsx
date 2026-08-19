@@ -32,12 +32,13 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         {/* Anti-parpadeo de tema: corre ANTES de pintar y fija data-theme en
-            <html> segun la eleccion guardada (por defecto oscuro). Sin esto, la
-            app pintaria oscuro y saltaria a claro tras hidratar. */}
+            <html>. Prioridad: eleccion guardada del usuario > tema del navegador
+            (prefers-color-scheme) > oscuro. Asi el acceso (sin eleccion previa)
+            sigue el tema por defecto del explorador. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('mc_theme');if(t!=='light'&&t!=='dark'){t='dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();",
+              "(function(){try{var t=localStorage.getItem('mc_theme');if(t!=='light'&&t!=='dark'){t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();",
           }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
